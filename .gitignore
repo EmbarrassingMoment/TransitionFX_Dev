@@ -1,0 +1,31 @@
+# Visual Studio / IDE
+.vs/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.idea/
+
+# Unreal Engine Generated
+Binaries/
+Intermediate/
+DerivedDataCache/
+Saved/
+Build/
+.vscode/
+.vsconfig
+
+# Plugins specific (プラグイン内の中間ファイルも除外)
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Large Assets (誤ってコミットしないよう保険)
+# ※ LFSを使う場合はコメントアウトするか、LFS管理下に置く
+# *.mp4
+# *.psd

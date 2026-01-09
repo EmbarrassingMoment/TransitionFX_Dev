@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "TransitionFX",
+	"Description": "Transition System for UE5",
+	"Category": "Other",
+	"CreatedBy": "Kurorekishi",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "TransitionFX",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
