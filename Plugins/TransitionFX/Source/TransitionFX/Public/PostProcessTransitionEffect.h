@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "TransitionEffect.h"
+#include "ITransitionEffect.h"
 #include "PostProcessTransitionEffect.generated.h"
 
 class UMaterialInterface;

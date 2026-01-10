@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "TransitionEffect.generated.h"
+#include "ITransitionEffect.generated.h"
 
 UINTERFACE(MinimalAPI, BlueprintType)
 class UTransitionEffect : public UInterface
@@ -34,4 +34,10 @@ public:
 	 * Cleans up the transition effect.
 	 */
 	virtual void Cleanup() = 0;
+
+	/**
+	 * Returns the progress point where the screen is considered fully covered.
+	 * Defaults to 0.5f.
+	 */
+	virtual float GetHalfwayPoint() const { return 0.5f; }
 };
