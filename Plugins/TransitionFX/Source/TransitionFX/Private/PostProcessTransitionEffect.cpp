@@ -1,24 +1,25 @@
 #include "PostProcessTransitionEffect.h"
+#include "TransitionPreset.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Engine/PostProcessVolume.h"
 #include "Kismet/KismetMaterialLibrary.h"
 #include "Engine/World.h"
 
-void UPostProcessTransitionEffect::Initialize(UWorld* World)
+void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* Preset)
 {
-	if (!World)
+	if (!World || !Preset)
 	{
 		return;
 	}
 
-	if (!TransitionMaterial)
+	if (!Preset->TransitionMaterial)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PostProcessTransitionEffect: TransitionMaterial is null in %s"), *GetName());
+		UE_LOG(LogTemp, Warning, TEXT("PostProcessTransitionEffect: TransitionMaterial is null in Preset %s"), *Preset->GetName());
 		return;
 	}
 
 	// Create Dynamic Material
-	DynamicMaterial = UKismetMaterialLibrary::CreateDynamicMaterialInstance(World, TransitionMaterial);
+	DynamicMaterial = UKismetMaterialLibrary::CreateDynamicMaterialInstance(World, Preset->TransitionMaterial);
 	if (!DynamicMaterial)
 	{
 		UE_LOG(LogTemp, Error, TEXT("PostProcessTransitionEffect: Failed to create Dynamic Material Instance"));
@@ -35,7 +36,7 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World)
 	if (SpawnedVolume)
 	{
 		SpawnedVolume->bUnbound = true; // Infinite extent
-		SpawnedVolume->Priority = 1000.0f; // Default high priority
+		SpawnedVolume->Priority = Preset->Priority;
 
 		// Add Dynamic Material to Weighted Blendables
 		SpawnedVolume->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, DynamicMaterial));

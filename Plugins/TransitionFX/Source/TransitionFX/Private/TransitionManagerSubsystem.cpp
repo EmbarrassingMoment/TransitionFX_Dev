@@ -87,7 +87,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset)
 			if (NewEffectObj && NewEffectObj->Implements<UTransitionEffect>())
 			{
 				CurrentEffect = NewEffectObj;
-				CurrentEffect->Initialize(World);
+				CurrentEffect->Initialize(World, Preset);
 			}
 			else
 			{
