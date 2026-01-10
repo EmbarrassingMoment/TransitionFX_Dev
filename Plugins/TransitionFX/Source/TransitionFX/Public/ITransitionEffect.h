@@ -4,6 +4,8 @@
 #include "UObject/Interface.h"
 #include "ITransitionEffect.generated.h"
 
+class UTransitionPreset;
+
 UINTERFACE(MinimalAPI, BlueprintType)
 class UTransitionEffect : public UInterface
 {
@@ -21,8 +23,9 @@ public:
 	/**
 	 * Initializes the transition effect.
 	 * @param World The world context.
+	 * @param Preset The preset containing settings for this effect.
 	 */
-	virtual void Initialize(UWorld* World) = 0;
+	virtual void Initialize(UWorld* World, UTransitionPreset* Preset) = 0;
 
 	/**
 	 * Updates the progress of the transition.

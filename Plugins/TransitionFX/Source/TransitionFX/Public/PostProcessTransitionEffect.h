@@ -5,6 +5,7 @@
 #include "ITransitionEffect.h"
 #include "PostProcessTransitionEffect.generated.h"
 
+class UTransitionPreset;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
 class APostProcessVolume;
@@ -19,7 +20,7 @@ class TRANSITIONFX_API UPostProcessTransitionEffect : public UObject, public ITr
 
 public:
 	// ITransitionEffect Interface
-	virtual void Initialize(UWorld* World) override;
+	virtual void Initialize(UWorld* World, UTransitionPreset* Preset) override;
 	virtual void UpdateProgress(float Progress) override;
 	virtual void Cleanup() override;
 
@@ -31,10 +32,6 @@ public:
 	virtual void UpdateMaterialParameters(UMaterialInstanceDynamic* MID, float Progress);
 
 protected:
-	/** The source material for the transition. */
-	UPROPERTY(EditDefaultsOnly, Category = "Transition")
-	TObjectPtr<UMaterialInterface> TransitionMaterial;
-
 	/** The dynamic material instance created at runtime. */
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "Transition")
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;

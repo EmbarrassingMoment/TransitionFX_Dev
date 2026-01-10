@@ -7,6 +7,7 @@
 
 class UCurveFloat;
 class USoundBase;
+class UMaterialInterface;
 
 /**
  * DataAsset to hold transition settings.
@@ -29,6 +30,10 @@ public:
 	/** The class of the transition effect to spawn. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
 	TSubclassOf<UTransitionEffect> EffectClass;
+
+	/** The material to use for this transition. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
+	TObjectPtr<UMaterialInterface> TransitionMaterial;
 
 	/** Default duration of the transition in seconds. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition", meta = (ClampMin = "0.0"))
