@@ -32,7 +32,7 @@ public:
 
 	/** Reverses the current transition. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
-	void ReverseTransition();
+	void ReverseTransition(bool bAutoStop = true);
 
 	/** Stops the current transition. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
@@ -72,6 +72,9 @@ private:
 
 	/** Whether the transition is reversing. */
 	bool bIsReversing;
+
+	/** Whether to automatically stop the transition when reverse completes. */
+	bool bAutoStopOnReverseComplete;
 
 	/** Whether the halfway point has been reached for the current transition. */
 	bool bHasReachedHalfway;
