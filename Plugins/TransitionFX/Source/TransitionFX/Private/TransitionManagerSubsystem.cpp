@@ -38,8 +38,11 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 	// Check Completion
 	if (RawProgress >= 1.0f)
 	{
-		StopTransition();
-		OnTransitionCompleted.Broadcast();
+		if (!bHasCompleted)
+		{
+			bHasCompleted = true;
+			OnTransitionCompleted.Broadcast();
+		}
 	}
 }
 
@@ -76,6 +79,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset)
 	CurrentTime = 0.0f;
 	bIsTransitionActive = true;
 	bHasReachedHalfway = false;
+	bHasCompleted = false;
 
 	// Create Effect
 	if (Preset->EffectClass)
