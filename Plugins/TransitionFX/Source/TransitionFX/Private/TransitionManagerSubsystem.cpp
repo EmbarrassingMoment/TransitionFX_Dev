@@ -14,6 +14,7 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 
 	float Duration = CurrentPreset->DefaultDuration;
 	float DeltaProgress = (Duration > 0.0f) ? (DeltaTime / Duration) : 1.0f;
+	DeltaProgress *= CurrentPlayRate;
 
 	if (CurrentMode == ETransitionMode::Reverse)
 	{
@@ -55,7 +56,10 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 				bHasCompleted = true;
 				OnTransitionCompleted.Broadcast();
 
-				StopTransition();
+				if (bAutoStopOnReverseComplete)
+				{
+					StopTransition();
+				}
 			}
 		}
 	}
@@ -87,7 +91,7 @@ TStatId UTransitionManagerSubsystem::GetStatId() const
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UTransitionManagerSubsystem, STATGROUP_Tickables);
 }
 
-void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode)
+void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode, float PlayRate)
 {
 	if (!Preset)
 	{
@@ -103,11 +107,13 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 
 	CurrentPreset = Preset;
 	CurrentMode = Mode;
+	CurrentPlayRate = PlayRate;
 	bIsTransitionActive = true;
 	bAutoStopOnReverseComplete = true;
 	bHasReachedHalfway = false;
 	bHasCompleted = false;
 
+	// Initialize Progress based on Mode
 	if (CurrentMode == ETransitionMode::Forward)
 	{
 		CurrentProgress = 0.0f;
@@ -129,10 +135,8 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 				CurrentEffect = NewEffectObj;
 				CurrentEffect->Initialize(World, Preset);
 
-				if (CurrentMode == ETransitionMode::Reverse)
-				{
-					CurrentEffect->UpdateProgress(1.0f);
-				}
+				// Immediate update to prevent glitches
+				CurrentEffect->UpdateProgress(CurrentProgress);
 			}
 			else
 			{
@@ -158,6 +162,11 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	}
 
 	OnTransitionStarted.Broadcast();
+}
+
+void UTransitionManagerSubsystem::SetPlayRate(float NewPlayRate)
+{
+	CurrentPlayRate = NewPlayRate;
 }
 
 void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)

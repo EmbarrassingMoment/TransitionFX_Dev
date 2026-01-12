@@ -35,7 +35,11 @@ public:
 
 	/** Starts a transition with the given preset. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
-	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward);
+	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward, float PlayRate = 1.0f);
+
+	/** Sets the playback speed of the transition. */
+	UFUNCTION(BlueprintCallable, Category = "Transition")
+	void SetPlayRate(float NewPlayRate);
 
 	/** Reverses the current transition. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
@@ -76,6 +80,9 @@ private:
 
 	/** Current normalized progress of the transition (0.0 to 1.0). */
 	float CurrentProgress;
+
+	/** Current playback speed multiplier. */
+	float CurrentPlayRate;
 
 	/** Whether a transition is currently active. */
 	bool bIsTransitionActive;
