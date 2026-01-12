@@ -28,8 +28,8 @@ public:
 	}
 
 	/** The class of the transition effect to spawn. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
-	TSubclassOf<UTransitionEffect> EffectClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition", meta = (MustImplement = "/Script/TransitionFX.TransitionEffect"))
+	TSubclassOf<UObject> EffectClass;
 
 	/** The material to use for this transition. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
