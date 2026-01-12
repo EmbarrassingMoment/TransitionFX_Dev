@@ -11,6 +11,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionHalfway);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionCompleted);
 
+UENUM(BlueprintType)
+enum class ETransitionMode : uint8
+{
+	Forward UMETA(DisplayName = "Fade Out (0 to 1)"),
+	Reverse UMETA(DisplayName = "Fade In (1 to 0)")
+};
+
 /**
  * Manager subsystem for transition effects.
  */
@@ -28,7 +35,7 @@ public:
 
 	/** Starts a transition with the given preset. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
-	void StartTransition(UTransitionPreset* Preset);
+	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward);
 
 	/** Reverses the current transition. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
@@ -64,14 +71,14 @@ private:
 	UPROPERTY(Transient)
 	TScriptInterface<ITransitionEffect> CurrentEffect;
 
+	/** Current transition mode. */
+	ETransitionMode CurrentMode;
+
 	/** Current normalized progress of the transition (0.0 to 1.0). */
-	float CurrentProgressValue;
+	float CurrentProgress;
 
 	/** Whether a transition is currently active. */
 	bool bIsTransitionActive;
-
-	/** Whether the transition is reversing. */
-	bool bIsReversing;
 
 	/** Whether to automatically stop the transition when reverse completes. */
 	bool bAutoStopOnReverseComplete;

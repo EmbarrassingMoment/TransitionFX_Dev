@@ -15,17 +15,17 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 	float Duration = CurrentPreset->DefaultDuration;
 	float DeltaProgress = (Duration > 0.0f) ? (DeltaTime / Duration) : 1.0f;
 
-	if (bIsReversing)
+	if (CurrentMode == ETransitionMode::Reverse)
 	{
-		CurrentProgressValue -= DeltaProgress;
+		CurrentProgress -= DeltaProgress;
 	}
 	else
 	{
-		CurrentProgressValue += DeltaProgress;
+		CurrentProgress += DeltaProgress;
 	}
 
-	CurrentProgressValue = FMath::Clamp(CurrentProgressValue, 0.0f, 1.0f);
-	float RawProgress = CurrentProgressValue;
+	CurrentProgress = FMath::Clamp(CurrentProgress, 0.0f, 1.0f);
+	float RawProgress = CurrentProgress;
 
 	float EasedProgress = RawProgress;
 	if (CurrentPreset->ProgressCurve)
@@ -46,7 +46,7 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 	}
 
 	// Check Completion
-	if (bIsReversing)
+	if (CurrentMode == ETransitionMode::Reverse)
 	{
 		if (RawProgress <= 0.0f)
 		{
@@ -55,10 +55,7 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 				bHasCompleted = true;
 				OnTransitionCompleted.Broadcast();
 
-				if (bAutoStopOnReverseComplete)
-				{
-					StopTransition();
-				}
+				StopTransition();
 			}
 		}
 	}
@@ -90,7 +87,7 @@ TStatId UTransitionManagerSubsystem::GetStatId() const
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UTransitionManagerSubsystem, STATGROUP_Tickables);
 }
 
-void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset)
+void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode)
 {
 	if (!Preset)
 	{
@@ -105,12 +102,20 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset)
 	}
 
 	CurrentPreset = Preset;
-	CurrentProgressValue = 0.0f;
+	CurrentMode = Mode;
 	bIsTransitionActive = true;
-	bIsReversing = false;
 	bAutoStopOnReverseComplete = true;
 	bHasReachedHalfway = false;
 	bHasCompleted = false;
+
+	if (CurrentMode == ETransitionMode::Forward)
+	{
+		CurrentProgress = 0.0f;
+	}
+	else
+	{
+		CurrentProgress = 1.0f;
+	}
 
 	// Create Effect
 	if (Preset->EffectClass)
@@ -123,6 +128,11 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset)
 			{
 				CurrentEffect = NewEffectObj;
 				CurrentEffect->Initialize(World, Preset);
+
+				if (CurrentMode == ETransitionMode::Reverse)
+				{
+					CurrentEffect->UpdateProgress(1.0f);
+				}
 			}
 			else
 			{
@@ -158,7 +168,7 @@ void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
 		return;
 	}
 
-	bIsReversing = true;
+	CurrentMode = ETransitionMode::Reverse;
 	bAutoStopOnReverseComplete = bAutoStop;
 	bHasCompleted = false;
 	bIsTransitionActive = true;
