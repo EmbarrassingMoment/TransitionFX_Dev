@@ -50,8 +50,16 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 	{
 		if (RawProgress <= 0.0f)
 		{
-			OnTransitionCompleted.Broadcast();
-			StopTransition();
+			if (!bHasCompleted)
+			{
+				bHasCompleted = true;
+				OnTransitionCompleted.Broadcast();
+
+				if (bAutoStopOnReverseComplete)
+				{
+					StopTransition();
+				}
+			}
 		}
 	}
 	else
@@ -100,6 +108,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset)
 	CurrentProgressValue = 0.0f;
 	bIsTransitionActive = true;
 	bIsReversing = false;
+	bAutoStopOnReverseComplete = true;
 	bHasReachedHalfway = false;
 	bHasCompleted = false;
 
@@ -141,7 +150,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset)
 	OnTransitionStarted.Broadcast();
 }
 
-void UTransitionManagerSubsystem::ReverseTransition()
+void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
 {
 	if (!CurrentPreset)
 	{
@@ -150,6 +159,8 @@ void UTransitionManagerSubsystem::ReverseTransition()
 	}
 
 	bIsReversing = true;
+	bAutoStopOnReverseComplete = bAutoStop;
+	bHasCompleted = false;
 	bIsTransitionActive = true;
 }
 
