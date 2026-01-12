@@ -30,6 +30,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Transition")
 	void StartTransition(UTransitionPreset* Preset);
 
+	/** Reverses the current transition. */
+	UFUNCTION(BlueprintCallable, Category = "Transition")
+	void ReverseTransition();
+
 	/** Stops the current transition. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
 	void StopTransition();
@@ -60,11 +64,14 @@ private:
 	UPROPERTY(Transient)
 	TScriptInterface<ITransitionEffect> CurrentEffect;
 
-	/** Current time elapsed in the transition. */
-	float CurrentTime;
+	/** Current normalized progress of the transition (0.0 to 1.0). */
+	float CurrentProgressValue;
 
 	/** Whether a transition is currently active. */
 	bool bIsTransitionActive;
+
+	/** Whether the transition is reversing. */
+	bool bIsReversing;
 
 	/** Whether the halfway point has been reached for the current transition. */
 	bool bHasReachedHalfway;

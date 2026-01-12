@@ -12,10 +12,20 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 		return;
 	}
 
-	CurrentTime += DeltaTime;
 	float Duration = CurrentPreset->DefaultDuration;
-	float RawProgress = (Duration > 0.0f) ? (CurrentTime / Duration) : 1.0f;
-	RawProgress = FMath::Clamp(RawProgress, 0.0f, 1.0f);
+	float DeltaProgress = (Duration > 0.0f) ? (DeltaTime / Duration) : 1.0f;
+
+	if (bIsReversing)
+	{
+		CurrentProgressValue -= DeltaProgress;
+	}
+	else
+	{
+		CurrentProgressValue += DeltaProgress;
+	}
+
+	CurrentProgressValue = FMath::Clamp(CurrentProgressValue, 0.0f, 1.0f);
+	float RawProgress = CurrentProgressValue;
 
 	float EasedProgress = RawProgress;
 	if (CurrentPreset->ProgressCurve)
@@ -36,12 +46,23 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 	}
 
 	// Check Completion
-	if (RawProgress >= 1.0f)
+	if (bIsReversing)
 	{
-		if (!bHasCompleted)
+		if (RawProgress <= 0.0f)
 		{
-			bHasCompleted = true;
 			OnTransitionCompleted.Broadcast();
+			StopTransition();
+		}
+	}
+	else
+	{
+		if (RawProgress >= 1.0f)
+		{
+			if (!bHasCompleted)
+			{
+				bHasCompleted = true;
+				OnTransitionCompleted.Broadcast();
+			}
 		}
 	}
 }
@@ -76,8 +97,9 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset)
 	}
 
 	CurrentPreset = Preset;
-	CurrentTime = 0.0f;
+	CurrentProgressValue = 0.0f;
 	bIsTransitionActive = true;
+	bIsReversing = false;
 	bHasReachedHalfway = false;
 	bHasCompleted = false;
 
@@ -117,6 +139,18 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset)
 	}
 
 	OnTransitionStarted.Broadcast();
+}
+
+void UTransitionManagerSubsystem::ReverseTransition()
+{
+	if (!CurrentPreset)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ReverseTransition called with null preset."));
+		return;
+	}
+
+	bIsReversing = true;
+	bIsTransitionActive = true;
 }
 
 void UTransitionManagerSubsystem::StopTransition()
