@@ -68,4 +68,7 @@ private:
 
 	/** Whether the halfway point has been reached for the current transition. */
 	bool bHasReachedHalfway;
+
+	/** Whether the completion event has been triggered for the current transition. */
+	bool bHasCompleted;
 };
