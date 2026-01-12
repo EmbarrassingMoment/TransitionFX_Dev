@@ -12,15 +12,24 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 		return;
 	}
 
-	CurrentTime += DeltaTime;
 	float Duration = CurrentPreset->DefaultDuration;
-	float RawProgress = (Duration > 0.0f) ? (CurrentTime / Duration) : 1.0f;
-	RawProgress = FMath::Clamp(RawProgress, 0.0f, 1.0f);
+	float DeltaProgress = (Duration > 0.0f) ? (DeltaTime / Duration) : 1.0f;
 
-	float EasedProgress = RawProgress;
+	if (bIsReversing)
+	{
+		CurrentProgressValue -= DeltaProgress;
+	}
+	else
+	{
+		CurrentProgressValue += DeltaProgress;
+	}
+
+	CurrentProgressValue = FMath::Clamp(CurrentProgressValue, 0.0f, 1.0f);
+
+	float EasedProgress = CurrentProgressValue;
 	if (CurrentPreset->ProgressCurve)
 	{
-		EasedProgress = CurrentPreset->ProgressCurve->GetFloatValue(RawProgress);
+		EasedProgress = CurrentPreset->ProgressCurve->GetFloatValue(CurrentProgressValue);
 	}
 
 	if (CurrentEffect)
@@ -29,17 +38,30 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 	}
 
 	// Check Halfway
-	if (!bHasReachedHalfway && RawProgress >= CurrentPreset->HalfwayThreshold)
+	// We only check halfway on forward progress as per typical transition logic
+	if (!bIsReversing && !bHasReachedHalfway && CurrentProgressValue >= CurrentPreset->HalfwayThreshold)
 	{
 		bHasReachedHalfway = true;
 		OnTransitionHalfway.Broadcast();
 	}
 
 	// Check Completion
-	if (RawProgress >= 1.0f)
+	if (bIsReversing)
 	{
-		StopTransition();
-		OnTransitionCompleted.Broadcast();
+		if (CurrentProgressValue <= 0.0f)
+		{
+			StopTransition();
+			OnTransitionCompleted.Broadcast();
+		}
+	}
+	else
+	{
+		// Forward completion: Hold at 1.0 and broadcast once.
+		if (CurrentProgressValue >= 1.0f && !bHasCompleted)
+		{
+			bHasCompleted = true;
+			OnTransitionCompleted.Broadcast();
+		}
 	}
 }
 
@@ -73,9 +95,11 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset)
 	}
 
 	CurrentPreset = Preset;
-	CurrentTime = 0.0f;
+	CurrentProgressValue = 0.0f;
 	bIsTransitionActive = true;
 	bHasReachedHalfway = false;
+	bIsReversing = false;
+	bHasCompleted = false;
 
 	// Create Effect
 	if (Preset->EffectClass)
@@ -115,9 +139,24 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset)
 	OnTransitionStarted.Broadcast();
 }
 
+void UTransitionManagerSubsystem::ReverseTransition()
+{
+	if (!CurrentPreset)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ReverseTransition called with no active preset."));
+		return;
+	}
+
+	bIsReversing = true;
+	bIsTransitionActive = true; // Ensure active if it was holding at 1.0
+	// We do NOT reset bHasCompleted here, as it tracks forward completion.
+	// We might want to reset bHasReachedHalfway if we want it to trigger again on next forward?
+	// But usually Reverse is the end of the sequence.
+}
+
 void UTransitionManagerSubsystem::StopTransition()
 {
-	if (!bIsTransitionActive)
+	if (!bIsTransitionActive && !CurrentPreset)
 	{
 		return;
 	}
@@ -141,6 +180,8 @@ void UTransitionManagerSubsystem::StopTransition()
 
 	bIsTransitionActive = false;
 	CurrentPreset = nullptr;
+	bIsReversing = false;
+	bHasCompleted = false;
 }
 
 bool UTransitionManagerSubsystem::IsTransitionPlaying() const
