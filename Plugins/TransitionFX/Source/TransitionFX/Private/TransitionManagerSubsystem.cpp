@@ -13,7 +13,8 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 	}
 
 	float Duration = CurrentPreset->DefaultDuration;
-	float DeltaProgress = (Duration > 0.0f) ? (DeltaTime / Duration) : 1.0f;
+	float BaseDelta = (Duration > 0.0f) ? (DeltaTime / Duration) : 1.0f;
+	float DeltaProgress = BaseDelta * CurrentPlaySpeed;
 
 	if (CurrentMode == ETransitionMode::Reverse)
 	{
@@ -87,7 +88,7 @@ TStatId UTransitionManagerSubsystem::GetStatId() const
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UTransitionManagerSubsystem, STATGROUP_Tickables);
 }
 
-void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode)
+void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed)
 {
 	if (!Preset)
 	{
@@ -103,6 +104,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 
 	CurrentPreset = Preset;
 	CurrentMode = Mode;
+	CurrentPlaySpeed = FMath::Max(0.01f, PlaySpeed);
 	bIsTransitionActive = true;
 	bAutoStopOnReverseComplete = true;
 	bHasReachedHalfway = false;
@@ -158,6 +160,11 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	}
 
 	OnTransitionStarted.Broadcast();
+}
+
+void UTransitionManagerSubsystem::SetPlaySpeed(float NewSpeed)
+{
+	CurrentPlaySpeed = FMath::Max(0.01f, NewSpeed);
 }
 
 void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
