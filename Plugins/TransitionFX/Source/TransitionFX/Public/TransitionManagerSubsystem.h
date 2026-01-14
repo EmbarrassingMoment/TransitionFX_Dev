@@ -53,6 +53,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Transition")
 	bool IsTransitionPlaying() const;
 
+	/** Returns true if the current transition has finished (reached 1.0 for Forward, or stopped for Reverse). */
+	UFUNCTION(BlueprintPure, Category = "Transition")
+	bool IsCurrentTransitionFinished() const;
+
 public:
 	/** Triggered when a transition starts. */
 	UPROPERTY(BlueprintAssignable, Category = "Transition")

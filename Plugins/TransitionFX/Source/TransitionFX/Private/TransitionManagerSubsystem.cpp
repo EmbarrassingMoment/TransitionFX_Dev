@@ -213,3 +213,8 @@ bool UTransitionManagerSubsystem::IsTransitionPlaying() const
 {
 	return bIsTransitionActive;
 }
+
+bool UTransitionManagerSubsystem::IsCurrentTransitionFinished() const
+{
+	return bHasCompleted;
+}
