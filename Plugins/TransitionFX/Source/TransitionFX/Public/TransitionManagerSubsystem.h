@@ -53,6 +53,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Transition")
 	bool IsTransitionPlaying() const;
 
+	/** Returns true if the current transition has finished its hold phase or completed. */
+	UFUNCTION(BlueprintPure, Category = "Transition")
+	bool IsCurrentTransitionFinished() const;
+
 public:
 	/** Triggered when a transition starts. */
 	UPROPERTY(BlueprintAssignable, Category = "Transition")

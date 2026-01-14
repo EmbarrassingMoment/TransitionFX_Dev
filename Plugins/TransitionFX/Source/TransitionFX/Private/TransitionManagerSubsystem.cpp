@@ -78,6 +78,11 @@ bool UTransitionManagerSubsystem::IsTickable() const
 	return bIsTransitionActive;
 }
 
+bool UTransitionManagerSubsystem::IsCurrentTransitionFinished() const
+{
+	return bHasCompleted;
+}
+
 bool UTransitionManagerSubsystem::IsTickableWhenPaused() const
 {
 	return bIsTransitionActive && CurrentPreset && CurrentPreset->bTickWhenPaused;
