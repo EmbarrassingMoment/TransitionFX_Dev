@@ -22,7 +22,7 @@ public:
 		}
 	}
 
-	virtual void UpdateOperation(FLatentActionResponse& Response) override
+	virtual void UpdateOperation(FLatentResponse& Response) override
 	{
 		bool bFinished = false;
 
