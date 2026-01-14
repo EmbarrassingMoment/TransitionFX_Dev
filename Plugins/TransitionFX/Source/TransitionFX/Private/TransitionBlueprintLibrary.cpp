@@ -46,7 +46,7 @@ public:
 			}
 		}
 
-		Response.FinishAndTriggerIf(bFinished, ExecutionFunction);
+		Response.FinishAndTriggerIf(bFinished, ExecutionFunction.ExecutionFunction, ExecutionFunction.Linkage, ExecutionFunction.CallbackTarget);
 	}
 
 #if WITH_EDITOR
