@@ -3,7 +3,6 @@
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
 #include "Curves/CurveFloat.h"
-#include "Sound/SoundBase.h"
 
 void UTransitionManagerSubsystem::Tick(float DeltaTime)
 {
@@ -156,12 +155,6 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		{
 			PC->SetCinematicMode(true, true, true, true, true);
 		}
-	}
-
-	// Play Sound
-	if (CurrentPreset->TransitionSound)
-	{
-		UGameplayStatics::PlaySound2D(this, CurrentPreset->TransitionSound);
 	}
 
 	OnTransitionStarted.Broadcast();
