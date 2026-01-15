@@ -6,7 +6,6 @@
 #include "TransitionPreset.generated.h"
 
 class UCurveFloat;
-class USoundBase;
 class UMaterialInterface;
 
 /**
@@ -58,8 +57,4 @@ public:
 	/** The progress point (0.0-1.0) where the screen is fully covered. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float HalfwayThreshold;
-
-	/** Optional sound to play at start. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
-	TObjectPtr<USoundBase> TransitionSound;
 };
