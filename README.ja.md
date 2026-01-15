@@ -3,8 +3,6 @@
 > **Note:** 🚧 **現在開発中です** 🚧
 > This project is currently under active development.
 
-**Status:** 🚧 開発中 / Under Development
-
 ## Description
 TransitionFXは、Unreal Engine 5向けの軽量かつ高度なプロシージャル画面遷移システムです。
 テクスチャを使用せず、SDF（Signed Distance Field）計算に基づいた高品質なトランジションを描画し、ブループリントからたった1つのノードで実装可能です。
