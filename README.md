@@ -16,7 +16,8 @@ It renders high-quality transitions based on SDF (Signed Distance Field) math wi
     *   **Pause Support:** Works smoothly even when the game is paused.
 *   **Versatile Control:**
     *   **Forward / Reverse:** Control "Fade Out" and "Fade In" with a single preset using Transition Modes.
-    *   **Speed Control:** Dynamic playback speed adjustment.
+    *   **Speed Control:** Dynamic playback speed adjustment via `SetPlaySpeed`.
+*   **Event System:** Access `OnTransitionStarted`, `OnTransitionHalfway`, and `OnTransitionCompleted` delegates for precise gameplay logic timing.
 *   **Blueprint Support:** Includes a Latent Action node (`PlayTransitionAndWait`) for clean and easy scripting.
 
 ## Installation
@@ -32,7 +33,11 @@ Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
 *   **Effect Class:** Select `PostProcessTransitionEffect`.
 *   **Transition Material:** Select `M_Transition_Master` (or `Iris`, `Diamond`).
 *   **Default Duration:** Set duration in seconds (e.g., `1.0`).
-*   **bAutoBlockInput:** Set to `True`.
+*   **Progress Curve:** (Optional) Set a float curve to control the ease-in/out of the transition.
+*   **bAutoBlockInput:** Set to `True` to automatically disable player input during the transition.
+*   **bTickWhenPaused:** Set to `True` to allow the transition to play even when the game is paused.
+*   **Priority:** Set the rendering priority (default: 1000).
+*   **HalfwayThreshold:** Define the point (0.0-1.0) where the transition is considered "halfway" (default: 0.5).
 
 ### 2. Call from Blueprint
 Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.
@@ -44,6 +49,12 @@ Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.
 *   **Fade In (Reverse):**
     `Play Transition And Wait` (Preset: `DA_FadeBlack`, Mode: `Reverse`, Speed: `1.0`)
     *(Effect is removed automatically upon completion)*
+
+### 3. Events
+You can bind to the following events in the `TransitionManagerSubsystem`:
+*   **OnTransitionStarted:** Fired when the transition begins.
+*   **OnTransitionHalfway:** Fired when progress crosses the `HalfwayThreshold` (useful for level loading or switching cameras).
+*   **OnTransitionCompleted:** Fired when the transition finishes.
 
 ## Built-in Effects
 *   **Fade:** Simple opacity fade.
