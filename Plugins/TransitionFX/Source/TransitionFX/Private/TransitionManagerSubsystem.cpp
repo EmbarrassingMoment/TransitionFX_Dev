@@ -82,6 +82,11 @@ bool UTransitionManagerSubsystem::IsCurrentTransitionFinished() const
 	return bHasCompleted;
 }
 
+float UTransitionManagerSubsystem::GetCurrentProgress() const
+{
+	return CurrentProgress;
+}
+
 bool UTransitionManagerSubsystem::IsTickableWhenPaused() const
 {
 	return bIsTransitionActive && CurrentPreset && CurrentPreset->bTickWhenPaused;

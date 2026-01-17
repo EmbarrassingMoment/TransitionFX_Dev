@@ -57,6 +57,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Transition")
 	bool IsCurrentTransitionFinished() const;
 
+	/** Returns the current progress of the transition (0.0 to 1.0). */
+	UFUNCTION(BlueprintPure, Category = "Transition")
+	float GetCurrentProgress() const;
+
 public:
 	/** Triggered when a transition starts. */
 	UPROPERTY(BlueprintAssignable, Category = "Transition")
