@@ -38,13 +38,6 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 		CurrentEffect->UpdateProgress(EasedProgress);
 	}
 
-	// Check Halfway
-	if (!bHasReachedHalfway && RawProgress >= CurrentPreset->HalfwayThreshold)
-	{
-		bHasReachedHalfway = true;
-		OnTransitionHalfway.Broadcast();
-	}
-
 	// Check Completion
 	if (CurrentMode == ETransitionMode::Reverse)
 	{
@@ -111,7 +104,6 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	CurrentPlaySpeed = FMath::Max(0.01f, PlaySpeed);
 	bIsTransitionActive = true;
 	bAutoStopOnReverseComplete = true;
-	bHasReachedHalfway = false;
 	bHasCompleted = false;
 
 	if (CurrentMode == ETransitionMode::Forward)
