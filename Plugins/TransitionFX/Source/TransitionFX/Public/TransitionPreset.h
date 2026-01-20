@@ -22,7 +22,6 @@ public:
 		, bAutoBlockInput(true)
 		, bTickWhenPaused(false)
 		, Priority(1000.0f)
-		, HalfwayThreshold(0.5f)
 	{
 	}
 
@@ -53,8 +52,4 @@ public:
 	/** Priority for PostProcess effect. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
 	float Priority;
-
-	/** The progress point (0.0-1.0) where the screen is fully covered. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float HalfwayThreshold;
 };

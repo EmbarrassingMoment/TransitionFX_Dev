@@ -8,7 +8,6 @@
 #include "TransitionManagerSubsystem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionStarted);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionHalfway);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionCompleted);
 
 UENUM(BlueprintType)
@@ -62,10 +61,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Transition")
 	FOnTransitionStarted OnTransitionStarted;
 
-	/** Triggered when a transition reaches the halfway threshold. */
-	UPROPERTY(BlueprintAssignable, Category = "Transition")
-	FOnTransitionHalfway OnTransitionHalfway;
-
 	/** Triggered when a transition completes. */
 	UPROPERTY(BlueprintAssignable, Category = "Transition")
 	FOnTransitionCompleted OnTransitionCompleted;
@@ -90,9 +85,6 @@ private:
 
 	/** Whether to automatically stop the transition when reverse completes. */
 	bool bAutoStopOnReverseComplete;
-
-	/** Whether the halfway point has been reached for the current transition. */
-	bool bHasReachedHalfway;
 
 	/** Whether the completion event has been triggered for the current transition. */
 	bool bHasCompleted;
