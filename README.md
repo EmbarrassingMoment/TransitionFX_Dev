@@ -11,13 +11,13 @@ It renders high-quality transitions based on SDF (Signed Distance Field) math wi
 *   **UE 5.5+ Native:** Optimized for the latest Unreal Engine features.
 *   **Procedural Rendering:** Texture-less SDF-based rendering ensures no degradation at any resolution and automatically corrects aspect ratio distortion.
 *   **Design-First Workflow:**
-    *   **Data Asset Driven:** Manage transition patterns, duration, curves, and sounds as reusable "Presets".
+    *   **Data Asset Driven:** Manage transition patterns, duration, and curves as reusable "Presets".
     *   **Auto Input Blocking:** Automatically handles player input blocking during transitions.
     *   **Pause Support:** Works smoothly even when the game is paused.
 *   **Versatile Control:**
     *   **Forward / Reverse:** Control "Fade Out" and "Fade In" with a single preset using Transition Modes.
     *   **Speed Control:** Dynamic playback speed adjustment via `SetPlaySpeed`.
-*   **Event System:** Access `OnTransitionStarted`, `OnTransitionHalfway`, and `OnTransitionCompleted` delegates for precise gameplay logic timing.
+*   **Event System:** Access `OnTransitionStarted` and `OnTransitionCompleted` delegates for precise gameplay logic timing.
 *   **Blueprint Support:** Includes a Latent Action node (`PlayTransitionAndWait`) for clean and easy scripting.
 
 ## Installation
@@ -37,7 +37,6 @@ Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
 *   **bAutoBlockInput:** Set to `True` to automatically disable player input during the transition.
 *   **bTickWhenPaused:** Set to `True` to allow the transition to play even when the game is paused.
 *   **Priority:** Set the rendering priority (default: 1000).
-*   **HalfwayThreshold:** Define the point (0.0-1.0) where the transition is considered "halfway" (default: 0.5).
 
 ### 2. Call from Blueprint
 Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.
@@ -53,8 +52,17 @@ Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.
 ### 3. Events
 You can bind to the following events in the `TransitionManagerSubsystem`:
 *   **OnTransitionStarted:** Fired when the transition begins.
-*   **OnTransitionHalfway:** Fired when progress crosses the `HalfwayThreshold` (useful for level loading or switching cameras).
 *   **OnTransitionCompleted:** Fired when the transition finishes.
+
+## API Reference
+The `TransitionManagerSubsystem` provides several callable functions for advanced control:
+
+*   **StopTransition():** Instantly stops the current transition.
+*   **ReverseTransition(bool bAutoStop):** Reverses the playback direction (e.g., from Fade Out to Fade In).
+*   **SetPlaySpeed(float NewSpeed):** Changes the playback speed multiplier dynamically.
+*   **GetCurrentProgress():** Returns the current progress (0.0 to 1.0).
+*   **IsTransitionPlaying():** Returns true if a transition is currently active.
+*   **IsCurrentTransitionFinished():** Returns true if the transition has reached its end state (useful for polling).
 
 ## Built-in Effects
 *   **Fade:** Simple opacity fade.
