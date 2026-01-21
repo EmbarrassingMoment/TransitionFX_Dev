@@ -47,7 +47,8 @@ void UPostProcessTransitionEffect::UpdateProgress(float Progress)
 {
 	if (DynamicMaterial)
 	{
-		DynamicMaterial->SetScalarParameterValue(FName("Progress"), Progress);
+		static const FName ProgressParamName(TEXT("Progress"));
+		DynamicMaterial->SetScalarParameterValue(ProgressParamName, Progress);
 		UpdateMaterialParameters(DynamicMaterial, Progress);
 	}
 }
