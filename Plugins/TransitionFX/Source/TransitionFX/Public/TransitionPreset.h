@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "ITransitionEffect.h"
+#include "Materials/MaterialInterface.h"
 #include "TransitionPreset.generated.h"
 
 class UCurveFloat;
-class UMaterialInterface;
 
 /**
  * DataAsset to hold transition settings.
