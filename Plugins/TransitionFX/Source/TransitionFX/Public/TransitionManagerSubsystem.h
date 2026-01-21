@@ -10,6 +10,8 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionCompleted);
 
+class APlayerController;
+
 UENUM(BlueprintType)
 enum class ETransitionMode : uint8
 {
@@ -95,4 +97,7 @@ private:
 
 	/** Current playback speed multiplier. */
 	float CurrentPlaySpeed;
+
+	/** Cached player controller to avoid redundant lookups. */
+	TWeakObjectPtr<APlayerController> CachedPlayerController;
 };
