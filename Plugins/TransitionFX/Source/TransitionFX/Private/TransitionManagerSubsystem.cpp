@@ -147,8 +147,13 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	// Block Input
 	if (CurrentPreset->bAutoBlockInput)
 	{
-		APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-		if (PC)
+		// Refresh cache if invalid (e.g. level change, or first run)
+		if (!CachedPlayerController.IsValid())
+		{
+			CachedPlayerController = UGameplayStatics::GetPlayerController(this, 0);
+		}
+
+		if (APlayerController* PC = CachedPlayerController.Get())
 		{
 			PC->SetCinematicMode(true, true, true, true, true);
 		}
@@ -193,8 +198,8 @@ void UTransitionManagerSubsystem::StopTransition()
 	// Restore Input
 	if (CurrentPreset && CurrentPreset->bAutoBlockInput)
 	{
-		APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-		if (PC)
+		// Use cached controller to restore input
+		if (APlayerController* PC = CachedPlayerController.Get())
 		{
 			PC->SetCinematicMode(false, true, true, true, true);
 		}
