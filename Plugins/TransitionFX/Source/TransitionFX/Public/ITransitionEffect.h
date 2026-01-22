@@ -38,6 +38,9 @@ public:
 	 */
 	virtual void Cleanup() = 0;
 
+	/** Sets whether to invert the transition mask (0=Normal, 1=Inverted). */
+	virtual void SetInvert(bool bInvert) = 0;
+
 	/**
 	 * Returns the progress point where the screen is considered fully covered.
 	 * Defaults to 0.5f.

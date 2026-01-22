@@ -23,6 +23,7 @@ public:
 	virtual void Initialize(UWorld* World, UTransitionPreset* Preset) override;
 	virtual void UpdateProgress(float Progress) override;
 	virtual void Cleanup() override;
+	virtual void SetInvert(bool bInvert) override;
 
 	/**
 	 * Updates custom material parameters. Override this in subclasses to add extra parameters.

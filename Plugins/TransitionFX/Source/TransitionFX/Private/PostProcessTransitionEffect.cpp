@@ -64,6 +64,16 @@ void UPostProcessTransitionEffect::Cleanup()
 	DynamicMaterial = nullptr;
 }
 
+void UPostProcessTransitionEffect::SetInvert(bool bInvert)
+{
+	if (DynamicMaterial)
+	{
+		// Pass 1.0 for True, 0.0 for False.
+		// The material will use an "If" node with a threshold of 0.5 to switch logic.
+		DynamicMaterial->SetScalarParameterValue(FName("Invert"), bInvert ? 1.0f : 0.0f);
+	}
+}
+
 void UPostProcessTransitionEffect::UpdateMaterialParameters(UMaterialInstanceDynamic* MID, float Progress)
 {
 	// Base implementation does nothing. Subclasses can override.

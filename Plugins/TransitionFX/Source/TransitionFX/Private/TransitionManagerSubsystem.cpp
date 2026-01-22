@@ -90,7 +90,7 @@ TStatId UTransitionManagerSubsystem::GetStatId() const
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UTransitionManagerSubsystem, STATGROUP_Tickables);
 }
 
-void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed)
+void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, bool bInvert)
 {
 	if (!Preset)
 	{
@@ -131,6 +131,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 			{
 				CurrentEffect = NewEffectObj;
 				CurrentEffect->Initialize(World, Preset);
+				CurrentEffect->SetInvert(bInvert);
 
 				if (CurrentMode == ETransitionMode::Reverse)
 				{

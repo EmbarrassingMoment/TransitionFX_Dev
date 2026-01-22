@@ -36,7 +36,7 @@ public:
 
 	/** Starts a transition with the given preset. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
-	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward, float PlaySpeed = 1.0f);
+	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward, float PlaySpeed = 1.0f, bool bInvert = false);
 
 	/** Sets the playback speed multiplier. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
