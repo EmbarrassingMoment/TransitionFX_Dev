@@ -100,4 +100,8 @@ private:
 
 	/** Cached player controller to avoid redundant lookups. */
 	TWeakObjectPtr<APlayerController> CachedPlayerController;
+
+	/** Pool of transition effect instances. */
+	UPROPERTY(Transient)
+	TMap<UClass*, UObject*> EffectPool;
 };

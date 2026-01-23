@@ -126,10 +126,26 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			UObject* NewEffectObj = NewObject<UObject>(this, Preset->EffectClass);
-			if (NewEffectObj && NewEffectObj->Implements<UTransitionEffect>())
+			UObject* EffectObj = nullptr;
+
+			// Check pool for existing instance
+			if (UObject** PooledObj = EffectPool.Find(Preset->EffectClass))
 			{
-				CurrentEffect = NewEffectObj;
+				EffectObj = *PooledObj;
+			}
+
+			if (!EffectObj)
+			{
+				EffectObj = NewObject<UObject>(this, Preset->EffectClass);
+				if (EffectObj)
+				{
+					EffectPool.Add(Preset->EffectClass, EffectObj);
+				}
+			}
+
+			if (EffectObj && EffectObj->Implements<UTransitionEffect>())
+			{
+				CurrentEffect = EffectObj;
 				CurrentEffect->Initialize(World, Preset);
 				CurrentEffect->SetInvert(bInvert);
 
@@ -140,7 +156,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("Failed to create transition effect instance."));
+				UE_LOG(LogTemp, Error, TEXT("Failed to create or retrieve transition effect instance."));
 			}
 		}
 	}
