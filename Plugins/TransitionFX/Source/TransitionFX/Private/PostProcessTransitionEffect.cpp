@@ -5,6 +5,8 @@
 #include "Kismet/KismetMaterialLibrary.h"
 #include "Engine/World.h"
 
+static TArray<TWeakObjectPtr<APostProcessVolume>> GlobalVolumePool;
+
 void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* Preset)
 {
 	if (!World || !Preset)
@@ -26,19 +28,48 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 		return;
 	}
 
-	// Spawn Post Process Volume
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.ObjectFlags = RF_Transient; // Don't save this actor
+	// Retrieve from pool or Spawn
+	APostProcessVolume* VolumeToUse = nullptr;
 
-	SpawnedVolume = World->SpawnActor<APostProcessVolume>(SpawnParams);
+	// Clean up invalid entries and look for a match
+	for (int32 i = GlobalVolumePool.Num() - 1; i >= 0; --i)
+	{
+		if (!GlobalVolumePool[i].IsValid())
+		{
+			GlobalVolumePool.RemoveAtSwap(i);
+			continue;
+		}
+
+		APostProcessVolume* Vol = GlobalVolumePool[i].Get();
+		if (Vol->GetWorld() == World)
+		{
+			VolumeToUse = Vol;
+			GlobalVolumePool.RemoveAtSwap(i);
+			break;
+		}
+	}
+
+	if (!VolumeToUse)
+	{
+		// Spawn Post Process Volume
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.ObjectFlags = RF_Transient; // Don't save this actor
+
+		VolumeToUse = World->SpawnActor<APostProcessVolume>(SpawnParams);
+	}
+
+	SpawnedVolume = VolumeToUse;
 
 	if (SpawnedVolume)
 	{
 		SpawnedVolume->bUnbound = true; // Infinite extent
 		SpawnedVolume->Priority = Preset->Priority;
+		SpawnedVolume->SetActorHiddenInGame(false);
+		SpawnedVolume->bEnabled = true;
 
 		// Add Dynamic Material to Weighted Blendables
+		SpawnedVolume->Settings.WeightedBlendables.Array.Empty();
 		SpawnedVolume->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, DynamicMaterial));
 	}
 }
@@ -57,7 +88,10 @@ void UPostProcessTransitionEffect::Cleanup()
 {
 	if (SpawnedVolume)
 	{
-		SpawnedVolume->Destroy();
+		SpawnedVolume->SetActorHiddenInGame(true);
+		SpawnedVolume->bEnabled = false;
+		SpawnedVolume->Settings.WeightedBlendables.Array.Empty();
+		GlobalVolumePool.Add(SpawnedVolume);
 		SpawnedVolume = nullptr;
 	}
 
