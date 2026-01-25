@@ -77,6 +77,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Polka Dots** | A wave of expanding circles (halftone pattern) covers the screen. Pop and modern look. | ![PolkaDots](https://via.placeholder.com/320x180/000000/FFFFFF?text=Polka+Dots) |
 | **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | ![Blinds](https://via.placeholder.com/320x180/000000/FFFFFF?text=Blinds) |
 | **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | ![Spiral](https://via.placeholder.com/320x180/000000/FFFFFF?text=Spiral) |
+| **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | ![RandomTiles](https://via.placeholder.com/320x180/000000/FFFFFF?text=Random+Tiles) |
 
 ## License
 MIT License
