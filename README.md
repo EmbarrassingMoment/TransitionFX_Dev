@@ -76,6 +76,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Box Grid** | The screen is divided into a grid, and blocks expand from the center in a wave pattern. | ![BoxGrid](https://via.placeholder.com/320x180/000000/FFFFFF?text=Box+Grid) |
 | **Polka Dots** | A wave of expanding circles (halftone pattern) covers the screen. Pop and modern look. | ![PolkaDots](https://via.placeholder.com/320x180/000000/FFFFFF?text=Polka+Dots) |
 | **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | ![Blinds](https://via.placeholder.com/320x180/000000/FFFFFF?text=Blinds) |
+| **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | ![Spiral](https://via.placeholder.com/320x180/000000/FFFFFF?text=Spiral) |
 
 ## License
 MIT License
