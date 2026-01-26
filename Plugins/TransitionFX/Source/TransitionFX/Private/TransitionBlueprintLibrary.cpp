@@ -67,6 +67,21 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldCont
 	}
 }
 
+bool UTransitionBlueprintLibrary::IsTransitionPlaying(const UObject* WorldContextObject)
+{
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	{
+		if (UGameInstance* GI = World->GetGameInstance())
+		{
+			if (UTransitionManagerSubsystem* Manager = GI->GetSubsystem<UTransitionManagerSubsystem>())
+			{
+				return Manager->IsTransitionPlaying();
+			}
+		}
+	}
+	return false;
+}
+
 void UTransitionBlueprintLibrary::PlayTransitionAndWaitWithDuration(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float Duration, bool bInvert, struct FLatentActionInfo LatentInfo)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))

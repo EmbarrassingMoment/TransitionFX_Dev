@@ -39,4 +39,13 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Transition", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "Mode"))
 	static void PlayTransitionAndWaitWithDuration(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float Duration, bool bInvert, struct FLatentActionInfo LatentInfo);
+
+	/**
+	 * Returns true if a transition is currently playing.
+	 *
+	 * @param WorldContextObject The world context object.
+	 * @return True if a transition is active, false otherwise.
+	 */
+	UFUNCTION(BlueprintPure, Category = "Transition", meta = (WorldContext = "WorldContextObject"))
+	static bool IsTransitionPlaying(const UObject* WorldContextObject);
 };
