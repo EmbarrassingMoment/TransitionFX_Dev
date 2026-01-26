@@ -71,6 +71,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Fade** | Standard opacity fade. Simple and lightweight. | ![Fade](https://via.placeholder.com/320x180/000000/FFFFFF?text=Fade) |
 | **Iris** | Classic circular wipe closing toward the center. Aspect ratio corrected. | ![Iris](https://via.placeholder.com/320x180/000000/FFFFFF?text=Iris) |
 | **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | ![Diamond](https://via.placeholder.com/320x180/000000/FFFFFF?text=Diamond) |
+| **Box** | A simple square expanding from the center. Basic geometric transition. | ![Box](https://via.placeholder.com/320x180/000000/FFFFFF?text=Box) |
 | **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | ![Linear](https://via.placeholder.com/320x180/000000/FFFFFF?text=Linear+Wipe) |
 | **Radial Wipe** | Clock-like radial wipe. Supports smooth edges and adjustable start angle. | ![Radial](https://via.placeholder.com/320x180/000000/FFFFFF?text=Radial+Wipe) |
 | **Box Grid** | The screen is divided into a grid, and blocks expand from the center in a wave pattern. | ![BoxGrid](https://via.placeholder.com/320x180/000000/FFFFFF?text=Box+Grid) |
