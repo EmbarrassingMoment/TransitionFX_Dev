@@ -3,6 +3,26 @@
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
 #include "Curves/CurveFloat.h"
+#include "HAL/IConsoleManager.h"
+
+void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	IConsoleManager::Get().RegisterConsoleCommand(
+		TEXT("TransitionFX.Clear"),
+		TEXT("Forcefully clears any active transition and resets input."),
+		FConsoleCommandDelegate::CreateUObject(this, &UTransitionManagerSubsystem::ForceClear),
+		ECVF_Default
+	);
+}
+
+void UTransitionManagerSubsystem::Deinitialize()
+{
+	IConsoleManager::Get().UnregisterConsoleObject(TEXT("TransitionFX.Clear"));
+
+	Super::Deinitialize();
+}
 
 void UTransitionManagerSubsystem::Tick(float DeltaTime)
 {
@@ -68,6 +88,35 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 bool UTransitionManagerSubsystem::IsTickable() const
 {
 	return bIsTransitionActive;
+}
+
+void UTransitionManagerSubsystem::ForceClear()
+{
+	UE_LOG(LogTemp, Warning, TEXT("TransitionFX: Force Clear Executed."));
+
+	// Cleanup Effect
+	if (CurrentEffect)
+	{
+		CurrentEffect->Cleanup();
+		CurrentEffect = nullptr;
+	}
+
+	// Reset Input
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
+	{
+		// Force disable cinematic mode
+		PC->SetCinematicMode(false, true, true, true, true);
+		CachedPlayerController = PC;
+	}
+
+	// TODO: Reset Audio Volume to 1.0f
+
+	// Reset Flags
+	bIsTransitionActive = false;
+	bHasCompleted = false;
+	bAutoStopOnReverseComplete = false;
+	CurrentPreset = nullptr;
+	CurrentProgress = 0.0f;
 }
 
 bool UTransitionManagerSubsystem::IsCurrentTransitionFinished() const
