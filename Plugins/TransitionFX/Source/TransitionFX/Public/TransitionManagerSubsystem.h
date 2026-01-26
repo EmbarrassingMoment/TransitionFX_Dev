@@ -9,6 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionCompleted);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTransitionHoldStarted);
 
 class APlayerController;
 
@@ -40,7 +41,11 @@ public:
 
 	/** Starts a transition with the given preset. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
-	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward, float PlaySpeed = 1.0f, bool bInvert = false);
+	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward, float PlaySpeed = 1.0f, bool bInvert = false, bool bHoldAtMax = false);
+
+	/** Releases the hold at max progress, allowing the transition to complete. */
+	UFUNCTION(BlueprintCallable, Category = "Transition")
+	void ReleaseHold();
 
 	/** Sets the playback speed multiplier. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
@@ -79,6 +84,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Transition")
 	FOnTransitionCompleted OnTransitionCompleted;
 
+	/** Triggered when a transition holds at max progress (1.0). */
+	UPROPERTY(BlueprintAssignable, Category = "Transition")
+	FTransitionHoldStarted OnTransitionHoldStarted;
+
 private:
 	/** The current transition preset. */
 	UPROPERTY(Transient)
@@ -102,6 +111,12 @@ private:
 
 	/** Whether the completion event has been triggered for the current transition. */
 	bool bHasCompleted;
+
+	/** Whether the transition should hold when it reaches max progress (1.0). */
+	bool bShouldHoldAtMax;
+
+	/** Whether the transition is currently holding at max progress. */
+	bool bIsHolding;
 
 	/** Current playback speed multiplier. */
 	float CurrentPlaySpeed;
