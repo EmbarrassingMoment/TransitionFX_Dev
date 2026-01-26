@@ -76,6 +76,19 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 	{
 		if (RawProgress >= 1.0f)
 		{
+			if (bShouldHoldAtMax && !bIsHolding && !bHasCompleted)
+			{
+				bIsHolding = true;
+				OnTransitionHoldStarted.Broadcast();
+				return;
+			}
+
+			if (bIsHolding)
+			{
+				CurrentProgress = 1.0f;
+				return;
+			}
+
 			if (!bHasCompleted)
 			{
 				bHasCompleted = true;
@@ -115,6 +128,8 @@ void UTransitionManagerSubsystem::ForceClear()
 	bIsTransitionActive = false;
 	bHasCompleted = false;
 	bAutoStopOnReverseComplete = false;
+	bShouldHoldAtMax = false;
+	bIsHolding = false;
 	CurrentPreset = nullptr;
 	CurrentProgress = 0.0f;
 }
@@ -139,7 +154,7 @@ TStatId UTransitionManagerSubsystem::GetStatId() const
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UTransitionManagerSubsystem, STATGROUP_Tickables);
 }
 
-void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, bool bInvert)
+void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, bool bInvert, bool bHoldAtMax)
 {
 	if (!Preset)
 	{
@@ -156,6 +171,8 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	CurrentPreset = Preset;
 	CurrentMode = Mode;
 	CurrentPlaySpeed = FMath::Max(0.01f, PlaySpeed);
+	bShouldHoldAtMax = bHoldAtMax;
+	bIsHolding = false;
 	bIsTransitionActive = true;
 	bAutoStopOnReverseComplete = true;
 	bHasCompleted = false;
@@ -212,6 +229,20 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	OnTransitionStarted.Broadcast();
 }
 
+void UTransitionManagerSubsystem::ReleaseHold()
+{
+	if (bIsHolding)
+	{
+		bIsHolding = false;
+		bShouldHoldAtMax = false;
+	}
+	else
+	{
+		// Even if not currently holding, ensure we don't hold in the future for this transition
+		bShouldHoldAtMax = false;
+	}
+}
+
 void UTransitionManagerSubsystem::SetPlaySpeed(float NewSpeed)
 {
 	CurrentPlaySpeed = FMath::Max(0.01f, NewSpeed);
@@ -256,6 +287,8 @@ void UTransitionManagerSubsystem::StopTransition()
 	}
 
 	bIsTransitionActive = false;
+	bShouldHoldAtMax = false;
+	bIsHolding = false;
 	CurrentPreset = nullptr;
 }
 
