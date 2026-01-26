@@ -34,6 +34,10 @@ public:
 	virtual bool IsTickableWhenPaused() const override;
 	virtual TStatId GetStatId() const override;
 
+	// USubsystem Interface
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
+
 	/** Starts a transition with the given preset. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
 	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward, float PlaySpeed = 1.0f, bool bInvert = false);
@@ -61,6 +65,10 @@ public:
 	/** Returns the current progress of the transition (0.0 to 1.0). */
 	UFUNCTION(BlueprintPure, Category = "Transition")
 	float GetCurrentProgress() const;
+
+	/** Forcefully clears any active transition and resets input. */
+	UFUNCTION(BlueprintCallable, Category = "Transition")
+	void ForceClear();
 
 public:
 	/** Triggered when a transition starts. */
