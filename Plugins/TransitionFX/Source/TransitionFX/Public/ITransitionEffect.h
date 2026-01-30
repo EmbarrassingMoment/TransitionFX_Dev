@@ -5,6 +5,7 @@
 #include "ITransitionEffect.generated.h"
 
 class UTransitionPreset;
+struct FTransitionParameters;
 
 UINTERFACE(MinimalAPI, BlueprintType)
 class UTransitionEffect : public UInterface
@@ -40,6 +41,12 @@ public:
 
 	/** Sets whether to invert the transition mask (0=Normal, 1=Inverted). */
 	virtual void SetInvert(bool bInvert) = 0;
+
+	/**
+	 * Sets the custom parameters for the transition material.
+	 * @param Params The parameters to apply.
+	 */
+	virtual void SetParameters(const FTransitionParameters& Params) = 0;
 
 	/**
 	 * Returns the progress point where the screen is considered fully covered.

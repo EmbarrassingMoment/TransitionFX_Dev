@@ -75,6 +75,22 @@ void UPostProcessTransitionEffect::SetInvert(bool bInvert)
 	}
 }
 
+void UPostProcessTransitionEffect::SetParameters(const FTransitionParameters& Params)
+{
+	if (DynamicMaterial)
+	{
+		for (const auto& Pair : Params.ScalarParams)
+		{
+			DynamicMaterial->SetScalarParameterValue(Pair.Key, Pair.Value);
+		}
+
+		for (const auto& Pair : Params.VectorParams)
+		{
+			DynamicMaterial->SetVectorParameterValue(Pair.Key, Pair.Value);
+		}
+	}
+}
+
 void UPostProcessTransitionEffect::UpdateMaterialParameters(UMaterialInstanceDynamic* MID, float Progress)
 {
 	// Base implementation does nothing. Subclasses can override.

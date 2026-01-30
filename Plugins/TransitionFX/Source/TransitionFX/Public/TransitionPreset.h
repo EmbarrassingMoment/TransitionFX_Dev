@@ -9,6 +9,23 @@
 class UCurveFloat;
 
 /**
+ * Parameters to override transition material properties at runtime.
+ */
+USTRUCT(BlueprintType)
+struct FTransitionParameters
+{
+	GENERATED_BODY()
+
+	/** Scalar parameters to override (e.g., float values). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	TMap<FName, float> ScalarParams;
+
+	/** Vector parameters to override (e.g., Colors). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	TMap<FName, FLinearColor> VectorParams;
+};
+
+/**
  * DataAsset to hold transition settings.
  */
 UCLASS(BlueprintType)

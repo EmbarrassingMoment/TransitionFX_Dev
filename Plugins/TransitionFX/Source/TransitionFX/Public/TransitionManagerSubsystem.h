@@ -41,7 +41,7 @@ public:
 
 	/** Starts a transition with the given preset. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")
-	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward, float PlaySpeed = 1.0f, bool bInvert = false, bool bHoldAtMax = false);
+	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward, float PlaySpeed = 1.0f, bool bInvert = false, bool bHoldAtMax = false, FTransitionParameters OverrideParams = FTransitionParameters());
 
 	/** Releases the hold at max progress, allowing the transition to complete. */
 	UFUNCTION(BlueprintCallable, Category = "Transition")

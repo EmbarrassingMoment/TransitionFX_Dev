@@ -50,7 +50,7 @@ public:
 #endif
 };
 
-void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, struct FLatentActionInfo LatentInfo)
+void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
 	{
@@ -60,14 +60,14 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldCont
 			UTransitionManagerSubsystem* Manager = World->GetGameInstance()->GetSubsystem<UTransitionManagerSubsystem>();
 			if (Manager)
 			{
-				Manager->StartTransition(Preset, Mode, PlaySpeed);
+				Manager->StartTransition(Preset, Mode, PlaySpeed, false, false, OverrideParams);
 				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionLatentAction(LatentInfo, Manager));
 			}
 		}
 	}
 }
 
-void UTransitionBlueprintLibrary::PlayTransitionAndWaitWithDuration(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float Duration, bool bInvert, struct FLatentActionInfo LatentInfo)
+void UTransitionBlueprintLibrary::PlayTransitionAndWaitWithDuration(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float Duration, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
 	{
@@ -89,7 +89,7 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWaitWithDuration(const UObjec
 						PlaySpeed = Preset->DefaultDuration / Duration;
 					}
 
-					Manager->StartTransition(Preset, Mode, PlaySpeed, bInvert);
+					Manager->StartTransition(Preset, Mode, PlaySpeed, bInvert, false, OverrideParams);
 					LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionLatentAction(LatentInfo, Manager));
 				}
 				else
