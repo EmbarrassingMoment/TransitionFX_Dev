@@ -79,6 +79,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | ![Blinds](https://via.placeholder.com/320x180/000000/FFFFFF?text=Blinds) |
 | **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | ![Spiral](https://via.placeholder.com/320x180/000000/FFFFFF?text=Spiral) |
 | **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | ![RandomTiles](https://via.placeholder.com/320x180/000000/FFFFFF?text=Random+Tiles) |
+| **Wind** | A directional wipe with streak noise, simulating wind blowing the image away. | ![Wind](https://via.placeholder.com/320x180/000000/FFFFFF?text=Wind) |
 
 ## License
 MIT License
