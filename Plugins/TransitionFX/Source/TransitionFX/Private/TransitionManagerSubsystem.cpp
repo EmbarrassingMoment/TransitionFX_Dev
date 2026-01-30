@@ -115,11 +115,20 @@ void UTransitionManagerSubsystem::ForceClear()
 	}
 
 	// Reset Input
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
+	APlayerController* PC = CachedPlayerController.Get();
+	if (!PC)
+	{
+		PC = UGameplayStatics::GetPlayerController(this, 0);
+		if (PC)
+		{
+			CachedPlayerController = PC;
+		}
+	}
+
+	if (PC)
 	{
 		// Force disable cinematic mode
 		PC->SetCinematicMode(false, true, true, true, true);
-		CachedPlayerController = PC;
 	}
 
 	// TODO: Reset Audio Volume to 1.0f
