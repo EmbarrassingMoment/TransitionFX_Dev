@@ -13,6 +13,16 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTransitionHoldStarted);
 
 class APlayerController;
 
+/** Pool for transition effects. */
+USTRUCT()
+struct FTransitionEffectPool
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TArray<TObjectPtr<UObject>> Effects;
+};
+
 UENUM(BlueprintType)
 enum class ETransitionMode : uint8
 {
@@ -89,6 +99,10 @@ public:
 	FTransitionHoldStarted OnTransitionHoldStarted;
 
 private:
+	/** Pool of available transition effects. */
+	UPROPERTY(Transient)
+	TMap<UClass*, FTransitionEffectPool> EffectPool;
+
 	/** The current transition preset. */
 	UPROPERTY(Transient)
 	TObjectPtr<UTransitionPreset> CurrentPreset;

@@ -26,19 +26,27 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 		return;
 	}
 
-	// Spawn Post Process Volume
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.ObjectFlags = RF_Transient; // Don't save this actor
+	// Reuse or Spawn Post Process Volume
+	if (!SpawnedVolume)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.ObjectFlags = RF_Transient; // Don't save this actor
 
-	SpawnedVolume = World->SpawnActor<APostProcessVolume>(SpawnParams);
+		SpawnedVolume = World->SpawnActor<APostProcessVolume>(SpawnParams);
+		if (SpawnedVolume)
+		{
+			SpawnedVolume->bUnbound = true; // Infinite extent
+		}
+	}
 
 	if (SpawnedVolume)
 	{
-		SpawnedVolume->bUnbound = true; // Infinite extent
+		SpawnedVolume->bEnabled = true;
 		SpawnedVolume->Priority = Preset->Priority;
 
-		// Add Dynamic Material to Weighted Blendables
+		// Update Weighted Blendables
+		SpawnedVolume->Settings.WeightedBlendables.Array.Empty();
 		SpawnedVolume->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, DynamicMaterial));
 	}
 }
@@ -57,11 +65,11 @@ void UPostProcessTransitionEffect::Cleanup()
 {
 	if (SpawnedVolume)
 	{
-		SpawnedVolume->Destroy();
-		SpawnedVolume = nullptr;
+		// Disable volume instead of destroying to allow reuse
+		SpawnedVolume->bEnabled = false;
 	}
 
-	DynamicMaterial = nullptr;
+	// Keep DynamicMaterial for potential reuse (or just let it be overwritten in Initialize)
 }
 
 void UPostProcessTransitionEffect::SetInvert(bool bInvert)
