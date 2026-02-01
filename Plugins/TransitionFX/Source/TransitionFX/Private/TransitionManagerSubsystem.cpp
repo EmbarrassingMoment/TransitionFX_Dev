@@ -21,6 +21,8 @@ void UTransitionManagerSubsystem::Deinitialize()
 {
 	IConsoleManager::Get().UnregisterConsoleObject(TEXT("TransitionFX.Clear"));
 
+	EffectPool.Empty();
+
 	Super::Deinitialize();
 }
 
@@ -111,6 +113,14 @@ void UTransitionManagerSubsystem::ForceClear()
 	if (CurrentEffect)
 	{
 		CurrentEffect->Cleanup();
+
+		// Return to pool
+		if (UObject* EffectObj = CurrentEffect.GetObject())
+		{
+			FTransitionEffectPool& Pool = EffectPool.FindOrAdd(EffectObj->GetClass());
+			Pool.Effects.Add(EffectObj);
+		}
+
 		CurrentEffect = nullptr;
 	}
 
@@ -201,10 +211,24 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			UObject* NewEffectObj = NewObject<UObject>(this, Preset->EffectClass);
-			if (NewEffectObj && NewEffectObj->Implements<UTransitionEffect>())
+			UObject* EffectObj = nullptr;
+
+			// Check Pool
+			FTransitionEffectPool& Pool = EffectPool.FindOrAdd(Preset->EffectClass);
+			if (Pool.Effects.Num() > 0)
 			{
-				CurrentEffect = NewEffectObj;
+				EffectObj = Pool.Effects.Pop();
+			}
+
+			// Create New if not found
+			if (!EffectObj)
+			{
+				EffectObj = NewObject<UObject>(this, Preset->EffectClass);
+			}
+
+			if (EffectObj && EffectObj->Implements<UTransitionEffect>())
+			{
+				CurrentEffect = EffectObj;
 				CurrentEffect->Initialize(World, Preset);
 				CurrentEffect->SetInvert(bInvert);
 				CurrentEffect->SetParameters(OverrideParams);
@@ -216,7 +240,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("Failed to create transition effect instance."));
+				UE_LOG(LogTemp, Error, TEXT("Failed to create or retrieve transition effect instance."));
 			}
 		}
 	}
@@ -283,6 +307,14 @@ void UTransitionManagerSubsystem::StopTransition()
 	if (CurrentEffect)
 	{
 		CurrentEffect->Cleanup();
+
+		// Return to pool
+		if (UObject* EffectObj = CurrentEffect.GetObject())
+		{
+			FTransitionEffectPool& Pool = EffectPool.FindOrAdd(EffectObj->GetClass());
+			Pool.Effects.Add(EffectObj);
+		}
+
 		CurrentEffect = nullptr;
 	}
 
