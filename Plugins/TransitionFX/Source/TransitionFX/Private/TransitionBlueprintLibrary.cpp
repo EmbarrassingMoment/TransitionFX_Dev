@@ -4,6 +4,9 @@
 #include "Engine/World.h"
 #include "Engine/LatentActionManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "PostProcessTransitionEffect.h"
+#include "TransitionPreset.h"
+#include "UObject/Package.h"
 
 class FTransitionLatentAction : public FPendingLatentAction
 {
@@ -65,6 +68,75 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldCont
 			}
 		}
 	}
+}
+
+bool UTransitionBlueprintLibrary::IsAnyTransitionPlaying(const UObject* WorldContextObject)
+{
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	{
+		if (UGameInstance* GameInstance = World->GetGameInstance())
+		{
+			if (UTransitionManagerSubsystem* Manager = GameInstance->GetSubsystem<UTransitionManagerSubsystem>())
+			{
+				return Manager->IsTransitionPlaying();
+			}
+		}
+	}
+	return false;
+}
+
+static void QuickFadeInternal(const UObject* WorldContextObject, float Duration, ETransitionMode Mode)
+{
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	{
+		if (UGameInstance* GameInstance = World->GetGameInstance())
+		{
+			if (UTransitionManagerSubsystem* Manager = GameInstance->GetSubsystem<UTransitionManagerSubsystem>())
+			{
+				UTransitionPreset* TempPreset = NewObject<UTransitionPreset>(GetTransientPackage());
+
+				// Try to load default Fade data to get the material
+				UTransitionPreset* FadeData = LoadObject<UTransitionPreset>(nullptr, TEXT("/TransitionFX/Data/DA_FadeToBlack.DA_FadeToBlack"));
+
+				if (FadeData)
+				{
+					TempPreset->EffectClass = FadeData->EffectClass;
+					TempPreset->TransitionMaterial = FadeData->TransitionMaterial;
+				}
+				else
+				{
+					// Fallback to manual setup if DataAsset is missing
+					TempPreset->EffectClass = UPostProcessTransitionEffect::StaticClass();
+
+					// Try to load the Master material mentioned in docs
+					TempPreset->TransitionMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/TransitionFX/Materials/M_Transition_Master.M_Transition_Master"));
+
+					if (!TempPreset->TransitionMaterial)
+					{
+						// Last resort: Log warning
+						UE_LOG(LogTemp, Warning, TEXT("QuickFade: Could not find DA_FadeToBlack or M_Transition_Master. Transition may not be visible."));
+					}
+				}
+
+				TempPreset->DefaultDuration = Duration;
+
+				FTransitionParameters Params;
+				Params.VectorParams.Add(FName("Color"), FLinearColor::Black);
+
+				Manager->StartTransition(TempPreset, Mode, 1.0f, false, false, Params);
+			}
+		}
+	}
+}
+
+void UTransitionBlueprintLibrary::QuickFadeToBlack(const UObject* WorldContextObject, float Duration)
+{
+	QuickFadeInternal(WorldContextObject, Duration, ETransitionMode::Forward);
+}
+
+void UTransitionBlueprintLibrary::QuickFadeFromBlack(const UObject* WorldContextObject, float Duration)
+{
+	QuickFadeInternal(WorldContextObject, Duration, ETransitionMode::Reverse);
 }
 
 void UTransitionBlueprintLibrary::PlayTransitionAndWaitWithDuration(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float Duration, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)

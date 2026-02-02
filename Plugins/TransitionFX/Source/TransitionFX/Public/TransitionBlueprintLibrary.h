@@ -41,4 +41,30 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Transition", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "Mode"))
 	static void PlayTransitionAndWaitWithDuration(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float Duration, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo);
+
+	/**
+	 * Returns true if any transition is currently playing.
+	 *
+	 * @param WorldContextObject The world context object.
+	 */
+	UFUNCTION(BlueprintPure, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
+	static bool IsAnyTransitionPlaying(const UObject* WorldContextObject);
+
+	/**
+	 * Quickly fades the screen to black using a transient preset.
+	 *
+	 * @param WorldContextObject The world context object.
+	 * @param Duration The duration of the fade.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
+	static void QuickFadeToBlack(const UObject* WorldContextObject, float Duration = 1.0f);
+
+	/**
+	 * Quickly fades the screen from black using a transient preset.
+	 *
+	 * @param WorldContextObject The world context object.
+	 * @param Duration The duration of the fade.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
+	static void QuickFadeFromBlack(const UObject* WorldContextObject, float Duration = 1.0f);
 };
