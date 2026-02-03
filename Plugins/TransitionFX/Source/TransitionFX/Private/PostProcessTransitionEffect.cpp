@@ -18,8 +18,19 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 		return;
 	}
 
-	// Create Dynamic Material
-	DynamicMaterial = UKismetMaterialLibrary::CreateDynamicMaterialInstance(World, Preset->TransitionMaterial);
+	// Create or Reuse Dynamic Material
+	bool bReuseMID = false;
+	if (DynamicMaterial && DynamicMaterial->Parent == Preset->TransitionMaterial)
+	{
+		bReuseMID = true;
+		DynamicMaterial->ClearParameterValues();
+	}
+
+	if (!bReuseMID)
+	{
+		DynamicMaterial = UKismetMaterialLibrary::CreateDynamicMaterialInstance(World, Preset->TransitionMaterial);
+	}
+
 	if (!DynamicMaterial)
 	{
 		UE_LOG(LogTemp, Error, TEXT("PostProcessTransitionEffect: Failed to create Dynamic Material Instance"));
