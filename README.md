@@ -71,6 +71,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Fade** | Standard opacity fade. Simple and lightweight. | ![Fade](https://via.placeholder.com/320x180/000000/FFFFFF?text=Fade) |
 | **Iris** | Classic circular wipe closing toward the center. Aspect ratio corrected. | ![Iris](https://via.placeholder.com/320x180/000000/FFFFFF?text=Iris) |
 | **Heart Iris** | An iris wipe in the shape of a heart using procedural SDF. | ![HeartIris](https://via.placeholder.com/320x180/000000/FFFFFF?text=Heart+Iris) |
+| **Flower Iris** | An iris wipe in the shape of a flower with rounded petals. The number of petals and the flower's shape (sharpness) are adjustable. | ![FlowerIris](https://via.placeholder.com/320x180/000000/FFFFFF?text=Flower+Iris) |
 | **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | ![Diamond](https://via.placeholder.com/320x180/000000/FFFFFF?text=Diamond) |
 | **Box** | A simple square expanding from the center. Basic geometric transition. | ![Box](https://via.placeholder.com/320x180/000000/FFFFFF?text=Box) |
 | **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | ![Linear](https://via.placeholder.com/320x180/000000/FFFFFF?text=Linear+Wipe) |
