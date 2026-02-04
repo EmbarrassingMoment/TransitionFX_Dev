@@ -96,7 +96,7 @@ static void QuickFadeInternal(const UObject* WorldContextObject, float Duration,
 				UTransitionPreset* TempPreset = NewObject<UTransitionPreset>(GetTransientPackage());
 
 				// Try to load default Fade data to get the material
-				UTransitionPreset* FadeData = LoadObject<UTransitionPreset>(nullptr, TEXT("/TransitionFX/Data/DA_FadeToBlack.DA_FadeToBlack"));
+				UTransitionPreset* FadeData = Manager->GetDefaultFadePreset();
 
 				if (FadeData)
 				{
@@ -109,7 +109,7 @@ static void QuickFadeInternal(const UObject* WorldContextObject, float Duration,
 					TempPreset->EffectClass = UPostProcessTransitionEffect::StaticClass();
 
 					// Try to load the Master material mentioned in docs
-					TempPreset->TransitionMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/TransitionFX/Materials/M_Transition_Master.M_Transition_Master"));
+					TempPreset->TransitionMaterial = Manager->GetDefaultMasterMaterial();
 
 					if (!TempPreset->TransitionMaterial)
 					{

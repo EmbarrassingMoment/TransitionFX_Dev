@@ -15,6 +15,28 @@ void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 		FConsoleCommandDelegate::CreateUObject(this, &UTransitionManagerSubsystem::ForceClear),
 		ECVF_Default
 	);
+
+	// Preload default assets to avoid hitching during gameplay
+	GetDefaultFadePreset();
+	GetDefaultMasterMaterial();
+}
+
+UTransitionPreset* UTransitionManagerSubsystem::GetDefaultFadePreset()
+{
+	if (!DefaultFadePreset)
+	{
+		DefaultFadePreset = LoadObject<UTransitionPreset>(nullptr, TEXT("/TransitionFX/Data/DA_FadeToBlack.DA_FadeToBlack"));
+	}
+	return DefaultFadePreset;
+}
+
+UMaterialInterface* UTransitionManagerSubsystem::GetDefaultMasterMaterial()
+{
+	if (!DefaultMasterMaterial)
+	{
+		DefaultMasterMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/TransitionFX/Materials/M_Transition_Master.M_Transition_Master"));
+	}
+	return DefaultMasterMaterial;
 }
 
 void UTransitionManagerSubsystem::Deinitialize()
