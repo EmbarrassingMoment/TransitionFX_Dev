@@ -19,14 +19,11 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 	}
 
 	// Create or Reuse Dynamic Material
-	bool bReuseMID = false;
 	if (DynamicMaterial && DynamicMaterial->Parent == Preset->TransitionMaterial)
 	{
-		bReuseMID = true;
 		DynamicMaterial->ClearParameterValues();
 	}
-
-	if (!bReuseMID)
+	else
 	{
 		DynamicMaterial = UKismetMaterialLibrary::CreateDynamicMaterialInstance(World, Preset->TransitionMaterial);
 	}
@@ -57,8 +54,21 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 		SpawnedVolume->Priority = Preset->Priority;
 
 		// Update Weighted Blendables
-		SpawnedVolume->Settings.WeightedBlendables.Array.Reset();
-		SpawnedVolume->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, DynamicMaterial));
+		bool bNeedsUpdate = true;
+		if (SpawnedVolume->Settings.WeightedBlendables.Array.Num() == 1)
+		{
+			const FWeightedBlendable& ExistingBlendable = SpawnedVolume->Settings.WeightedBlendables.Array[0];
+			if (ExistingBlendable.Object == DynamicMaterial && FMath::IsNearlyEqual(ExistingBlendable.Weight, 1.0f))
+			{
+				bNeedsUpdate = false;
+			}
+		}
+
+		if (bNeedsUpdate)
+		{
+			SpawnedVolume->Settings.WeightedBlendables.Array.Reset();
+			SpawnedVolume->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, DynamicMaterial));
+		}
 	}
 }
 
