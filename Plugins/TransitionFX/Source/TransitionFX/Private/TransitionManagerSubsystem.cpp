@@ -213,7 +213,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		{
 			UObject* EffectObj = nullptr;
 
-			// Check Pool
+			// Check Pool (Reuse existing instance to avoid allocation and reduce GC pressure)
 			FTransitionEffectPool& Pool = EffectPool.FindOrAdd(Preset->EffectClass);
 			if (Pool.Effects.Num() > 0)
 			{
