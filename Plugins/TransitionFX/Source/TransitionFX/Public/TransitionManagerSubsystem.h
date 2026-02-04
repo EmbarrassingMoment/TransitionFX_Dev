@@ -85,6 +85,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Transition")
 	void ForceClear();
 
+	/** Returns the default Fade preset (DA_FadeToBlack), loading it if necessary. */
+	UTransitionPreset* GetDefaultFadePreset();
+
+	/** Returns the default master material (M_Transition_Master), loading it if necessary. */
+	UMaterialInterface* GetDefaultMasterMaterial();
+
 public:
 	/** Triggered when a transition starts. */
 	UPROPERTY(BlueprintAssignable, Category = "Transition")
@@ -137,4 +143,12 @@ private:
 
 	/** Cached player controller to avoid redundant lookups. */
 	TWeakObjectPtr<APlayerController> CachedPlayerController;
+
+	/** Cached default fade preset to avoid runtime loading. */
+	UPROPERTY(Transient)
+	TObjectPtr<UTransitionPreset> DefaultFadePreset;
+
+	/** Cached default master material to avoid runtime loading. */
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInterface> DefaultMasterMaterial;
 };
