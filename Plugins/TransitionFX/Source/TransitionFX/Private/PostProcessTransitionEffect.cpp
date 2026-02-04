@@ -57,7 +57,7 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 		SpawnedVolume->Priority = Preset->Priority;
 
 		// Update Weighted Blendables
-		SpawnedVolume->Settings.WeightedBlendables.Array.Empty();
+		SpawnedVolume->Settings.WeightedBlendables.Array.Reset();
 		SpawnedVolume->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, DynamicMaterial));
 	}
 }
