@@ -197,9 +197,10 @@ TStatId UTransitionManagerSubsystem::GetStatId() const
 
 void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, bool bInvert, bool bHoldAtMax, FTransitionParameters OverrideParams)
 {
-	if (!Preset)
+	if (!Preset || !Preset->TransitionMaterial)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("StartTransition called with null preset."));
+		UE_LOG(LogTemp, Error, TEXT("TransitionFX: Invalid Preset or Material is missing!"));
+		ForceClear();
 		return;
 	}
 

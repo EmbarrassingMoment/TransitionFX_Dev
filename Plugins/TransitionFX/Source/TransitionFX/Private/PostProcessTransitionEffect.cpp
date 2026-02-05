@@ -34,6 +34,14 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 		return;
 	}
 
+	// Check for "Progress" Parameter
+	float TempVal = 0.0f;
+	FMaterialParameterInfo ProgressInfo(TEXT("Progress"));
+	if (!DynamicMaterial->GetScalarParameterValue(ProgressInfo, TempVal))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TransitionFX: Material '%s' is missing 'Progress' parameter. Transition will not animate."), *Preset->TransitionMaterial->GetName());
+	}
+
 	// Reuse or Spawn Post Process Volume
 	if (!SpawnedVolume)
 	{
@@ -106,17 +114,19 @@ void UPostProcessTransitionEffect::SetInvert(bool bInvert)
 
 void UPostProcessTransitionEffect::SetParameters(const FTransitionParameters& Params)
 {
-	if (DynamicMaterial)
+	if (!DynamicMaterial)
 	{
-		for (const auto& Pair : Params.ScalarParams)
-		{
-			DynamicMaterial->SetScalarParameterValue(Pair.Key, Pair.Value);
-		}
+		return;
+	}
 
-		for (const auto& Pair : Params.VectorParams)
-		{
-			DynamicMaterial->SetVectorParameterValue(Pair.Key, Pair.Value);
-		}
+	for (const auto& Pair : Params.ScalarParams)
+	{
+		DynamicMaterial->SetScalarParameterValue(Pair.Key, Pair.Value);
+	}
+
+	for (const auto& Pair : Params.VectorParams)
+	{
+		DynamicMaterial->SetVectorParameterValue(Pair.Key, Pair.Value);
 	}
 }
 
