@@ -84,6 +84,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | ![RandomTiles](https://via.placeholder.com/320x180/000000/FFFFFF?text=Random+Tiles) |
 | **Wind** | A directional wipe with streak noise, simulating wind blowing the image away. | ![Wind](https://via.placeholder.com/320x180/000000/FFFFFF?text=Wind) |
 | **Cross Wipe** | A cross shape expands from the center, pushing the image into the four corners until it vanishes. | ![CrossWipe](https://via.placeholder.com/320x180/000000/FFFFFF?text=Cross+Wipe) |
+| **Zoom Wipe** | A directional wipe that distorts and zooms the scene inward as it fades out. | ![ZoomWipe](https://via.placeholder.com/320x180/000000/FFFFFF?text=Zoom+Wipe) |
 
 ## License
 MIT License
