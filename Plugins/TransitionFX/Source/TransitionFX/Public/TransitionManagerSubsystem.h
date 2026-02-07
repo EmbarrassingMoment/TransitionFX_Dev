@@ -85,6 +85,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Transition")
 	void ForceClear();
 
+	/** Preloads the shaders for the given presets to prevent hitching. */
+	UFUNCTION(BlueprintCallable, Category = "Transition")
+	void PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets);
+
 	/** Returns the default Fade preset (DA_FadeToBlack), loading it if necessary. */
 	UTransitionPreset* GetDefaultFadePreset();
 

@@ -100,5 +100,25 @@ Control how the transition progresses over time using the `EasingType` property 
 
 See [easings.net](https://easings.net/) for visualization of these curves.
 
+## 🚀 Performance Tips
+
+### Shader Preloading (Warmup)
+To prevent frame drops (hitching) when a transition plays for the first time, you can pre-compile the shaders using the Preload API.
+Unreal Engine compiles shaders on-demand, which can cause a slight stutter the first time a transition effect is used.
+
+**How to use:**
+Call `PreloadTransitionPresets` in a safe place like your `GameInstance Init` or `Level BeginPlay`. Pass an array of your most commonly used Transition Presets to this function.
+
+**C++ Example:**
+```cpp
+// In your GameInstance or custom class
+TArray<UTransitionPreset*> MyPresets = { FadePreset, WipePreset };
+TransitionSubsystem->PreloadTransitionPresets(MyPresets);
+```
+*This creates temporary dynamic material instances for a single frame to ensure the GPU is ready.*
+
+**API Reference:**
+*   `TransitionManagerSubsystem->PreloadTransitionPresets(TArray<UTransitionPreset*> Presets)`
+
 ## License
 MIT License

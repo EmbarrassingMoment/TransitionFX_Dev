@@ -5,6 +5,7 @@
 #include "Curves/CurveFloat.h"
 #include "HAL/IConsoleManager.h"
 #include "TransitionBlueprintLibrary.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -170,6 +171,30 @@ void UTransitionManagerSubsystem::ForceClear()
 	bIsHolding = false;
 	CurrentPreset = nullptr;
 	CurrentProgress = 0.0f;
+}
+
+void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets)
+{
+	if (Presets.IsEmpty())
+	{
+		return;
+	}
+
+	for (UTransitionPreset* Preset : Presets)
+	{
+		if (Preset && Preset->TransitionMaterial)
+		{
+			// Create a transient dynamic material instance to force shader compilation
+			UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Preset->TransitionMaterial, this);
+			if (MID)
+			{
+				// Setting a parameter often helps trigger the compilation
+				MID->SetScalarParameterValue(TEXT("Progress"), 0.0f);
+			}
+		}
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("TransitionFX: Preloaded %d presets."), Presets.Num());
 }
 
 bool UTransitionManagerSubsystem::IsCurrentTransitionFinished() const
