@@ -7,6 +7,7 @@
 #include "PostProcessTransitionEffect.h"
 #include "TransitionPreset.h"
 #include "UObject/Package.h"
+#include "Curves/CurveFloat.h"
 
 class FTransitionLatentAction : public FPendingLatentAction
 {
@@ -67,6 +68,90 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldCont
 				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionLatentAction(LatentInfo, Manager));
 			}
 		}
+	}
+}
+
+float UTransitionBlueprintLibrary::ApplyEasing(float Alpha, ETransitionEasing EasingType, const UCurveFloat* CustomCurve)
+{
+	// Clamp input
+	float x = FMath::Clamp(Alpha, 0.0f, 1.0f);
+
+	switch (EasingType)
+	{
+	case ETransitionEasing::Linear:
+		return x;
+
+	case ETransitionEasing::EaseInSine:
+		return 1.0f - FMath::Cos((x * PI) / 2.0f);
+
+	case ETransitionEasing::EaseOutSine:
+		return FMath::Sin((x * PI) / 2.0f);
+
+	case ETransitionEasing::EaseInOutSine:
+		return -(FMath::Cos(PI * x) - 1.0f) / 2.0f;
+
+	case ETransitionEasing::EaseInCubic:
+		return x * x * x;
+
+	case ETransitionEasing::EaseOutCubic:
+		return 1.0f - FMath::Pow(1.0f - x, 3.0f);
+
+	case ETransitionEasing::EaseInOutCubic:
+		return x < 0.5f ? 4.0f * x * x * x : 1.0f - FMath::Pow(-2.0f * x + 2.0f, 3.0f) / 2.0f;
+
+	case ETransitionEasing::EaseInExpo:
+		return x == 0.0f ? 0.0f : FMath::Pow(2.0f, 10.0f * (x - 1.0f));
+
+	case ETransitionEasing::EaseOutExpo:
+		return x == 1.0f ? 1.0f : 1.0f - FMath::Pow(2.0f, -10.0f * x);
+
+	case ETransitionEasing::EaseInOutExpo:
+		if (x == 0.0f) return 0.0f;
+		if (x == 1.0f) return 1.0f;
+		if ((x *= 2.0f) < 1.0f) return 0.5f * FMath::Pow(2.0f, 10.0f * (x - 1.0f));
+		return 0.5f * (2.0f - FMath::Pow(2.0f, -10.0f * (x - 1.0f)));
+
+	case ETransitionEasing::EaseOutElastic:
+	{
+		const float c4 = (2.0f * PI) / 3.0f;
+		return x == 0.0f ? 0.0f : x == 1.0f ? 1.0f : FMath::Pow(2.0f, -10.0f * x) * FMath::Sin((x * 10.0f - 0.75f) * c4) + 1.0f;
+	}
+
+	case ETransitionEasing::EaseOutBounce:
+	{
+		const float n1 = 7.5625f;
+		const float d1 = 2.75f;
+
+		if (x < 1.0f / d1)
+		{
+			return n1 * x * x;
+		}
+		else if (x < 2.0f / d1)
+		{
+			x -= 1.5f / d1;
+			return n1 * x * x + 0.75f;
+		}
+		else if (x < 2.5f / d1)
+		{
+			x -= 2.25f / d1;
+			return n1 * x * x + 0.9375f;
+		}
+		else
+		{
+			x -= 2.625f / d1;
+			return n1 * x * x + 0.984375f;
+		}
+	}
+
+	case ETransitionEasing::Custom:
+		if (CustomCurve)
+		{
+			return CustomCurve->GetFloatValue(x);
+		}
+		return x;
+
+	default:
+		return x;
 	}
 }
 

@@ -4,6 +4,7 @@
 #include "Engine/World.h"
 #include "Curves/CurveFloat.h"
 #include "HAL/IConsoleManager.h"
+#include "TransitionBlueprintLibrary.h"
 
 void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -71,11 +72,7 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 	CurrentProgress = FMath::Clamp(CurrentProgress, 0.0f, 1.0f);
 	float RawProgress = CurrentProgress;
 
-	float EasedProgress = RawProgress;
-	if (CurrentPreset->ProgressCurve)
-	{
-		EasedProgress = CurrentPreset->ProgressCurve->GetFloatValue(RawProgress);
-	}
+	float EasedProgress = UTransitionBlueprintLibrary::ApplyEasing(RawProgress, CurrentPreset->EasingType, CurrentPreset->ProgressCurve);
 
 	if (CurrentEffect)
 	{

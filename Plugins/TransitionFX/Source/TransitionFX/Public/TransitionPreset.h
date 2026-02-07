@@ -4,6 +4,7 @@
 #include "Engine/DataAsset.h"
 #include "ITransitionEffect.h"
 #include "Materials/MaterialInterface.h"
+#include "TransitionFXTypes.h"
 #include "TransitionPreset.generated.h"
 
 class UCurveFloat;
@@ -54,8 +55,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition", meta = (ClampMin = "0.0"))
 	float DefaultDuration;
 
+	/** The easing function to apply to the progress. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	ETransitionEasing EasingType;
+
 	/** Optional curve to ease the progress. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition", meta = (EditCondition = "EasingType == ETransitionEasing::Custom", EditConditionHides))
 	TObjectPtr<UCurveFloat> ProgressCurve;
 
 	/** Blocks player input during transition. */
