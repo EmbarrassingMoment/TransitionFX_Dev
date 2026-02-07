@@ -86,5 +86,19 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Cross Wipe** | A cross shape expands from the center, pushing the image into the four corners until it vanishes. | ![CrossWipe](https://via.placeholder.com/320x180/000000/FFFFFF?text=Cross+Wipe) |
 | **Zoom Wipe** | A directional wipe that distorts and zooms the scene inward as it fades out. | ![ZoomWipe](https://via.placeholder.com/320x180/000000/FFFFFF?text=Zoom+Wipe) |
 
+## ⏳ Transition Timing & Easing
+Control how the transition progresses over time using the `EasingType` property in your Transition Preset.
+
+| Easing Type | Description |
+| :--- | :--- |
+| **Linear** | Constant speed (Default). Good for simple fades. |
+| **Sine / Cubic / Expo** | Smooth acceleration and deceleration. (In, Out, InOut variants available). |
+| **Bounce / Elastic** | Adds a bouncing or elastic effect at the end of the transition. |
+| **Custom** | Allows you to supply your own `FloatCurve` asset. |
+
+*Note: The `Transition Curve` slot will only appear when `Custom` is selected.*
+
+See [easings.net](https://easings.net/) for visualization of these curves.
+
 ## License
 MIT License
