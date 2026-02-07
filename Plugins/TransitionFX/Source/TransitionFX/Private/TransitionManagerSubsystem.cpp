@@ -5,6 +5,9 @@
 #include "Curves/CurveFloat.h"
 #include "HAL/IConsoleManager.h"
 #include "TransitionBlueprintLibrary.h"
+#include "Materials/MaterialInstanceDynamic.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogTransitionFX, Log, All);
 
 void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -122,6 +125,32 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 bool UTransitionManagerSubsystem::IsTickable() const
 {
 	return bIsTransitionActive;
+}
+
+void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets)
+{
+	if (Presets.IsEmpty())
+	{
+		return;
+	}
+
+	UE_LOG(LogTransitionFX, Log, TEXT("Preloading %d Transition Presets..."), Presets.Num());
+
+	for (UTransitionPreset* Preset : Presets)
+	{
+		if (Preset && Preset->TransitionMaterial)
+		{
+			// Create a temporary Dynamic Material Instance (MID)
+			UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Preset->TransitionMaterial, this);
+
+			// Crucial: If the MID is successfully created, set a scalar parameter (e.g., "Progress" to 0.0f)
+			// to ensure the uniform buffer is initialized by the render thread.
+			if (MID)
+			{
+				MID->SetScalarParameterValue(FName("Progress"), 0.0f);
+			}
+		}
+	}
 }
 
 void UTransitionManagerSubsystem::ForceClear()

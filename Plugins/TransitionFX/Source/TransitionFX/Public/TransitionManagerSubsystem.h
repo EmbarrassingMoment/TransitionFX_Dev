@@ -91,6 +91,10 @@ public:
 	/** Returns the default master material (M_Transition_Master), loading it if necessary. */
 	UMaterialInterface* GetDefaultMasterMaterial();
 
+	/** Preloads a list of transition presets to warm up shaders. */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX|System")
+	void PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets);
+
 public:
 	/** Triggered when a transition starts. */
 	UPROPERTY(BlueprintAssignable, Category = "Transition")
