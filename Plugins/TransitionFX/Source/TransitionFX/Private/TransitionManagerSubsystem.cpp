@@ -5,6 +5,9 @@
 #include "Curves/CurveFloat.h"
 #include "HAL/IConsoleManager.h"
 #include "TransitionBlueprintLibrary.h"
+#include "Materials/MaterialInstanceDynamic.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogTransitionFX, Log, All);
 
 void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -122,6 +125,34 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 bool UTransitionManagerSubsystem::IsTickable() const
 {
 	return bIsTransitionActive;
+}
+
+void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets)
+{
+	if (Presets.IsEmpty())
+	{
+		return;
+	}
+
+	UE_LOG(LogTransitionFX, Log, TEXT("Preloading %d Transition Presets..."), Presets.Num());
+
+	for (UTransitionPreset* Preset : Presets)
+	{
+		if (Preset && Preset->TransitionMaterial)
+		{
+			// Create a temporary Dynamic Material Instance (MID)
+			UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Preset->TransitionMaterial, this);
+
+			if (MID)
+			{
+				// Set a scalar parameter to ensure the uniform buffer is initialized
+				MID->SetScalarParameterValue(FName("Progress"), 0.0f);
+
+				// Do not store this MID. We want it to be garbage collected immediately.
+				// The sole purpose is to force the engine to compile/cache the PSOs (Pipeline State Objects) for this material.
+			}
+		}
+	}
 }
 
 void UTransitionManagerSubsystem::ForceClear()
