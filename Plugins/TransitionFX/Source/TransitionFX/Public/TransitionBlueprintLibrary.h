@@ -4,7 +4,10 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "TransitionManagerSubsystem.h"
 #include "Engine/LatentActionManager.h"
+#include "TransitionFXTypes.h"
 #include "TransitionBlueprintLibrary.generated.h"
+
+class UCurveFloat;
 
 /**
  * Blueprint function library for transition effects.
@@ -67,4 +70,15 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
 	static void QuickFadeFromBlack(const UObject* WorldContextObject, float Duration = 1.0f);
+
+	/**
+	 * Applies an easing function to the given alpha value.
+	 *
+	 * @param Alpha The input alpha value (0.0 to 1.0).
+	 * @param EasingType The easing type to apply.
+	 * @param CustomCurve Optional custom curve to use if EasingType is Custom.
+	 * @return The eased alpha value.
+	 */
+	UFUNCTION(BlueprintPure, Category = "TransitionFX|Math")
+	static float ApplyEasing(float Alpha, ETransitionEasing EasingType, const UCurveFloat* CustomCurve = nullptr);
 };
