@@ -122,5 +122,30 @@ TransitionSubsystem->PreloadTransitionPresets(MyPresets);
 **API Reference:**
 *   **Function:** `TransitionManagerSubsystem->PreloadTransitionPresets(TArray<UTransitionPreset*> Presets)`
 
+### ⏳ Asynchronous Loading (Soft References)
+If you want to load transition assets on-demand (e.g., during a loading screen) to save memory, use the Async API.
+It loads the assets in the background, then automatically runs the shader warmup, and finally fires a callback event.
+
+**How to use:**
+1. Pass an array of **Soft Object References** to `AsyncLoadTransitionPresets`.
+2. The system will load them in the background and warm up the shaders.
+3. The `OnComplete` event fires when everything is ready.
+
+**Blueprint Usage:**
+Pass an array of Soft Object References. Connect your logic (e.g., Open Level) to the 'On Complete' delegate pin.
+
+```cpp
+// C++ Example
+TArray<TSoftObjectPtr<UTransitionPreset>> SoftPresets = { ... };
+
+TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadCompleteDelegate::CreateLambda([]()
+{
+    UE_LOG(LogTemp, Log, TEXT("Assets loaded and shaders ready!"));
+}));
+```
+
+**API Reference:**
+*   **Function:** `AsyncLoadTransitionPresets(TArray<TSoftObjectPtr<UTransitionPreset>> Presets, FTransitionPreloadCompleteDelegate OnComplete)`
+
 ## License
 MIT License
