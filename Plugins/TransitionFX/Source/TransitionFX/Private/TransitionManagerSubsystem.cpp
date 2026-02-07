@@ -5,6 +5,10 @@
 #include "Curves/CurveFloat.h"
 #include "HAL/IConsoleManager.h"
 #include "TransitionBlueprintLibrary.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
+#include "TransitionPreset.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -122,6 +126,57 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 bool UTransitionManagerSubsystem::IsTickable() const
 {
 	return bIsTransitionActive;
+}
+
+void UTransitionManagerSubsystem::AsyncLoadTransitionPresets(const TArray<TSoftObjectPtr<UTransitionPreset>>& SoftPresets, FTransitionPreloadCompleteDelegate OnComplete)
+{
+	if (SoftPresets.Num() == 0)
+	{
+		OnComplete.ExecuteIfBound();
+		return;
+	}
+
+	// Create Path List
+	TArray<FSoftObjectPath> ItemsToStream;
+	for (const auto& Ref : SoftPresets)
+	{
+		ItemsToStream.Add(Ref.ToSoftObjectPath());
+	}
+
+	// Get StreamableManager (from AssetManager)
+	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+
+	// Kick Async Load
+	Streamable.RequestAsyncLoad(ItemsToStream, FStreamableDelegate::CreateWeakLambda(this, [this, SoftPresets, OnComplete]()
+	{
+		// Post-Load Processing
+		TArray<UTransitionPreset*> LoadedPresets;
+		for (const auto& Ref : SoftPresets)
+		{
+			if (UTransitionPreset* Preset = Ref.Get())
+			{
+				LoadedPresets.Add(Preset);
+			}
+		}
+
+		// Execute Shader Warmup (Synchronous Preload)
+		PreloadTransitionPresets(LoadedPresets);
+
+		// Notify Completion
+		OnComplete.ExecuteIfBound();
+	}));
+}
+
+void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets)
+{
+	for (UTransitionPreset* Preset : Presets)
+	{
+		if (Preset && Preset->TransitionMaterial)
+		{
+			// Create a temporary MID to compile/warmup the shader
+			UMaterialInstanceDynamic::Create(Preset->TransitionMaterial, this)->SetScalarParameterValue(TEXT("Progress"), 0.0f);
+		}
+	}
 }
 
 void UTransitionManagerSubsystem::ForceClear()

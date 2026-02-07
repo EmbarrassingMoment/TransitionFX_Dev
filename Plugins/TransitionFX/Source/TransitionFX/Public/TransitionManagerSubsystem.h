@@ -10,6 +10,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionCompleted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTransitionHoldStarted);
+DECLARE_DYNAMIC_DELEGATE(FTransitionPreloadCompleteDelegate);
 
 class APlayerController;
 
@@ -90,6 +91,14 @@ public:
 
 	/** Returns the default master material (M_Transition_Master), loading it if necessary. */
 	UMaterialInterface* GetDefaultMasterMaterial();
+
+	/** Asynchronously loads transition presets and warms up their shaders. */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX|System")
+	void AsyncLoadTransitionPresets(const TArray<TSoftObjectPtr<UTransitionPreset>>& SoftPresets, FTransitionPreloadCompleteDelegate OnComplete);
+
+	/** Preloads and warms up shaders for the given presets. */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX|System")
+	void PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets);
 
 public:
 	/** Triggered when a transition starts. */
