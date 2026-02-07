@@ -1,4 +1,7 @@
 #include "TransitionManagerSubsystem.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
+#include "TransitionPreset.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
@@ -125,6 +128,45 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 bool UTransitionManagerSubsystem::IsTickable() const
 {
 	return bIsTransitionActive;
+}
+
+void UTransitionManagerSubsystem::AsyncLoadTransitionPresets(const TArray<TSoftObjectPtr<UTransitionPreset>>& SoftPresets, FTransitionPreloadCompleteDelegate OnComplete)
+{
+	if (SoftPresets.Num() == 0)
+	{
+		OnComplete.ExecuteIfBound();
+		return;
+	}
+
+	// Create Path List
+	TArray<FSoftObjectPath> ItemsToStream;
+	for (const auto& Ref : SoftPresets)
+	{
+		ItemsToStream.Add(Ref.ToSoftObjectPath());
+	}
+
+	// Get StreamableManager (from AssetManager)
+	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+
+	// Kick Async Load
+	Streamable.RequestAsyncLoad(ItemsToStream, FStreamableDelegate::CreateWeakLambda(this, [this, SoftPresets, OnComplete]()
+	{
+		// Post-Load Processing
+		TArray<UTransitionPreset*> LoadedPresets;
+		for (const auto& Ref : SoftPresets)
+		{
+			if (UTransitionPreset* Preset = Ref.Get())
+			{
+				LoadedPresets.Add(Preset);
+			}
+		}
+
+		// Execute Shader Warmup (Synchronous Preload)
+		PreloadTransitionPresets(LoadedPresets);
+
+		// Notify Completion
+		OnComplete.ExecuteIfBound();
+	}));
 }
 
 void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets)
