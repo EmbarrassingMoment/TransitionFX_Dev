@@ -10,6 +10,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionCompleted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTransitionHoldStarted);
+DECLARE_DYNAMIC_DELEGATE(FTransitionPreloadCompleteDelegate);
 
 class APlayerController;
 
@@ -94,6 +95,10 @@ public:
 	/** Preloads a list of transition presets to warm up shaders. */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX|System")
 	void PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets);
+
+	/** Asynchronously loads a list of transition presets and warms up their shaders. */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX|System")
+	void AsyncLoadTransitionPresets(const TArray<TSoftObjectPtr<UTransitionPreset>>& SoftPresets, FTransitionPreloadCompleteDelegate OnComplete);
 
 public:
 	/** Triggered when a transition starts. */
