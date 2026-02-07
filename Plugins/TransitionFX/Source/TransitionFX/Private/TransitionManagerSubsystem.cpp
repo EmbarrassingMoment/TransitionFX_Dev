@@ -5,6 +5,7 @@
 #include "Curves/CurveFloat.h"
 #include "HAL/IConsoleManager.h"
 #include "TransitionBlueprintLibrary.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -122,6 +123,30 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 bool UTransitionManagerSubsystem::IsTickable() const
 {
 	return bIsTransitionActive;
+}
+
+void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets)
+{
+	UE_LOG(LogTemp, Log, TEXT("TransitionFX: Preloading %d transition presets."), Presets.Num());
+
+	for (UTransitionPreset* Preset : Presets)
+	{
+		if (!Preset || !Preset->TransitionMaterial)
+		{
+			continue;
+		}
+
+		// Ensure material is loaded
+		Preset->TransitionMaterial->EnsureIsLoaded();
+
+		// Create temporary MID to warm up shaders
+		UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Preset->TransitionMaterial, this);
+		if (MID)
+		{
+			// Force render thread interaction
+			MID->SetScalarParameterValue(FName("Progress"), 0.0f);
+		}
+	}
 }
 
 void UTransitionManagerSubsystem::ForceClear()
