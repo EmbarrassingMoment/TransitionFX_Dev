@@ -17,6 +17,7 @@ It renders high-quality transitions based on SDF (Signed Distance Field) math wi
 *   **Versatile Control:**
     *   **Forward / Reverse:** Control "Fade Out" and "Fade In" with a single preset using Transition Modes.
     *   **Speed Control:** Dynamic playback speed adjustment via `SetPlaySpeed`.
+*   **🔊 Audio Integration:** Synchronize Sound Effects (SFX) with your transitions. The system manages the audio lifecycle, ensuring sounds play on start and stop automatically if the transition is cancelled.
 *   **Event System:** Access `OnTransitionStarted` and `OnTransitionCompleted` delegates for precise gameplay logic timing.
 *   **Blueprint Support:** Includes a Latent Action node (`PlayTransitionAndWait`) for clean and easy scripting.
 
@@ -37,6 +38,7 @@ Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
 *   **bAutoBlockInput:** Set to `True` to automatically disable player input during the transition.
 *   **bTickWhenPaused:** Set to `True` to allow the transition to play even when the game is paused.
 *   **Priority:** Set the rendering priority (default: 1000).
+*   **Audio:** (Optional) Assign a Sound asset to play. Includes Volume and Pitch controls.
 
 ### 2. Call from Blueprint
 Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.
