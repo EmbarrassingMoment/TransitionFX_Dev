@@ -8,6 +8,7 @@
 #include "TransitionPreset.generated.h"
 
 class UCurveFloat;
+class USoundBase;
 
 /**
  * Parameters to override transition material properties at runtime.
@@ -40,6 +41,8 @@ public:
 		, bAutoBlockInput(true)
 		, bTickWhenPaused(false)
 		, Priority(1000.0f)
+		, SoundVolume(1.0f)
+		, SoundPitch(1.0f)
 	{
 	}
 
@@ -74,4 +77,16 @@ public:
 	/** Priority for PostProcess effect. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
 	float Priority;
+
+	/** The sound to play (Optional). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	TObjectPtr<USoundBase> TransitionSound;
+
+	/** Volume of the transition sound. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio", meta = (ClampMin = "0.0"))
+	float SoundVolume;
+
+	/** Pitch of the transition sound. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio", meta = (ClampMin = "0.0"))
+	float SoundPitch;
 };
