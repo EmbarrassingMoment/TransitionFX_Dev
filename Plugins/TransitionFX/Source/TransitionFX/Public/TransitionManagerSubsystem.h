@@ -13,6 +13,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTransitionHoldStarted);
 DECLARE_DYNAMIC_DELEGATE(FTransitionPreloadCompleteDelegate);
 
 class APlayerController;
+class UAudioComponent;
 
 /** Pool for transition effects. */
 USTRUCT()
@@ -125,6 +126,10 @@ private:
 	/** The current active effect instance. */
 	UPROPERTY(Transient)
 	TScriptInterface<ITransitionEffect> CurrentEffect;
+
+	/** The current active audio component. */
+	UPROPERTY(Transient)
+	TObjectPtr<UAudioComponent> CurrentAudioComponent;
 
 	/** Current transition mode. */
 	ETransitionMode CurrentMode;

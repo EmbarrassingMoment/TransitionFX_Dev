@@ -2,6 +2,8 @@
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "TransitionPreset.h"
+#include "Sound/SoundBase.h"
+#include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
@@ -233,7 +235,15 @@ void UTransitionManagerSubsystem::ForceClear()
 		PC->SetCinematicMode(false, true, true, true, true);
 	}
 
-	// TODO: Reset Audio Volume to 1.0f
+	// Stop Audio
+	if (CurrentAudioComponent)
+	{
+		if (CurrentAudioComponent->IsPlaying())
+		{
+			CurrentAudioComponent->Stop();
+		}
+		CurrentAudioComponent = nullptr;
+	}
 
 	// Reset Flags
 	bIsTransitionActive = false;
@@ -280,6 +290,16 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		StopTransition();
 	}
 
+	// Ensure previous audio is stopped
+	if (CurrentAudioComponent)
+	{
+		if (CurrentAudioComponent->IsPlaying())
+		{
+			CurrentAudioComponent->Stop();
+		}
+		CurrentAudioComponent = nullptr;
+	}
+
 	CurrentPreset = Preset;
 	CurrentMode = Mode;
 	CurrentPlaySpeed = FMath::Max(0.01f, PlaySpeed);
@@ -296,6 +316,17 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	else
 	{
 		CurrentProgress = 1.0f;
+	}
+
+	// Play Sound
+	if (Preset->TransitionSound)
+	{
+		CurrentAudioComponent = UGameplayStatics::SpawnSound2D(
+			this,
+			Preset->TransitionSound,
+			Preset->SoundVolume,
+			Preset->SoundPitch
+		);
 	}
 
 	// Create Effect
@@ -394,6 +425,16 @@ void UTransitionManagerSubsystem::StopTransition()
 	if (!bIsTransitionActive)
 	{
 		return;
+	}
+
+	// Stop Audio
+	if (CurrentAudioComponent)
+	{
+		if (CurrentAudioComponent->IsPlaying())
+		{
+			CurrentAudioComponent->Stop();
+		}
+		CurrentAudioComponent = nullptr;
 	}
 
 	// Cleanup Effect
