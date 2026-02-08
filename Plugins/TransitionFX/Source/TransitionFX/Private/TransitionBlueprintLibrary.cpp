@@ -32,15 +32,7 @@ public:
 		if (Manager.IsValid())
 		{
 			// If we're done (finished hold phase or fully completed), we trigger
-			if (Manager->IsCurrentTransitionFinished())
-			{
-				bFinished = true;
-			}
-			else
-			{
-				// Still playing
-				bFinished = false;
-			}
+			bFinished = Manager->IsCurrentTransitionFinished();
 		}
 
 		Response.FinishAndTriggerIf(bFinished, ExecutionFunction.ExecutionFunction, OutputLink, CallbackTarget);

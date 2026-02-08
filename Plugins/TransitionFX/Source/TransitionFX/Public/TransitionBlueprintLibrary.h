@@ -28,7 +28,7 @@ public:
 	 * @param OverrideParams Optional parameters to override material properties.
 	 * @param LatentInfo The latent action info.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Transition", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "Mode"))
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "Mode"))
 	static void PlayTransitionAndWait(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo);
 
 	/**
