@@ -106,33 +106,33 @@ float UTransitionBlueprintLibrary::ApplyEasing(float Alpha, ETransitionEasing Ea
 
 	case ETransitionEasing::EaseOutElastic:
 	{
-		const float c4 = (2.0f * PI) / 3.0f;
-		return x == 0.0f ? 0.0f : x == 1.0f ? 1.0f : FMath::Pow(2.0f, -10.0f * x) * FMath::Sin((x * 10.0f - 0.75f) * c4) + 1.0f;
+		static constexpr float ELASTIC_C4 = (2.0f * PI) / 3.0f;
+		return x == 0.0f ? 0.0f : x == 1.0f ? 1.0f : FMath::Pow(2.0f, -10.0f * x) * FMath::Sin((x * 10.0f - 0.75f) * ELASTIC_C4) + 1.0f;
 	}
 
 	case ETransitionEasing::EaseOutBounce:
 	{
-		const float n1 = 7.5625f;
-		const float d1 = 2.75f;
+		static constexpr float BOUNCE_N1 = 7.5625f;
+		static constexpr float BOUNCE_D1 = 2.75f;
 
-		if (x < 1.0f / d1)
+		if (x < 1.0f / BOUNCE_D1)
 		{
-			return n1 * x * x;
+			return BOUNCE_N1 * x * x;
 		}
-		else if (x < 2.0f / d1)
+		else if (x < 2.0f / BOUNCE_D1)
 		{
-			x -= 1.5f / d1;
-			return n1 * x * x + 0.75f;
+			x -= 1.5f / BOUNCE_D1;
+			return BOUNCE_N1 * x * x + 0.75f;
 		}
-		else if (x < 2.5f / d1)
+		else if (x < 2.5f / BOUNCE_D1)
 		{
-			x -= 2.25f / d1;
-			return n1 * x * x + 0.9375f;
+			x -= 2.25f / BOUNCE_D1;
+			return BOUNCE_N1 * x * x + 0.9375f;
 		}
 		else
 		{
-			x -= 2.625f / d1;
-			return n1 * x * x + 0.984375f;
+			x -= 2.625f / BOUNCE_D1;
+			return BOUNCE_N1 * x * x + 0.984375f;
 		}
 	}
 
