@@ -11,8 +11,7 @@
 #include "HAL/IConsoleManager.h"
 #include "TransitionBlueprintLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
-
-DEFINE_LOG_CATEGORY_STATIC(LogTransitionFX, Log, All);
+#include "TransitionFX.h"
 
 void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -201,7 +200,7 @@ void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransit
 
 void UTransitionManagerSubsystem::ForceClear()
 {
-	UE_LOG(LogTemp, Warning, TEXT("TransitionFX: Force Clear Executed."));
+	UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: Force Clear Executed."));
 
 	// Cleanup Effect
 	if (CurrentEffect)
@@ -279,7 +278,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 {
 	if (!Preset || !Preset->TransitionMaterial)
 	{
-		UE_LOG(LogTemp, Error, TEXT("TransitionFX: Invalid Preset or Material is missing!"));
+		UE_LOG(LogTransitionFX, Error, TEXT("TransitionFX: Invalid Preset or Material is missing!"));
 		ForceClear();
 		return;
 	}
@@ -364,7 +363,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("Failed to create or retrieve transition effect instance."));
+				UE_LOG(LogTransitionFX, Error, TEXT("Failed to create or retrieve transition effect instance."));
 			}
 		}
 	}
@@ -410,7 +409,7 @@ void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
 {
 	if (!CurrentPreset)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ReverseTransition called with null preset."));
+		UE_LOG(LogTransitionFX, Warning, TEXT("ReverseTransition called with null preset."));
 		return;
 	}
 

@@ -8,6 +8,7 @@
 #include "TransitionPreset.h"
 #include "UObject/Package.h"
 #include "Curves/CurveFloat.h"
+#include "TransitionFX.h"
 
 class FTransitionLatentAction : public FPendingLatentAction
 {
@@ -191,7 +192,7 @@ static void QuickFadeInternal(const UObject* WorldContextObject, float Duration,
 					if (!TempPreset->TransitionMaterial)
 					{
 						// Last resort: Log warning
-						UE_LOG(LogTemp, Warning, TEXT("QuickFade: Could not find DA_FadeToBlack or M_Transition_Master. Transition may not be visible."));
+						UE_LOG(LogTransitionFX, Warning, TEXT("QuickFade: Could not find DA_FadeToBlack or M_Transition_Master. Transition may not be visible."));
 					}
 				}
 
@@ -243,7 +244,7 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWaitWithDuration(const UObjec
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("PlayTransitionAndWaitWithDuration called with null preset."));
+					UE_LOG(LogTransitionFX, Warning, TEXT("PlayTransitionAndWaitWithDuration called with null preset."));
 				}
 			}
 		}

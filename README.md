@@ -142,7 +142,7 @@ TArray<TSoftObjectPtr<UTransitionPreset>> SoftPresets = { ... };
 
 TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadCompleteDelegate::CreateLambda([]()
 {
-    UE_LOG(LogTemp, Log, TEXT("Assets loaded and shaders ready!"));
+    UE_LOG(LogTransitionFX, Log, TEXT("Assets loaded and shaders ready!"));
 }));
 ```
 
