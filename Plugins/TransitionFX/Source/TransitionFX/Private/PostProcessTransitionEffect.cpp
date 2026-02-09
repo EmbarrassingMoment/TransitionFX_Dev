@@ -87,7 +87,7 @@ void UPostProcessTransitionEffect::UpdateProgress(float Progress)
 	{
 		static const FName ProgressParamName(TEXT("Progress"));
 		DynamicMaterial->SetScalarParameterValue(ProgressParamName, Progress);
-		UpdateMaterialParameters(DynamicMaterial, Progress);
+		UpdateMaterialParameters(Progress);
 	}
 }
 
@@ -131,7 +131,7 @@ void UPostProcessTransitionEffect::SetParameters(const FTransitionParameters& Pa
 	}
 }
 
-void UPostProcessTransitionEffect::UpdateMaterialParameters(UMaterialInstanceDynamic* MID, float Progress)
+void UPostProcessTransitionEffect::UpdateMaterialParameters(float Progress)
 {
 	// Base implementation does nothing. Subclasses can override.
 }

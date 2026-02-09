@@ -28,10 +28,9 @@ public:
 
 	/**
 	 * Updates custom material parameters. Override this in subclasses to add extra parameters.
-	 * @param MID The dynamic material instance.
 	 * @param Progress The current transition progress.
 	 */
-	virtual void UpdateMaterialParameters(UMaterialInstanceDynamic* MID, float Progress);
+	virtual void UpdateMaterialParameters(float Progress);
 
 protected:
 	/** The dynamic material instance created at runtime. */
