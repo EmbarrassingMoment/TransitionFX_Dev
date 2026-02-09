@@ -4,6 +4,8 @@
 
 #include "Modules/ModuleManager.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogTransitionFX, Log, All);
+
 class FTransitionFXModule : public IModuleInterface
 {
 public:

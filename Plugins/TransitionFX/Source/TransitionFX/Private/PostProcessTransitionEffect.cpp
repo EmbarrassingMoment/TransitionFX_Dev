@@ -4,6 +4,7 @@
 #include "Engine/PostProcessVolume.h"
 #include "Kismet/KismetMaterialLibrary.h"
 #include "Engine/World.h"
+#include "TransitionFX.h"
 
 void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* Preset)
 {
@@ -14,7 +15,7 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 
 	if (!Preset->TransitionMaterial)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PostProcessTransitionEffect: TransitionMaterial is null in Preset %s"), *Preset->GetName());
+		UE_LOG(LogTransitionFX, Warning, TEXT("PostProcessTransitionEffect: TransitionMaterial is null in Preset %s"), *Preset->GetName());
 		return;
 	}
 
@@ -30,7 +31,7 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 
 	if (!DynamicMaterial)
 	{
-		UE_LOG(LogTemp, Error, TEXT("PostProcessTransitionEffect: Failed to create Dynamic Material Instance"));
+		UE_LOG(LogTransitionFX, Error, TEXT("PostProcessTransitionEffect: Failed to create Dynamic Material Instance"));
 		return;
 	}
 
@@ -39,7 +40,7 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 	FMaterialParameterInfo ProgressInfo(TEXT("Progress"));
 	if (!DynamicMaterial->GetScalarParameterValue(ProgressInfo, TempVal))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("TransitionFX: Material '%s' is missing 'Progress' parameter. Transition will not animate."), *Preset->TransitionMaterial->GetName());
+		UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: Material '%s' is missing 'Progress' parameter. Transition will not animate."), *Preset->TransitionMaterial->GetName());
 	}
 
 	// Reuse or Spawn Post Process Volume
