@@ -4,6 +4,7 @@
 #include "Engine/PostProcessVolume.h"
 #include "Kismet/KismetMaterialLibrary.h"
 #include "Engine/World.h"
+#include "Engine/Texture.h"
 #include "TransitionFX.h"
 
 void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* Preset)
@@ -128,6 +129,14 @@ void UPostProcessTransitionEffect::SetParameters(const FTransitionParameters& Pa
 	for (const auto& Pair : Params.VectorParams)
 	{
 		DynamicMaterial->SetVectorParameterValue(Pair.Key, Pair.Value);
+	}
+
+	for (const auto& Pair : Params.TextureParams)
+	{
+		if (Pair.Value)
+		{
+			DynamicMaterial->SetTextureParameterValue(Pair.Key, Pair.Value);
+		}
 	}
 }
 

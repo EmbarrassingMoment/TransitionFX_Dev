@@ -9,6 +9,7 @@
 
 class UCurveFloat;
 class USoundBase;
+class UTexture;
 
 /**
  * Parameters to override transition material properties at runtime.
@@ -25,6 +26,10 @@ struct FTransitionParameters
 	/** Vector parameters to override (e.g., Colors). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
 	TMap<FName, FLinearColor> VectorParams;
+
+	/** Texture parameters to override. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	TMap<FName, TObjectPtr<UTexture>> TextureParams;
 };
 
 /**
