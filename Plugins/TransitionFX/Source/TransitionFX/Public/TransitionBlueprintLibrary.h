@@ -32,6 +32,19 @@ public:
 	static void PlayTransitionAndWait(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo);
 
 	/**
+	 * Picks a random preset from the list and plays it, waiting for completion.
+	 *
+	 * @param WorldContextObject The world context object.
+	 * @param Presets List of presets to choose from.
+	 * @param Mode The transition mode (Forward or Reverse).
+	 * @param PlaySpeed The speed multiplier for the transition.
+	 * @param OverrideParams Optional parameters to override material properties.
+	 * @param LatentInfo The latent action info.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "Mode"))
+	static void PlayRandomTransitionAndWait(const UObject* WorldContextObject, const TArray<UTransitionPreset*>& Presets, ETransitionMode Mode, float PlaySpeed, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo);
+
+	/**
 	 * Plays a transition with a specific duration and waits for it to complete.
 	 *
 	 * @param WorldContextObject The world context object.
