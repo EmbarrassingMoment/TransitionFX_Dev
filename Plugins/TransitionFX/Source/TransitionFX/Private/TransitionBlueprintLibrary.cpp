@@ -64,6 +64,31 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldCont
 	}
 }
 
+void UTransitionBlueprintLibrary::PlayRandomTransitionAndWait(const UObject* WorldContextObject, const TArray<UTransitionPreset*>& Presets, ETransitionMode Mode, float PlaySpeed, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
+{
+	if (Presets.IsEmpty())
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("PlayRandomTransitionAndWait: Presets array is empty."));
+
+		// Finish immediately to prevent hanging
+		if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+		{
+			FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
+			if (LatentActionManager.FindExistingAction<FTransitionLatentAction>(LatentInfo.CallbackTarget, LatentInfo.UUID) == nullptr)
+			{
+				// Passing nullptr for Manager will cause FTransitionLatentAction::UpdateOperation to return true immediately
+				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionLatentAction(LatentInfo, nullptr));
+			}
+		}
+		return;
+	}
+
+	int32 Index = FMath::RandRange(0, Presets.Num() - 1);
+	UTransitionPreset* SelectedPreset = Presets[Index];
+
+	PlayTransitionAndWait(WorldContextObject, SelectedPreset, Mode, PlaySpeed, OverrideParams, LatentInfo);
+}
+
 float UTransitionBlueprintLibrary::ApplyEasing(float Alpha, ETransitionEasing EasingType, const UCurveFloat* CustomCurve)
 {
 	// Clamp input
