@@ -47,7 +47,7 @@ public:
 #endif
 };
 
-void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
+void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
 	{
@@ -57,14 +57,14 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldCont
 			UTransitionManagerSubsystem* Manager = World->GetGameInstance()->GetSubsystem<UTransitionManagerSubsystem>();
 			if (Manager)
 			{
-				Manager->StartTransition(Preset, Mode, PlaySpeed, false, false, OverrideParams);
+				Manager->StartTransition(Preset, Mode, PlaySpeed, bInvert, false, OverrideParams);
 				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionLatentAction(LatentInfo, Manager));
 			}
 		}
 	}
 }
 
-void UTransitionBlueprintLibrary::PlayRandomTransitionAndWait(const UObject* WorldContextObject, const TArray<UTransitionPreset*>& Presets, ETransitionMode Mode, float PlaySpeed, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
+void UTransitionBlueprintLibrary::PlayRandomTransitionAndWait(const UObject* WorldContextObject, const TArray<UTransitionPreset*>& Presets, ETransitionMode Mode, float PlaySpeed, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
 {
 	if (Presets.IsEmpty())
 	{
@@ -86,7 +86,7 @@ void UTransitionBlueprintLibrary::PlayRandomTransitionAndWait(const UObject* Wor
 	int32 Index = FMath::RandRange(0, Presets.Num() - 1);
 	UTransitionPreset* SelectedPreset = Presets[Index];
 
-	PlayTransitionAndWait(WorldContextObject, SelectedPreset, Mode, PlaySpeed, OverrideParams, LatentInfo);
+	PlayTransitionAndWait(WorldContextObject, SelectedPreset, Mode, PlaySpeed, bInvert, OverrideParams, LatentInfo);
 }
 
 float UTransitionBlueprintLibrary::ApplyEasing(float Alpha, ETransitionEasing EasingType, const UCurveFloat* CustomCurve)
