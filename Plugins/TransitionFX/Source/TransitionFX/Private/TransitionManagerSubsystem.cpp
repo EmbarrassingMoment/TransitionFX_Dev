@@ -179,10 +179,20 @@ void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransit
 
 	UE_LOG(LogTransitionFX, Log, TEXT("Preloading %d Transition Presets..."), Presets.Num());
 
+	TSet<UMaterialInterface*> ProcessedMaterials;
+
 	for (UTransitionPreset* Preset : Presets)
 	{
 		if (Preset && Preset->TransitionMaterial)
 		{
+			bool bIsAlreadyInSet = false;
+			ProcessedMaterials.Add(Preset->TransitionMaterial, &bIsAlreadyInSet);
+
+			if (bIsAlreadyInSet)
+			{
+				continue;
+			}
+
 			// Create a temporary Dynamic Material Instance (MID)
 			UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Preset->TransitionMaterial, this);
 
