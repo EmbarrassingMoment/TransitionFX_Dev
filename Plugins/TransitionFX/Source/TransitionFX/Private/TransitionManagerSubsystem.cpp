@@ -211,6 +211,28 @@ void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransit
 	}
 }
 
+void UTransitionManagerSubsystem::ReturnEffectToPool(UObject* EffectObj)
+{
+	if (!EffectObj)
+	{
+		return;
+	}
+
+	FTransitionEffectPool& Pool = EffectPool.FindOrAdd(EffectObj->GetClass());
+
+	// Cap the pool size to prevent memory bloat
+	constexpr int32 MaxPoolSize = 3;
+	if (Pool.Effects.Num() < MaxPoolSize)
+	{
+		Pool.Effects.Add(EffectObj);
+	}
+	else
+	{
+		// Do nothing. Let the Garbage Collector handle the unreferenced object.
+		UE_LOG(LogTransitionFX, Verbose, TEXT("Pool for %s is full. Discarding effect instance for GC."), *EffectObj->GetClass()->GetName());
+	}
+}
+
 void UTransitionManagerSubsystem::ForceClear()
 {
 	UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: Force Clear Executed."));
@@ -223,8 +245,7 @@ void UTransitionManagerSubsystem::ForceClear()
 		// Return to pool
 		if (UObject* EffectObj = CurrentEffect.GetObject())
 		{
-			FTransitionEffectPool& Pool = EffectPool.FindOrAdd(EffectObj->GetClass());
-			Pool.Effects.Add(EffectObj);
+			ReturnEffectToPool(EffectObj);
 		}
 
 		CurrentEffect = nullptr;
@@ -457,8 +478,7 @@ void UTransitionManagerSubsystem::StopTransition()
 		// Return to pool
 		if (UObject* EffectObj = CurrentEffect.GetObject())
 		{
-			FTransitionEffectPool& Pool = EffectPool.FindOrAdd(EffectObj->GetClass());
-			Pool.Effects.Add(EffectObj);
+			ReturnEffectToPool(EffectObj);
 		}
 
 		CurrentEffect = nullptr;

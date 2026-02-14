@@ -115,6 +115,9 @@ public:
 	FTransitionHoldStarted OnTransitionHoldStarted;
 
 private:
+	/** Internal helper to return an effect to the pool with size checks. */
+	void ReturnEffectToPool(UObject* EffectObj);
+
 	/** Pool of available transition effects. */
 	UPROPERTY(Transient)
 	TMap<UClass*, FTransitionEffectPool> EffectPool;
