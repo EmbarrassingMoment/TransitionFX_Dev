@@ -96,7 +96,10 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 				bHasCompleted = true;
 				OnTransitionCompleted.Broadcast();
 
-				StopTransition();
+				if (bAutoStopOnReverseComplete)
+				{
+					StopTransition();
+				}
 			}
 		}
 	}
