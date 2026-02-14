@@ -1,4 +1,5 @@
 #include "TransitionBlueprintLibrary.h"
+#include "TransitionFXConfig.h"
 #include "TransitionManagerSubsystem.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -255,9 +256,9 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWaitWithDuration(const UObjec
 				if (Preset)
 				{
 					float PlaySpeed = 1.0f;
-					if (Duration <= 0.001f)
+					if (Duration <= TransitionFXConfig::MinDurationThreshold)
 					{
-						PlaySpeed = 100.0f;
+						PlaySpeed = TransitionFXConfig::FallbackPlaySpeed;
 					}
 					else
 					{
