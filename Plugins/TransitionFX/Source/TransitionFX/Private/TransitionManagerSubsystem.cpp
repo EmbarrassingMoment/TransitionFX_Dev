@@ -1,4 +1,5 @@
 #include "TransitionManagerSubsystem.h"
+#include "TransitionFXConfig.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "TransitionPreset.h"
@@ -33,7 +34,7 @@ UTransitionPreset* UTransitionManagerSubsystem::GetDefaultFadePreset()
 {
 	if (!DefaultFadePreset)
 	{
-		DefaultFadePreset = LoadObject<UTransitionPreset>(nullptr, TEXT("/TransitionFX/Data/DA_FadeToBlack.DA_FadeToBlack"));
+		DefaultFadePreset = LoadObject<UTransitionPreset>(nullptr, TransitionFXConfig::DefaultFadePresetPath);
 	}
 	return DefaultFadePreset;
 }
@@ -42,7 +43,7 @@ UMaterialInterface* UTransitionManagerSubsystem::GetDefaultMasterMaterial()
 {
 	if (!DefaultMasterMaterial)
 	{
-		DefaultMasterMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/TransitionFX/Materials/M_Transition_Master.M_Transition_Master"));
+		DefaultMasterMaterial = LoadObject<UMaterialInterface>(nullptr, TransitionFXConfig::DefaultMasterMaterialPath);
 	}
 	return DefaultMasterMaterial;
 }
