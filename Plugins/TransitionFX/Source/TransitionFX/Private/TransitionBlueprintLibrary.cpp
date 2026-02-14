@@ -125,10 +125,13 @@ float UTransitionBlueprintLibrary::ApplyEasing(float Alpha, ETransitionEasing Ea
 		return x == 1.0f ? 1.0f : 1.0f - FMath::Pow(2.0f, -10.0f * x);
 
 	case ETransitionEasing::EaseInOutExpo:
+	{
 		if (x == 0.0f) return 0.0f;
 		if (x == 1.0f) return 1.0f;
-		if ((x *= 2.0f) < 1.0f) return 0.5f * FMath::Pow(2.0f, 10.0f * (x - 1.0f));
-		return 0.5f * (2.0f - FMath::Pow(2.0f, -10.0f * (x - 1.0f)));
+		float t = x * 2.0f;
+		if (t < 1.0f) return 0.5f * FMath::Pow(2.0f, 10.0f * (t - 1.0f));
+		return 0.5f * (2.0f - FMath::Pow(2.0f, -10.0f * (t - 1.0f)));
+	}
 
 	case ETransitionEasing::EaseOutElastic:
 	{
