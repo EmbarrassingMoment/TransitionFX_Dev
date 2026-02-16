@@ -1,83 +1,83 @@
 # TransitionFX API Reference
 
-このドキュメントでは、TransitionFXプラグインのAPIについて詳しく解説します。
+This document provides a detailed explanation of the API for the TransitionFX plugin.
 
-## 1. はじめに (Introduction)
+## 1. Introduction
 
-TransitionFXプラグインは、主に以下の2つのコンポーネントで構成されています。
+The TransitionFX plugin mainly consists of the following two components:
 
-*   **UTransitionManagerSubsystem**: 遷移効果の実行、管理、およびティック処理を行うシングルトンサブシステムです。
-*   **UTransitionPreset**: 遷移効果の設定（エフェクトクラス、マテリアル、持続時間、イージングタイプなど）を定義するデータアセットです。
+*   **UTransitionManagerSubsystem**: A singleton subsystem that handles the execution, management, and ticking of transition effects.
+*   **UTransitionPreset**: A data asset that defines the settings for a transition effect (Effect Class, Material, Duration, Easing Type, etc.).
 
-## 2. ブループリントAPI (Blueprint API Reference)
+## 2. Blueprint API Reference
 
-主な機能は `UTransitionBlueprintLibrary` を通じて提供され、レイテントアクション（Latent Action）として実装されています。
+Primary functionality is provided via `UTransitionBlueprintLibrary`, implemented as Latent Action nodes.
 
-### レイテントアクション (Latent Action Nodes)
+### Latent Action Nodes
 
-これらのノードは、遷移が完了するまで実行を待機します。
+These nodes wait for the transition to complete before proceeding.
 
 #### Play Transition And Wait
-指定されたプリセットを使用して遷移を再生し、完了まで待機します。
+Plays a transition using the specified preset and waits for completion.
 
-| ピン名 | タイプ | 説明 |
+| Pin Name | Type | Description |
 | :--- | :--- | :--- |
-| **World Context Object** | Input | ワールドコンテキストオブジェクト。 |
-| **Preset** | Input | 使用する遷移プリセット (`UTransitionPreset`)。 |
-| **Mode** | Input | 遷移モード (`Forward`: フェードアウト/0→1, `Reverse`: フェードイン/1→0)。 |
-| **Play Speed** | Input | 再生速度の倍率 (デフォルト: 1.0)。 |
-| **bInvert** | Input | マスクを反転するかどうか。 |
-| **Override Params** | Input | マテリアルパラメータを動的に上書きするための構造体 (`FTransitionParameters`)。 |
-| **Completed** | Output | 遷移が完了した後に実行されます。 |
+| **World Context Object** | Input | The world context object. |
+| **Preset** | Input | The transition preset (`UTransitionPreset`) to use. |
+| **Mode** | Input | Transition mode (`Forward`: Fade Out/0→1, `Reverse`: Fade In/1→0). |
+| **Play Speed** | Input | Playback speed multiplier (Default: 1.0). |
+| **bInvert** | Input | Whether to invert the mask. |
+| **Override Params** | Input | Structure for dynamically overriding material parameters (`FTransitionParameters`). |
+| **Completed** | Output | Executed after the transition is complete. |
 
 #### Play Transition And Wait With Duration
-再生速度の代わりに、具体的な持続時間（秒）を指定して遷移を再生します。
+Plays a transition with a specific duration (in seconds) instead of using play speed.
 
-| ピン名 | タイプ | 説明 |
+| Pin Name | Type | Description |
 | :--- | :--- | :--- |
-| **World Context Object** | Input | ワールドコンテキストオブジェクト。 |
-| **Preset** | Input | 使用する遷移プリセット (`UTransitionPreset`)。 |
-| **Mode** | Input | 遷移モード (`Forward`, `Reverse`)。 |
-| **Duration** | Input | 遷移の持続時間（秒）。 |
-| **bInvert** | Input | マスクを反転するかどうか。 |
-| **Override Params** | Input | マテリアルパラメータを動的に上書きするための構造体。 |
-| **Completed** | Output | 遷移が完了した後に実行されます。 |
+| **World Context Object** | Input | The world context object. |
+| **Preset** | Input | The transition preset (`UTransitionPreset`) to use. |
+| **Mode** | Input | Transition mode (`Forward`, `Reverse`). |
+| **Duration** | Input | Duration of the transition in seconds. |
+| **bInvert** | Input | Whether to invert the mask. |
+| **Override Params** | Input | Structure for dynamically overriding material parameters. |
+| **Completed** | Output | Executed after the transition is complete. |
 
 #### Play Random Transition And Wait
-指定されたプリセットのリストからランダムに1つを選択して再生します。
+Randomly selects one preset from the provided list and plays it.
 
-| ピン名 | タイプ | 説明 |
+| Pin Name | Type | Description |
 | :--- | :--- | :--- |
-| **World Context Object** | Input | ワールドコンテキストオブジェクト。 |
-| **Presets** | Input | 選択対象となる遷移プリセットの配列。 |
-| **Mode** | Input | 遷移モード (`Forward`, `Reverse`)。 |
-| **Play Speed** | Input | 再生速度の倍率。 |
-| **bInvert** | Input | マスクを反転するかどうか。 |
-| **Override Params** | Input | マテリアルパラメータを動的に上書きするための構造体。 |
-| **Completed** | Output | 遷移が完了した後に実行されます。 |
+| **World Context Object** | Input | The world context object. |
+| **Presets** | Input | Array of transition presets to choose from. |
+| **Mode** | Input | Transition mode (`Forward`, `Reverse`). |
+| **Play Speed** | Input | Playback speed multiplier. |
+| **bInvert** | Input | Whether to invert the mask. |
+| **Override Params** | Input | Structure for dynamically overriding material parameters. |
+| **Completed** | Output | Executed after the transition is complete. |
 
-### 制御ノード (Control Nodes)
+### Control Nodes
 
 #### Stop Transition
-現在再生中の遷移を停止します。
+Stops the currently playing transition.
 
 #### Force Clear
-すべての遷移状態を強制的にクリアし、入力をリセットします。緊急停止やリセットに使用します。
+Forcefully clears all transition states and resets input. Used for emergency stops or resetting.
 
-## 3. C++ API (C++ API Reference)
+## 3. C++ API Reference
 
-C++からは `UTransitionManagerSubsystem` を通じて遷移を制御します。
+From C++, you control transitions via the `UTransitionManagerSubsystem`.
 
-### サブシステムの取得
+### Accessing the Subsystem
 
 ```cpp
 UTransitionManagerSubsystem* TransitionSystem = GetGameInstance()->GetSubsystem<UTransitionManagerSubsystem>();
 ```
 
-### 主要関数
+### Key Functions
 
 #### StartTransition
-遷移を開始します。
+Starts a transition.
 
 ```cpp
 void StartTransition(
@@ -91,47 +91,47 @@ void StartTransition(
 ```
 
 #### StopTransition
-現在の遷移を停止します。
+Stops the current transition.
 
 ```cpp
 void StopTransition();
 ```
 
-### デリゲート (Delegates / Event Dispatchers)
+### Delegates / Event Dispatchers
 
-サブシステムには以下のイベントディスパッチャーが用意されています。
+The subsystem provides the following event dispatchers:
 
-*   **OnTransitionStarted**: 遷移が開始されたときに呼び出されます。
-*   **OnTransitionCompleted**: 遷移が完了したときに呼び出されます。
-*   **OnTransitionHoldStarted**: 遷移が最大進行度（1.0）でホールド（一時停止）されたときに呼び出されます（`bHoldAtMax` が true の場合）。
+*   **OnTransitionStarted**: Called when a transition starts.
+*   **OnTransitionCompleted**: Called when a transition completes.
+*   **OnTransitionHoldStarted**: Called when a transition holds at max progress (1.0) (if `bHoldAtMax` is true).
 
-※ `OnTransitionStop` という名前のデリゲートは存在しませんが、`StopTransition` を呼び出すと遷移は中断されます。
+*Note: There is no delegate named `OnTransitionStop`, but calling `StopTransition` will interrupt the transition.*
 
-## 4. 高度な機能 (Advanced Features)
+## 4. Advanced Features
 
-### 非同期ロード (Async Loading)
-`AsyncLoadTransitionPresets` を使用すると、ソフトオブジェクト参照 (`TSoftObjectPtr`) のリストを使用してプリセットを非同期にロードし、シェーダーのプリロードを行うことができます。
+### Async Loading
+Using `AsyncLoadTransitionPresets`, you can asynchronously load presets using a list of Soft Object References (`TSoftObjectPtr`) and perform shader preloading.
 
 ```cpp
 void AsyncLoadTransitionPresets(const TArray<TSoftObjectPtr<UTransitionPreset>>& SoftPresets, FTransitionPreloadCompleteDelegate OnComplete);
 ```
 
-### プリロード (Preloading)
-`PreloadTransitionPresets` は、ロード済みのプリセットを使用してシェーダーを事前にウォームアップし、遷移実行時のヒッチ（カクつき）を防ぎます。
+### Preloading
+`PreloadTransitionPresets` uses loaded presets to warm up shaders in advance, preventing hitches (stuttering) during transition execution.
 
 ```cpp
 void PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets);
 ```
 
-## 5. パラメータのオーバーライド (Parameter Overrides)
+## 5. Parameter Overrides
 
-`FTransitionParameters` 構造体を使用することで、プリセットのマテリアルパラメータを実行時に動的に変更できます。
+By using the `FTransitionParameters` struct, you can dynamically change preset material parameters at runtime.
 
 ```cpp
 FTransitionParameters Params;
 Params.ScalarParams.Add(FName("Intensity"), 2.0f);
 Params.VectorParams.Add(FName("Color"), FLinearColor::Red);
-// TextureParams も同様に設定可能
+// TextureParams can also be set similarly
 ```
 
-この構造体は `StartTransition` や各種ブループリントノードに渡すことができます。
+This structure can be passed to `StartTransition` and various Blueprint nodes.
