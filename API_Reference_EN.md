@@ -135,3 +135,42 @@ Params.VectorParams.Add(FName("Color"), FLinearColor::Red);
 ```
 
 This structure can be passed to `StartTransition` and various Blueprint nodes.
+
+## 6. Manual Control & Loading Screen Workflow
+
+TransitionFX provides the ability to manually control transition timing, which is especially useful for creating "Loading Screens" that hide the screen during level loading or heavy processing.
+
+### Key Parameters and Functions
+
+*   **bHoldAtMax (StartTransition)**:
+    If this parameter is set to `true`, the transition effect will automatically pause (hold) when the progress reaches **1.0 (fully covered screen)**. Input remains blocked in this state.
+
+*   **ReleaseHold**:
+    Function to resume and complete a transition that is in a hold state. Calling this releases the hold and seamlessly transitions to the finish.
+
+### Workflow Example
+
+1.  **Start Transition**
+    *   Call `StartTransition` (or the Blueprint node) and set `bHoldAtMax` to `true`.
+    *   The screen becomes covered by the effect and pauses at progress 1.0.
+
+2.  **Background Processing (Load Level / Spawn Actors)**
+    *   While the screen is hidden, perform tasks you don't want the player to see, such as loading levels or spawning actors.
+
+3.  **Release Hold (Call ReleaseHold)**
+    *   Once loading is complete, call the `ReleaseHold` function.
+
+4.  **Transition Finishes**
+    *   The effect resumes and the transition finishes smoothly.
+
+## 7. Debugging & Utilities
+
+Functions helpful for development and debugging.
+
+### Force Clear
+
+*   **Blueprint Node**: `ForceClear`
+    *   Instantly destroys all transition states and unblocks input. Used to recover from unexpected stuck states.
+
+*   **Console Command**: `TransitionFX.ForceClear`
+    *   **Important**: QA testers and developers can type this command in the console window (`@` or `~` key) to instantly recover from a stuck black screen.
