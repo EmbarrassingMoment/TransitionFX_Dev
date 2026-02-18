@@ -95,6 +95,9 @@ public:
 	/** Returns the default master material (M_Transition_Master), loading it if necessary. */
 	UMaterialInterface* GetDefaultMasterMaterial();
 
+	/** Returns the current transition generation ID. */
+	uint32 GetActiveTransitionID() const { return ActiveTransitionID; }
+
 	/** Preloads a list of transition presets to warm up shaders. */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX|System")
 	void PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets);
@@ -159,6 +162,9 @@ private:
 
 	/** Current playback speed multiplier. */
 	float CurrentPlaySpeed;
+
+	/** Current transition generation ID. Incremented on every StartTransition call. */
+	uint32 ActiveTransitionID = 0;
 
 	/** Cached player controller to avoid redundant lookups. */
 	TWeakObjectPtr<APlayerController> CachedPlayerController;

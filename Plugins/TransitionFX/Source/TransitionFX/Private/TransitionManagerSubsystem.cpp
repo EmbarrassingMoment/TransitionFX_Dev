@@ -327,6 +327,8 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		StopTransition();
 	}
 
+	ActiveTransitionID++;
+
 	// Ensure previous audio is stopped
 	if (CurrentAudioComponent)
 	{
@@ -463,6 +465,8 @@ void UTransitionManagerSubsystem::StopTransition()
 	{
 		return;
 	}
+
+	bHasCompleted = true;
 
 	// Stop Audio
 	if (CurrentAudioComponent)

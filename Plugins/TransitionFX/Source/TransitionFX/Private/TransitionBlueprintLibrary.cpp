@@ -20,13 +20,19 @@ public:
 	int32 OutputLink;
 	FWeakObjectPtr CallbackTarget;
 	TWeakObjectPtr<UTransitionManagerSubsystem> Manager;
+	uint32 TargetTransitionID;
 
 	FTransitionLatentAction(const FLatentActionInfo& InLatentInfo, UTransitionManagerSubsystem* InManager)
 		: ExecutionFunction(InLatentInfo)
 		, OutputLink(InLatentInfo.Linkage)
 		, CallbackTarget(InLatentInfo.CallbackTarget)
 		, Manager(InManager)
+		, TargetTransitionID(0)
 	{
+		if (Manager.IsValid())
+		{
+			TargetTransitionID = Manager->GetActiveTransitionID();
+		}
 	}
 
 	virtual void UpdateOperation(FLatentResponse& Response) override
@@ -35,8 +41,11 @@ public:
 
 		if (Manager.IsValid())
 		{
-			// If we're done (finished hold phase or fully completed), we trigger
-			bFinished = Manager->IsCurrentTransitionFinished();
+			// Check if we were interrupted by a new transition, or if our transition finished normally
+			bool bWasInterrupted = Manager->GetActiveTransitionID() != TargetTransitionID;
+			bool bIsFinished = bWasInterrupted || Manager->IsCurrentTransitionFinished() || !Manager->IsTransitionActive();
+
+			bFinished = bIsFinished;
 		}
 
 		Response.FinishAndTriggerIf(bFinished, ExecutionFunction.ExecutionFunction, OutputLink, CallbackTarget);
