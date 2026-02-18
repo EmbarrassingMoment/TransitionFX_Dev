@@ -17,3 +17,13 @@ Direct runtime profiling with Unreal Insights is not possible in the current hea
 ### Complexity Analysis
 *   **Before:** O(Disk_IO) + O(Hash_Lookup) on first run; O(Hash_Lookup) on subsequent runs.
 *   **After:** O(1) Pointer Access on all runs (Disk_IO moved to Initialization).
+
+## Memory Management & Object Pooling
+
+To further enhance performance and stability, particularly for large-scale projects, the TransitionFX plugin implements a robust object pooling system.
+
+### Strategy
+Instead of creating and destroying `UTransitionEffect` objects and `UMaterialInstanceDynamic` (MIDs) for every transition, the system recycles them.
+1.  **Allocation Prevention:** Creating UObjects and Material Instances involves memory allocation and initialization, which can cause micro-stutters (hitching). Pooling reuses existing instances, bypassing this cost.
+2.  **Pool Size Limit:** To prevent unbounded memory growth (memory leaks) during extended play sessions, the pool is capped (e.g., max 3 instances per effect class).
+3.  **Garbage Collection:** Excess instances beyond the pool limit are properly dereferenced and handled by Unreal Engine's Garbage Collector (GC), ensuring memory usage remains stable even in games with hundreds of scene transitions.
