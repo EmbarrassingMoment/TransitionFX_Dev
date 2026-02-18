@@ -22,15 +22,15 @@ struct FTransitionParameters
 	GENERATED_BODY()
 
 	/** Scalar parameters to override (e.g., float values). */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TransitionFX")
 	TMap<FName, float> ScalarParams;
 
 	/** Vector parameters to override (e.g., Colors). */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TransitionFX")
 	TMap<FName, FLinearColor> VectorParams;
 
 	/** Texture parameters to override. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TransitionFX")
 	TMap<FName, TObjectPtr<UTexture>> TextureParams;
 };
 
@@ -54,35 +54,35 @@ public:
 	}
 
 	/** The class of the transition effect to spawn. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition", meta = (MustImplement = "/Script/TransitionFX.TransitionEffect"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX", meta = (MustImplement = "/Script/TransitionFX.TransitionEffect"))
 	TSubclassOf<UObject> EffectClass;
 
 	/** The material to use for this transition. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX")
 	TObjectPtr<UMaterialInterface> TransitionMaterial;
 
 	/** Default duration of the transition in seconds. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition", meta = (ClampMin = "0.0"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX", meta = (ClampMin = "0.0"))
 	float DefaultDuration;
 
 	/** The easing function to apply to the progress. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TransitionFX")
 	ETransitionEasing EasingType;
 
 	/** Optional curve to ease the progress. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition", meta = (EditCondition = "EasingType == ETransitionEasing::Custom", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX", meta = (EditCondition = "EasingType == ETransitionEasing::Custom", EditConditionHides))
 	TObjectPtr<UCurveFloat> ProgressCurve;
 
 	/** Blocks player input during transition. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX")
 	bool bAutoBlockInput;
 
 	/** Allows transition while game is paused. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX")
 	bool bTickWhenPaused;
 
 	/** Priority for PostProcess effect. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Transition")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX")
 	float Priority;
 
 	/** The sound to play (Optional). */
