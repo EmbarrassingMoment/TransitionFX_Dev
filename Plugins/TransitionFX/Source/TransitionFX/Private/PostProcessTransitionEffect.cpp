@@ -38,7 +38,8 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 
 	// Check for "Progress" Parameter
 	float TempVal = 0.0f;
-	FMaterialParameterInfo ProgressInfo(TEXT("Progress"));
+	static const FName ProgressParamName(TEXT("Progress"));
+	FMaterialParameterInfo ProgressInfo(ProgressParamName);
 	if (!DynamicMaterial->GetScalarParameterValue(ProgressInfo, TempVal))
 	{
 		UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: Material '%s' is missing 'Progress' parameter. Transition will not animate."), *Preset->TransitionMaterial->GetName());
