@@ -1,8 +1,5 @@
 # TransitionFX
 
-> **Note:** 🚧 **Work In Progress** 🚧
-> This project is currently under active development.
-
 ## Description
 TransitionFX is a lightweight and advanced procedural screen transition system for Unreal Engine 5.
 It renders high-quality transitions based on SDF (Signed Distance Field) math without using textures, and can be implemented from Blueprints with just a single node.

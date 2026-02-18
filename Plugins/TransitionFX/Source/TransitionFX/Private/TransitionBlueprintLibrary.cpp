@@ -1,3 +1,5 @@
+// Copyright Kurorekishi. All Rights Reserved.
+
 #include "TransitionBlueprintLibrary.h"
 #include "TransitionFXConfig.h"
 #include "TransitionManagerSubsystem.h"
