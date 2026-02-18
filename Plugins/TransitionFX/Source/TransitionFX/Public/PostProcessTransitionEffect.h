@@ -37,10 +37,10 @@ public:
 
 protected:
 	/** The dynamic material instance created at runtime. */
-	UPROPERTY(Transient, BlueprintReadOnly, Category = "Transition")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "TransitionFX")
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;
 
 	/** The spawned post process volume. */
-	UPROPERTY(Transient, BlueprintReadOnly, Category = "Transition")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "TransitionFX")
 	TObjectPtr<APostProcessVolume> SpawnedVolume;
 };

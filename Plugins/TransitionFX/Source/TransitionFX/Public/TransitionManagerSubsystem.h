@@ -54,39 +54,39 @@ public:
 	virtual void Deinitialize() override;
 
 	/** Starts a transition with the given preset. */
-	UFUNCTION(BlueprintCallable, Category = "Transition")
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward, float PlaySpeed = 1.0f, bool bInvert = false, bool bHoldAtMax = false, FTransitionParameters OverrideParams = FTransitionParameters());
 
 	/** Releases the hold at max progress, allowing the transition to complete. */
-	UFUNCTION(BlueprintCallable, Category = "Transition")
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void ReleaseHold();
 
 	/** Sets the playback speed multiplier. */
-	UFUNCTION(BlueprintCallable, Category = "Transition")
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void SetPlaySpeed(float NewSpeed);
 
 	/** Reverses the current transition. */
-	UFUNCTION(BlueprintCallable, Category = "Transition")
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void ReverseTransition(bool bAutoStop = true);
 
 	/** Stops the current transition. */
-	UFUNCTION(BlueprintCallable, Category = "Transition")
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void StopTransition();
 
 	/** Returns true if a transition is currently playing. */
-	UFUNCTION(BlueprintPure, Category = "Transition")
+	UFUNCTION(BlueprintPure, Category = "TransitionFX")
 	bool IsTransitionPlaying() const;
 
 	/** Returns true if the current transition has finished its hold phase or completed. */
-	UFUNCTION(BlueprintPure, Category = "Transition")
+	UFUNCTION(BlueprintPure, Category = "TransitionFX")
 	bool IsCurrentTransitionFinished() const;
 
 	/** Returns the current progress of the transition (0.0 to 1.0). */
-	UFUNCTION(BlueprintPure, Category = "Transition")
+	UFUNCTION(BlueprintPure, Category = "TransitionFX")
 	float GetCurrentProgress() const;
 
 	/** Forcefully clears any active transition and resets input. */
-	UFUNCTION(BlueprintCallable, Category = "Transition")
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void ForceClear();
 
 	/** Returns the default Fade preset (DA_FadeToBlack), loading it if necessary. */
@@ -105,15 +105,15 @@ public:
 
 public:
 	/** Triggered when a transition starts. */
-	UPROPERTY(BlueprintAssignable, Category = "Transition")
+	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
 	FOnTransitionStarted OnTransitionStarted;
 
 	/** Triggered when a transition completes. */
-	UPROPERTY(BlueprintAssignable, Category = "Transition")
+	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
 	FOnTransitionCompleted OnTransitionCompleted;
 
 	/** Triggered when a transition holds at max progress (1.0). */
-	UPROPERTY(BlueprintAssignable, Category = "Transition")
+	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
 	FTransitionHoldStarted OnTransitionHoldStarted;
 
 private:
