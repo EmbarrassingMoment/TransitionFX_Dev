@@ -1,3 +1,5 @@
+// Copyright Kurorekishi. All Rights Reserved.
+
 #include "TransitionManagerSubsystem.h"
 #include "TransitionFXConfig.h"
 #include "Engine/AssetManager.h"

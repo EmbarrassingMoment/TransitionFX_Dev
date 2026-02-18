@@ -1,3 +1,5 @@
+// Copyright Kurorekishi. All Rights Reserved.
+
 #include "PostProcessTransitionEffect.h"
 #include "TransitionPreset.h"
 #include "Materials/MaterialInstanceDynamic.h"
