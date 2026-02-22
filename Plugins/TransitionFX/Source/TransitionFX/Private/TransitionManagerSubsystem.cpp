@@ -205,8 +205,7 @@ void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransit
 			if (MID)
 			{
 				// Set a scalar parameter to ensure the uniform buffer is initialized
-				static const FName ProgressParamName(TEXT("Progress"));
-				MID->SetScalarParameterValue(ProgressParamName, 0.0f);
+				MID->SetScalarParameterValue(TransitionFXConfig::ProgressParamName, 0.0f);
 
 				// Do not store this MID. We want it to be garbage collected immediately.
 				// The sole purpose is to force the engine to compile/cache the PSOs (Pipeline State Objects) for this material.
