@@ -229,8 +229,7 @@ static void QuickFadeInternal(const UObject* WorldContextObject, float Duration,
 				TempPreset->DefaultDuration = Duration;
 
 				FTransitionParameters Params;
-				static const FName ColorParamName(TEXT("Color"));
-				Params.VectorParams.Add(ColorParamName, FLinearColor::Black);
+				Params.VectorParams.Add(TransitionFXConfig::ColorParamName, FLinearColor::Black);
 
 				Manager->StartTransition(TempPreset, Mode, 1.0f, false, false, Params);
 			}

@@ -7,6 +7,7 @@
 #include "Kismet/KismetMaterialLibrary.h"
 #include "Engine/World.h"
 #include "Engine/Texture.h"
+#include "TransitionFXConfig.h"
 #include "TransitionFX.h"
 
 void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* Preset)
@@ -95,8 +96,7 @@ void UPostProcessTransitionEffect::UpdateProgress(float Progress)
 {
 	if (DynamicMaterial)
 	{
-		static const FName ProgressParamName(TEXT("Progress"));
-		DynamicMaterial->SetScalarParameterValue(ProgressParamName, Progress);
+		DynamicMaterial->SetScalarParameterValue(TransitionFXConfig::ProgressParamName, Progress);
 		UpdateMaterialParameters(DynamicMaterial, Progress);
 	}
 }
@@ -118,8 +118,7 @@ void UPostProcessTransitionEffect::SetInvert(bool bInvert)
 	{
 		// Pass 1.0 for True, 0.0 for False.
 		// The material will use an "If" node with a threshold of 0.5 to switch logic.
-		static const FName InvertParamName(TEXT("Invert"));
-		DynamicMaterial->SetScalarParameterValue(InvertParamName, bInvert ? 1.0f : 0.0f);
+		DynamicMaterial->SetScalarParameterValue(TransitionFXConfig::InvertParamName, bInvert ? 1.0f : 0.0f);
 	}
 }
 

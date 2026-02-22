@@ -17,4 +17,8 @@ namespace TransitionFXConfig
 
 	/** Default path for the Master Transition Material. */
 	static const TCHAR* const DefaultMasterMaterialPath = TEXT("/TransitionFX/Materials/M_Transition_Master.M_Transition_Master");
+
+	static const FName ProgressParamName(TEXT("Progress"));
+	static const FName InvertParamName(TEXT("Invert"));
+	static const FName ColorParamName(TEXT("Color"));
 }
