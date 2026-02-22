@@ -47,6 +47,12 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 		UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: Material '%s' is missing 'Progress' parameter. Transition will not animate."), *Preset->TransitionMaterial->GetName());
 	}
 
+	// Invalidate volume if it belongs to a different (stale) world
+	if (SpawnedVolume && SpawnedVolume->GetWorld() != World)
+	{
+		SpawnedVolume = nullptr;
+	}
+
 	// Reuse or Spawn Post Process Volume
 	if (!SpawnedVolume)
 	{
