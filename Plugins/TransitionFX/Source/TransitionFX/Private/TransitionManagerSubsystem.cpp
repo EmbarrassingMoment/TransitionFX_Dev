@@ -499,6 +499,7 @@ void UTransitionManagerSubsystem::StopTransition()
 	}
 
 	bIsTransitionActive = false;
+	bHasCompleted = false;
 	bShouldHoldAtMax = false;
 	bIsHolding = false;
 	CurrentPreset = nullptr;
