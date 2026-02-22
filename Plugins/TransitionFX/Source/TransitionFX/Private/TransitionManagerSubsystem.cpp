@@ -21,7 +21,7 @@ void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	Super::Initialize(Collection);
 
 	IConsoleManager::Get().RegisterConsoleCommand(
-		TEXT("TransitionFX.Clear"),
+		TEXT("TransitionFX.ForceClear"),
 		TEXT("Forcefully clears any active transition and resets input."),
 		FConsoleCommandDelegate::CreateUObject(this, &UTransitionManagerSubsystem::ForceClear),
 		ECVF_Default
@@ -52,7 +52,7 @@ UMaterialInterface* UTransitionManagerSubsystem::GetDefaultMasterMaterial()
 
 void UTransitionManagerSubsystem::Deinitialize()
 {
-	IConsoleManager::Get().UnregisterConsoleObject(TEXT("TransitionFX.Clear"));
+	IConsoleManager::Get().UnregisterConsoleObject(TEXT("TransitionFX.ForceClear"));
 
 	EffectPool.Empty();
 
