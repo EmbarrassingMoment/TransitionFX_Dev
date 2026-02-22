@@ -1,11 +1,13 @@
 // Copyright Kurorekishi. All Rights Reserved.
 
 #include "TransitionBlueprintLibrary.h"
+#include "Engine/GameInstance.h"
+#include "Engine/LatentActionManager.h"
+#include "LatentActions.h"
 #include "TransitionFXConfig.h"
 #include "TransitionManagerSubsystem.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
-#include "Engine/LatentActionManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "PostProcessTransitionEffect.h"
 #include "TransitionPreset.h"
