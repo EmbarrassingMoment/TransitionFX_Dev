@@ -95,9 +95,10 @@ public:
 	 * @param WorldContextObject The world context object.
 	 * @param LevelName The name of the level to open.
 	 * @param Preset The transition preset to use.
+	 * @param Duration The duration of the transition (applies to both fade out and fade in).
 	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
-	static void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset);
+	static void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
 
 	/**
 	 * Applies an easing function to the given alpha value.

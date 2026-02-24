@@ -108,7 +108,7 @@ public:
 	 * Persists state across level transitions.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
-	void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset);
+	void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
 
 public:
 	/** Triggered when a transition starts. */
@@ -181,6 +181,7 @@ private:
 	// Level Transition State
 	bool bAutoReverseOnLevelLoad = false;
 	FName PendingLevelName;
+	float PendingDuration = 1.0f;
 
 	UPROPERTY()
 	TObjectPtr<UTransitionPreset> PendingPreset;

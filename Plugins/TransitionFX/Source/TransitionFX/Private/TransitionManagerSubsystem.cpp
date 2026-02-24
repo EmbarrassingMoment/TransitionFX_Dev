@@ -180,7 +180,7 @@ void UTransitionManagerSubsystem::AsyncLoadTransitionPresets(const TArray<TSoftO
 	}));
 }
 
-void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset)
+void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration)
 {
 	if (!Preset)
 	{
@@ -190,14 +190,26 @@ void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldCo
 
 	PendingLevelName = LevelName;
 	PendingPreset = Preset;
+	PendingDuration = Duration;
 	bAutoReverseOnLevelLoad = true;
 
 	// Ensure we don't have stale bindings
 	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
 	OnTransitionCompleted.AddDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
 
+	// Calculate PlaySpeed based on duration
+	float PlaySpeed = 1.0f;
+	if (Duration <= TransitionFXConfig::MinDurationThreshold)
+	{
+		PlaySpeed = TransitionFXConfig::FallbackPlaySpeed;
+	}
+	else
+	{
+		PlaySpeed = Preset->DefaultDuration / Duration;
+	}
+
 	// Start Fade Out (Forward, Invert=False)
-	StartTransition(Preset, ETransitionMode::Forward, 1.0f, false);
+	StartTransition(Preset, ETransitionMode::Forward, PlaySpeed, false);
 }
 
 void UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished()
@@ -216,8 +228,19 @@ void UTransitionManagerSubsystem::OnPostLoadMapWithWorld(UWorld* LoadedWorld)
 
 		if (PendingPreset)
 		{
+			// Calculate PlaySpeed based on duration
+			float PlaySpeed = 1.0f;
+			if (PendingDuration <= TransitionFXConfig::MinDurationThreshold)
+			{
+				PlaySpeed = TransitionFXConfig::FallbackPlaySpeed;
+			}
+			else
+			{
+				PlaySpeed = PendingPreset->DefaultDuration / PendingDuration;
+			}
+
 			// Start Fade In (Forward, Invert=True to go from Black to Clear if using standard mask behavior)
-			StartTransition(PendingPreset, ETransitionMode::Forward, 1.0f, true);
+			StartTransition(PendingPreset, ETransitionMode::Forward, PlaySpeed, true);
 		}
 	}
 }
