@@ -30,6 +30,8 @@ void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	// Preload default assets to avoid hitching during gameplay
 	GetDefaultFadePreset();
 	GetDefaultMasterMaterial();
+
+	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UTransitionManagerSubsystem::OnPostLoadMapWithWorld);
 }
 
 UTransitionPreset* UTransitionManagerSubsystem::GetDefaultFadePreset()
@@ -53,6 +55,8 @@ UMaterialInterface* UTransitionManagerSubsystem::GetDefaultMasterMaterial()
 void UTransitionManagerSubsystem::Deinitialize()
 {
 	IConsoleManager::Get().UnregisterConsoleObject(TEXT("TransitionFX.ForceClear"));
+
+	FCoreUObjectDelegates::PostLoadMapWithWorld.RemoveAll(this);
 
 	EffectPool.Empty();
 
@@ -174,6 +178,48 @@ void UTransitionManagerSubsystem::AsyncLoadTransitionPresets(const TArray<TSoftO
 		// Notify Completion
 		OnComplete.ExecuteIfBound();
 	}));
+}
+
+void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset)
+{
+	if (!Preset)
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransition: Null Preset provided. Falling back to default fade."));
+		Preset = GetDefaultFadePreset();
+	}
+
+	PendingLevelName = LevelName;
+	PendingPreset = Preset;
+	bAutoReverseOnLevelLoad = true;
+
+	// Ensure we don't have stale bindings
+	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
+	OnTransitionCompleted.AddDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
+
+	// Start Fade Out (Forward, Invert=False)
+	StartTransition(Preset, ETransitionMode::Forward, 1.0f, false);
+}
+
+void UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished()
+{
+	// One-shot callback
+	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
+
+	UGameplayStatics::OpenLevel(this, PendingLevelName);
+}
+
+void UTransitionManagerSubsystem::OnPostLoadMapWithWorld(UWorld* LoadedWorld)
+{
+	if (bAutoReverseOnLevelLoad)
+	{
+		bAutoReverseOnLevelLoad = false;
+
+		if (PendingPreset)
+		{
+			// Start Fade In (Forward, Invert=True to go from Black to Clear if using standard mask behavior)
+			StartTransition(PendingPreset, ETransitionMode::Forward, 1.0f, true);
+		}
+	}
 }
 
 void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets)

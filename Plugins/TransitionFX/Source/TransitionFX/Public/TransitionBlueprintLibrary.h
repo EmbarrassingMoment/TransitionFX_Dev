@@ -89,6 +89,17 @@ public:
 	static void QuickFadeFromBlack(const UObject* WorldContextObject, float Duration = 1.0f);
 
 	/**
+	 * Handles the sequence of "Fade Out -> Open Level -> Fade In".
+	 * Persists state across level transitions.
+	 *
+	 * @param WorldContextObject The world context object.
+	 * @param LevelName The name of the level to open.
+	 * @param Preset The transition preset to use.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
+	static void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset);
+
+	/**
 	 * Applies an easing function to the given alpha value.
 	 *
 	 * @param Alpha The input alpha value (0.0 to 1.0).
