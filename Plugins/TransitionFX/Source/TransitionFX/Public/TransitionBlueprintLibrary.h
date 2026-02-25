@@ -101,6 +101,19 @@ public:
 	static void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
 
 	/**
+	 * Plays a transition, waits for it to complete (Fade Out), then opens the specified level.
+	 * The new level will automatically play the reverse transition (Fade In).
+	 *
+	 * @param WorldContextObject The world context object.
+	 * @param LevelName The name of the level to open.
+	 * @param Preset The transition preset to use.
+	 * @param Duration The duration of the transition (applies to both fade out and fade in).
+	 * @param LatentInfo The latent action info.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", Duration = "1.0"))
+	static void OpenLevelWithTransitionAndWait(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration, struct FLatentActionInfo LatentInfo);
+
+	/**
 	 * Applies an easing function to the given alpha value.
 	 *
 	 * @param Alpha The input alpha value (0.0 to 1.0).
