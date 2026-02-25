@@ -52,6 +52,34 @@ public:
 #endif
 };
 
+class FInfiniteWaitAction : public FPendingLatentAction
+{
+public:
+	FLatentActionInfo ExecutionFunction;
+	int32 OutputLink;
+	FWeakObjectPtr CallbackTarget;
+
+	FInfiniteWaitAction(const FLatentActionInfo& InLatentInfo)
+		: ExecutionFunction(InLatentInfo)
+		, OutputLink(InLatentInfo.Linkage)
+		, CallbackTarget(InLatentInfo.CallbackTarget)
+	{
+	}
+
+	virtual void UpdateOperation(FLatentResponse& Response) override
+	{
+		// Always return false to keep waiting until the world is destroyed (level change)
+		Response.FinishAndTriggerIf(false, ExecutionFunction.ExecutionFunction, OutputLink, CallbackTarget);
+	}
+
+#if WITH_EDITOR
+	virtual FString GetDescription() const override
+	{
+		return TEXT("Waiting for Level Load...");
+	}
+#endif
+};
+
 void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
@@ -256,6 +284,31 @@ void UTransitionBlueprintLibrary::OpenLevelWithTransition(const UObject* WorldCo
 			if (UTransitionManagerSubsystem* Manager = GameInstance->GetSubsystem<UTransitionManagerSubsystem>())
 			{
 				Manager->OpenLevelWithTransition(WorldContextObject, LevelName, Preset, Duration);
+			}
+		}
+	}
+}
+
+void UTransitionBlueprintLibrary::OpenLevelWithTransitionAndWait(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration, struct FLatentActionInfo LatentInfo)
+{
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	{
+		if (UGameInstance* GameInstance = World->GetGameInstance())
+		{
+			if (UTransitionManagerSubsystem* Manager = GameInstance->GetSubsystem<UTransitionManagerSubsystem>())
+			{
+				FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
+				if (LatentActionManager.FindExistingAction<FInfiniteWaitAction>(LatentInfo.CallbackTarget, LatentInfo.UUID) == nullptr)
+				{
+					// Register for resumption in the next level
+					Manager->RegisterLatentActionForLevelLoad(LatentInfo);
+
+					// Start sequence
+					Manager->OpenLevelWithTransition(WorldContextObject, LevelName, Preset, Duration);
+
+					// Add blocking action
+					LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FInfiniteWaitAction(LatentInfo));
+				}
 			}
 		}
 	}

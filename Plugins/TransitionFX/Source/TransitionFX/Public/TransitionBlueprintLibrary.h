@@ -101,6 +101,21 @@ public:
 	static void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
 
 	/**
+	 * Latent version of OpenLevelWithTransition.
+	 * Waits for the full sequence: Fade Out -> Level Load -> Fade In.
+	 * NOTE: The Completed pin will only fire if the calling object persists across level transitions (e.g. GameInstance).
+	 * If called from an Actor that is destroyed during level load, the Completed pin will not be executed.
+	 *
+	 * @param WorldContextObject The world context object.
+	 * @param LevelName The name of the level to open.
+	 * @param Preset The transition preset to use.
+	 * @param Duration The duration of the transition.
+	 * @param LatentInfo The latent action info.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject"))
+	static void OpenLevelWithTransitionAndWait(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration, struct FLatentActionInfo LatentInfo);
+
+	/**
 	 * Applies an easing function to the given alpha value.
 	 *
 	 * @param Alpha The input alpha value (0.0 to 1.0).

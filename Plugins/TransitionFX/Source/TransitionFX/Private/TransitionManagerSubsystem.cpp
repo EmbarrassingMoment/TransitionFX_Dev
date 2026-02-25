@@ -15,10 +15,39 @@
 #include "TransitionBlueprintLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "TransitionFX.h"
+#include "LatentActions.h"
+
+class FResumeLevelTransitionAction : public FPendingLatentAction
+{
+public:
+	FLatentActionInfo ExecutionFunction;
+	int32 OutputLink;
+	FWeakObjectPtr CallbackTarget;
+
+	FResumeLevelTransitionAction(const FLatentActionInfo& InLatentInfo)
+		: ExecutionFunction(InLatentInfo)
+		, OutputLink(InLatentInfo.Linkage)
+		, CallbackTarget(InLatentInfo.CallbackTarget)
+	{
+	}
+
+	virtual void UpdateOperation(FLatentResponse& Response) override
+	{
+		Response.FinishAndTriggerIf(true, ExecutionFunction.ExecutionFunction, OutputLink, CallbackTarget);
+	}
+
+#if WITH_EDITOR
+	virtual FString GetDescription() const override
+	{
+		return TEXT("Resuming Level Transition...");
+	}
+#endif
+};
 
 void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	bHasPendingLatentInfo = false;
 
 	IConsoleManager::Get().RegisterConsoleCommand(
 		TEXT("TransitionFX.ForceClear"),
@@ -103,6 +132,20 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 				bHasCompleted = true;
 				OnTransitionCompleted.Broadcast();
 
+				if (bHasPendingLatentInfo)
+				{
+					if (UObject* Target = PendingLatentTarget.Get())
+					{
+						// Target is alive (persistent object)
+						if (UWorld* World = GetWorld())
+						{
+							FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
+							LatentActionManager.AddNewAction(Target, PendingLatentInfo.UUID, new FResumeLevelTransitionAction(PendingLatentInfo));
+						}
+					}
+					bHasPendingLatentInfo = false;
+				}
+
 				if (bAutoStopOnReverseComplete)
 				{
 					StopTransition();
@@ -139,6 +182,13 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 bool UTransitionManagerSubsystem::IsTickable() const
 {
 	return bIsTransitionActive;
+}
+
+void UTransitionManagerSubsystem::RegisterLatentActionForLevelLoad(const FLatentActionInfo& LatentInfo)
+{
+	PendingLatentInfo = LatentInfo;
+	PendingLatentTarget = LatentInfo.CallbackTarget;
+	bHasPendingLatentInfo = true;
 }
 
 void UTransitionManagerSubsystem::AsyncLoadTransitionPresets(const TArray<TSoftObjectPtr<UTransitionPreset>>& SoftPresets, FTransitionPreloadCompleteDelegate OnComplete)

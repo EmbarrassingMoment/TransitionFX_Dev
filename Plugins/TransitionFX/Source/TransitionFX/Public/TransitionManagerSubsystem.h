@@ -7,6 +7,7 @@
 #include "Tickable.h"
 #include "TransitionPreset.h"
 #include "ITransitionEffect.h"
+#include "Engine/LatentActionManager.h"
 #include "TransitionManagerSubsystem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionStarted);
@@ -110,6 +111,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
 	void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
 
+	/**
+	 * Registers a latent action to be triggered after the level load and subsequent fade-in is complete.
+	 * This is used by the latent OpenLevelWithTransitionAndWait node.
+	 */
+	void RegisterLatentActionForLevelLoad(const FLatentActionInfo& LatentInfo);
+
 public:
 	/** Triggered when a transition starts. */
 	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
@@ -185,6 +192,11 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UTransitionPreset> PendingPreset;
+
+	/** Pending latent action info to resume after level load. */
+	FLatentActionInfo PendingLatentInfo;
+	TWeakObjectPtr<UObject> PendingLatentTarget;
+	bool bHasPendingLatentInfo;
 
 	UFUNCTION()
 	void OnLevelTransitionFadeOutFinished();
