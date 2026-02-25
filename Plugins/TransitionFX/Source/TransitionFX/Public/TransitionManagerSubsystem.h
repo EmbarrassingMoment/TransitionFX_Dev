@@ -103,6 +103,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX|System")
 	void AsyncLoadTransitionPresets(const TArray<TSoftObjectPtr<UTransitionPreset>>& SoftPresets, FTransitionPreloadCompleteDelegate OnComplete);
 
+	/**
+	 * Handles the sequence of "Fade Out -> Open Level -> Fade In".
+	 * Persists state across level transitions.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
+	void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
+
 public:
 	/** Triggered when a transition starts. */
 	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
@@ -170,4 +177,17 @@ private:
 	/** Cached default master material to avoid runtime loading. */
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInterface> DefaultMasterMaterial;
+
+	// Level Transition State
+	bool bAutoReverseOnLevelLoad = false;
+	FName PendingLevelName;
+	float PendingDuration = 1.0f;
+
+	UPROPERTY()
+	TObjectPtr<UTransitionPreset> PendingPreset;
+
+	UFUNCTION()
+	void OnLevelTransitionFadeOutFinished();
+
+	void OnPostLoadMapWithWorld(UWorld* LoadedWorld);
 };

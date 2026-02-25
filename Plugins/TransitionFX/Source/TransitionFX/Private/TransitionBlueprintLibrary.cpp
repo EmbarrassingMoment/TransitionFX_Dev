@@ -247,6 +247,20 @@ void UTransitionBlueprintLibrary::QuickFadeFromBlack(const UObject* WorldContext
 	QuickFadeInternal(WorldContextObject, Duration, ETransitionMode::Reverse);
 }
 
+void UTransitionBlueprintLibrary::OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration)
+{
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	{
+		if (UGameInstance* GameInstance = World->GetGameInstance())
+		{
+			if (UTransitionManagerSubsystem* Manager = GameInstance->GetSubsystem<UTransitionManagerSubsystem>())
+			{
+				Manager->OpenLevelWithTransition(WorldContextObject, LevelName, Preset, Duration);
+			}
+		}
+	}
+}
+
 void UTransitionBlueprintLibrary::PlayTransitionAndWaitWithDuration(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float Duration, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
