@@ -52,6 +52,83 @@ public:
 #endif
 };
 
+class FOpenLevelTransitionLatentAction : public FPendingLatentAction
+{
+public:
+	FLatentActionInfo ExecutionFunction;
+	int32 OutputLink;
+	FWeakObjectPtr CallbackTarget;
+	TWeakObjectPtr<UTransitionManagerSubsystem> Manager;
+	FName LevelName;
+	TWeakObjectPtr<const UObject> WorldContextObject;
+
+	FOpenLevelTransitionLatentAction(const FLatentActionInfo& InLatentInfo, UTransitionManagerSubsystem* InManager, FName InLevelName, UTransitionPreset* Preset, float Duration, const UObject* InWorldContextObject)
+		: ExecutionFunction(InLatentInfo)
+		, OutputLink(InLatentInfo.Linkage)
+		, CallbackTarget(InLatentInfo.CallbackTarget)
+		, Manager(InManager)
+		, LevelName(InLevelName)
+		, WorldContextObject(InWorldContextObject)
+	{
+		if (Manager.IsValid())
+		{
+			// Prepare Auto Reverse for the NEXT level
+			Manager->PrepareAutoReverseTransition(Preset, Duration);
+
+			// Calculate PlaySpeed
+			float PlaySpeed = 1.0f;
+			if (Duration <= TransitionFXConfig::MinDurationThreshold)
+			{
+				PlaySpeed = TransitionFXConfig::FallbackPlaySpeed;
+			}
+			else
+			{
+				PlaySpeed = Preset->DefaultDuration / Duration;
+			}
+
+			// Start Fade Out (Forward, Invert=False)
+			Manager->StartTransition(Preset, ETransitionMode::Forward, PlaySpeed, false);
+		}
+	}
+
+	virtual void UpdateOperation(FLatentResponse& Response) override
+	{
+		bool bFinished = false;
+
+		if (Manager.IsValid())
+		{
+			// If transition finished (reached 1.0), we trigger OpenLevel
+			if (Manager->IsCurrentTransitionFinished())
+			{
+				if (const UObject* WorldContext = WorldContextObject.Get())
+				{
+					UGameplayStatics::OpenLevel(WorldContext, LevelName);
+				}
+				bFinished = true;
+			}
+			// Safety: If transition was stopped manually, we should abort to avoid hanging
+			else if (!Manager->IsTransitionPlaying())
+			{
+				UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransitionAndWait: Transition stopped manually. Aborting level load."));
+				bFinished = true;
+			}
+		}
+		else
+		{
+			bFinished = true;
+		}
+
+		Response.FinishAndTriggerIf(bFinished, ExecutionFunction.ExecutionFunction, OutputLink, CallbackTarget);
+	}
+
+#if WITH_EDITOR
+	virtual FString GetDescription() const override
+	{
+		return FString::Printf(TEXT("Opening Level %s after transition..."), *LevelName.ToString());
+	}
+#endif
+};
+
 void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
@@ -256,6 +333,28 @@ void UTransitionBlueprintLibrary::OpenLevelWithTransition(const UObject* WorldCo
 			if (UTransitionManagerSubsystem* Manager = GameInstance->GetSubsystem<UTransitionManagerSubsystem>())
 			{
 				Manager->OpenLevelWithTransition(WorldContextObject, LevelName, Preset, Duration);
+			}
+		}
+	}
+}
+
+void UTransitionBlueprintLibrary::OpenLevelWithTransitionAndWait(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration, struct FLatentActionInfo LatentInfo)
+{
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	{
+		FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
+		if (LatentActionManager.FindExistingAction<FOpenLevelTransitionLatentAction>(LatentInfo.CallbackTarget, LatentInfo.UUID) == nullptr)
+		{
+			UTransitionManagerSubsystem* Manager = World->GetGameInstance()->GetSubsystem<UTransitionManagerSubsystem>();
+			if (Manager)
+			{
+				if (!Preset)
+				{
+					UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransitionAndWait: Null Preset provided. Falling back to default fade."));
+					Preset = Manager->GetDefaultFadePreset();
+				}
+
+				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FOpenLevelTransitionLatentAction(LatentInfo, Manager, LevelName, Preset, Duration, WorldContextObject));
 			}
 		}
 	}

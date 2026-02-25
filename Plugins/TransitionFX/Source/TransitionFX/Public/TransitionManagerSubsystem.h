@@ -110,6 +110,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
 	void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
 
+	/**
+	 * Prepares the subsystem for an auto-reverse transition on the next level load.
+	 * Does NOT start any transition immediately.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
+	void PrepareAutoReverseTransition(UTransitionPreset* Preset, float Duration = 1.0f);
+
 public:
 	/** Triggered when a transition starts. */
 	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")

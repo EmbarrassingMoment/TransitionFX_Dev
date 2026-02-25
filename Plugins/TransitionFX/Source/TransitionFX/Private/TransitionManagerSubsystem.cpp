@@ -212,6 +212,13 @@ void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldCo
 	StartTransition(Preset, ETransitionMode::Forward, PlaySpeed, false);
 }
 
+void UTransitionManagerSubsystem::PrepareAutoReverseTransition(UTransitionPreset* Preset, float Duration)
+{
+	PendingPreset = Preset;
+	PendingDuration = Duration;
+	bAutoReverseOnLevelLoad = true;
+}
+
 void UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished()
 {
 	// One-shot callback
