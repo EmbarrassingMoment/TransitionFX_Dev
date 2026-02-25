@@ -132,19 +132,7 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 				bHasCompleted = true;
 				OnTransitionCompleted.Broadcast();
 
-				if (bHasPendingLatentInfo)
-				{
-					if (UObject* Target = PendingLatentTarget.Get())
-					{
-						// Target is alive (persistent object)
-						if (UWorld* World = GetWorld())
-						{
-							FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
-							LatentActionManager.AddNewAction(Target, PendingLatentInfo.UUID, new FResumeLevelTransitionAction(PendingLatentInfo));
-						}
-					}
-					bHasPendingLatentInfo = false;
-				}
+				TryResumePendingLatentAction();
 
 				if (bAutoStopOnReverseComplete)
 				{
@@ -174,6 +162,7 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 			{
 				bHasCompleted = true;
 				OnTransitionCompleted.Broadcast();
+				TryResumePendingLatentAction();
 			}
 		}
 	}
@@ -182,6 +171,25 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 bool UTransitionManagerSubsystem::IsTickable() const
 {
 	return bIsTransitionActive;
+}
+
+void UTransitionManagerSubsystem::TryResumePendingLatentAction()
+{
+	if (!bHasPendingLatentInfo)
+	{
+		return;
+	}
+
+	if (UObject* Target = PendingLatentTarget.Get())
+	{
+		// Target is alive (persistent object)
+		if (UWorld* World = GetWorld())
+		{
+			FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
+			LatentActionManager.AddNewAction(Target, PendingLatentInfo.UUID, new FResumeLevelTransitionAction(PendingLatentInfo));
+		}
+	}
+	bHasPendingLatentInfo = false;
 }
 
 void UTransitionManagerSubsystem::RegisterLatentActionForLevelLoad(const FLatentActionInfo& LatentInfo)

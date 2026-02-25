@@ -134,6 +134,9 @@ private:
 	/** Internal helper to return an effect to the pool with size checks. */
 	void ReturnEffectToPool(UObject* EffectObj);
 
+	/** Internal helper to resume pending latent action if exists. */
+	void TryResumePendingLatentAction();
+
 	/** Pool of available transition effects. */
 	UPROPERTY(Transient)
 	TMap<UClass*, FTransitionEffectPool> EffectPool;
