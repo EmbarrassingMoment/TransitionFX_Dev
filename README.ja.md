@@ -104,7 +104,7 @@ TransitionFXは、**インディーや小規模チームの開発者が、制作
 | **Linear Wipe** | 方向性のあるワイプ（角度調整可能）。画面の端から端まで正確に覆います。 | ![Linear](https://via.placeholder.com/320x180/000000/FFFFFF?text=Linear+Wipe) |
 | **Wavy Curtain** | Linear Wipeに似ていますが、カーテンのような波打つ境界線を持つ方向性ワイプです。 | ![WavyCurtain](https://via.placeholder.com/320x180/000000/FFFFFF?text=Wavy+Curtain) |
 | **Radial Wipe** | 時計のような放射状ワイプ。滑らかなエッジと開始角度の調整をサポート。 | ![Radial](https://via.placeholder.com/320x180/000000/FFFFFF?text=Radial+Wipe) |
-| **Box Grid** | 画面がグリッド状に分割され、ブロックが中央から波のように拡大します。 | ![BoxGrid](https://via.placeholder.com/320x180/000000/FFFFFF?text=Box+Grid) |
+| **Tiles** | 画面がグリッド状に分割され、ブロックが中央から波のように拡大します。 | ![Tiles](https://via.placeholder.com/320x180/000000/FFFFFF?text=Tiles) |
 | **Polka Dots** | 拡大する円（ハーフトーンパターン）の波が画面を覆います。ポップでモダンな外観。 | ![PolkaDots](https://via.placeholder.com/320x180/000000/FFFFFF?text=Polka+Dots) |
 | **Blinds** | スタイリッシュなストライプ/ベネチアンブラインド効果。ストライプが拡大・結合して画面を覆います。 | ![Blinds](https://via.placeholder.com/320x180/000000/FFFFFF?text=Blinds) |
 | **Spiral** | 中央に渦巻く催眠的なスパイラル効果。回転スピンと開始角度を調整可能。 | ![Spiral](https://via.placeholder.com/320x180/000000/FFFFFF?text=Spiral) |
