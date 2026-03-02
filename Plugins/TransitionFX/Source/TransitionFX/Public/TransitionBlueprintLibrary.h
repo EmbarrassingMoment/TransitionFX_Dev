@@ -31,7 +31,7 @@ public:
 	 * @param OverrideParams Optional parameters to override material properties.
 	 * @param LatentInfo The latent action info.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "Mode"))
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "Mode", PlaySpeed = "1.0"))
 	static void PlayTransitionAndWait(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo);
 
 	/**
@@ -45,7 +45,7 @@ public:
 	 * @param OverrideParams Optional parameters to override material properties.
 	 * @param LatentInfo The latent action info.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "Mode"))
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "Mode", PlaySpeed = "1.0"))
 	static void PlayRandomTransitionAndWait(const UObject* WorldContextObject, const TArray<UTransitionPreset*>& Presets, ETransitionMode Mode, float PlaySpeed, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo);
 
 	/**
