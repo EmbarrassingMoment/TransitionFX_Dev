@@ -102,6 +102,7 @@ TransitionFXは、**インディーや小規模チームの開発者が、制作
 | **Diamond** | 中央に向かって閉じるダイヤモンド型のワイプ。レトロなスタイル。 | ![Diamond](https://via.placeholder.com/320x180/000000/FFFFFF?text=Diamond) |
 | **Box** | 中央から拡大するシンプルな正方形。基本的な幾何学的トランジション。 | ![Box](https://via.placeholder.com/320x180/000000/FFFFFF?text=Box) |
 | **Linear Wipe** | 方向性のあるワイプ（角度調整可能）。画面の端から端まで正確に覆います。 | ![Linear](https://via.placeholder.com/320x180/000000/FFFFFF?text=Linear+Wipe) |
+| **Split** | 画面中央から真っ二つに割れて開くスタイリッシュなワイプ。分割する角度（水平、垂直、斜めなど）を自由に調整可能です。 | ![Split](https://via.placeholder.com/320x180/000000/FFFFFF?text=Split) |
 | **Wavy Curtain** | Linear Wipeに似ていますが、カーテンのような波打つ境界線を持つ方向性ワイプです。 | ![WavyCurtain](https://via.placeholder.com/320x180/000000/FFFFFF?text=Wavy+Curtain) |
 | **Radial Wipe** | 時計のような放射状ワイプ。滑らかなエッジと開始角度の調整をサポート。 | ![Radial](https://via.placeholder.com/320x180/000000/FFFFFF?text=Radial+Wipe) |
 | **Tiles** | 画面がグリッド状に分割され、ブロックが中央から波のように拡大します。 | ![Tiles](https://via.placeholder.com/320x180/000000/FFFFFF?text=Tiles) |
