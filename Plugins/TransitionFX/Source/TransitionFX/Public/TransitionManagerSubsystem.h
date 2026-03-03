@@ -54,7 +54,7 @@ public:
 	virtual void Deinitialize() override;
 
 	/** Starts a transition with the given preset. */
-	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (PlaySpeed = "1.0"))
 	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward, float PlaySpeed = 1.0f, bool bInvert = false, bool bHoldAtMax = false, FTransitionParameters OverrideParams = FTransitionParameters());
 
 	/** Releases the hold at max progress, allowing the transition to complete. */
@@ -62,8 +62,8 @@ public:
 	void ReleaseHold();
 
 	/** Sets the playback speed multiplier. */
-	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
-	void SetPlaySpeed(float NewSpeed);
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (PlaySpeed = "1.0"))
+	void SetPlaySpeed(float PlaySpeed = 1.0f);
 
 	/** Reverses the current transition. */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")

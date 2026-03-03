@@ -513,9 +513,9 @@ void UTransitionManagerSubsystem::ReleaseHold()
 	}
 }
 
-void UTransitionManagerSubsystem::SetPlaySpeed(float NewSpeed)
+void UTransitionManagerSubsystem::SetPlaySpeed(float PlaySpeed)
 {
-	CurrentPlaySpeed = FMath::Max(0.01f, NewSpeed);
+	CurrentPlaySpeed = FMath::Max(0.01f, PlaySpeed);
 }
 
 void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
