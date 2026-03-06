@@ -11,7 +11,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "PostProcessTransitionEffect.h"
 #include "TransitionPreset.h"
-#include "UObject/Package.h"
 #include "Curves/CurveFloat.h"
 #include "TransitionFX.h"
 
@@ -206,10 +205,13 @@ float UTransitionBlueprintLibrary::ApplyEasing(float Alpha, ETransitionEasing Ea
 		return x == 1.0f ? 1.0f : 1.0f - FMath::Pow(2.0f, -10.0f * x);
 
 	case ETransitionEasing::EaseInOutExpo:
+	{
 		if (x == 0.0f) return 0.0f;
 		if (x == 1.0f) return 1.0f;
-		if ((x *= 2.0f) < 1.0f) return 0.5f * FMath::Pow(2.0f, 10.0f * (x - 1.0f));
-		return 0.5f * (2.0f - FMath::Pow(2.0f, -10.0f * (x - 1.0f)));
+		const float x2 = x * 2.0f;
+		if (x2 < 1.0f) return 0.5f * FMath::Pow(2.0f, 10.0f * (x2 - 1.0f));
+		return 0.5f * (2.0f - FMath::Pow(2.0f, -10.0f * (x2 - 1.0f)));
+	}
 
 	case ETransitionEasing::EaseOutElastic:
 	{
@@ -278,7 +280,7 @@ static void QuickFadeInternal(const UObject* WorldContextObject, float Duration,
 		{
 			if (UTransitionManagerSubsystem* Manager = GameInstance->GetSubsystem<UTransitionManagerSubsystem>())
 			{
-				UTransitionPreset* TempPreset = NewObject<UTransitionPreset>(GetTransientPackage());
+				UTransitionPreset* TempPreset = NewObject<UTransitionPreset>(Manager);
 
 				// Try to load default Fade data to get the material
 				UTransitionPreset* FadeData = Manager->GetDefaultFadePreset();
@@ -388,6 +390,8 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWaitWithDuration(const UObjec
 				else
 				{
 					UE_LOG(LogTransitionFX, Warning, TEXT("PlayTransitionAndWaitWithDuration called with null preset."));
+					// Finish immediately to prevent Blueprint from hanging
+					LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionLatentAction(LatentInfo, nullptr));
 				}
 			}
 		}
