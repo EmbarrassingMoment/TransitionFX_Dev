@@ -54,7 +54,7 @@ TransitionFXは、**インディーや小規模チームの開発者が、制作
 コンテンツブラウザで右クリック > `Miscellaneous` (その他) > `Data Asset`。
 `TransitionPreset`クラスを選択し、名前を付けます（例：`DA_FadeBlack`）。
 *   **Effect Class:** `PostProcessTransitionEffect`を選択します。
-*   **Transition Material:** `M_Transition_Master`（または`Iris`、`Diamond`）を選択します。
+*   **Transition Material:** `M_Transition_Master`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。
 *   **Default Duration:** 秒単位で時間を設定します（例：`1.0`）。
 *   **Progress Curve:** (任意) トランジションのイージングを制御するためのフロートカーブを設定します。
 *   **bAutoBlockInput:** トランジション中のプレイヤー入力を自動的に無効にするには `True` に設定します。
@@ -80,6 +80,7 @@ TransitionFXは、**インディーや小規模チームの開発者が、制作
 `TransitionManagerSubsystem`内の以下のイベントにバインドできます：
 *   **OnTransitionStarted:** トランジション開始時に発火します。
 *   **OnTransitionCompleted:** トランジション終了時に発火します。
+*   **OnTransitionHoldStarted:** トランジションが最大進行度（1.0）でホールド（一時停止）されたときに発火します（`bHoldAtMax` が true の場合）。
 
 ## API Reference
 `TransitionManagerSubsystem`は、高度な制御のためにいくつかの呼び出し可能な関数を提供します：
@@ -116,6 +117,8 @@ TransitionFXは、**インディーや小規模チームの開発者が、制作
 | **Texture Mask** | グレースケールテクスチャを使用してトランジションの順序を決定します（黒=開始、白=終了）。パラメータオーバーライドによるカスタムマスクテクスチャをサポート。 | ![TextureMask](https://via.placeholder.com/320x180/000000/FFFFFF?text=Texture+Mask) |
 | **TV Switch Off** | ブラウン管テレビの電源を切った時のように、画面が上下に潰れて横線になり、最後に中央の点に向かって消滅するレトロなエフェクトです。 | ![TVSwitchOff](https://via.placeholder.com/320x180/000000/FFFFFF?text=TV+Switch+Off) |
 | **Hexagon** | SFテイストのハニカム（六角形）ワイプです。画面中央から波紋のように、各セルが滑らかに縮小して消滅します。 | ![Hexagon](https://via.placeholder.com/320x180/000000/FFFFFF?text=Hexagon) |
+| **Checkerboard** | 画面をチェッカーボード（市松模様）パターンで分割し、各タイルが拡大して画面を覆います。クラシックなレトロ風。 | ![Checkerboard](https://via.placeholder.com/320x180/000000/FFFFFF?text=Checkerboard) |
+| **Pixelate** | 画面の解像度を徐々に下げていくピクセル化エフェクト。フェードアウトまでモザイクが進行します。 | ![Pixelate](https://via.placeholder.com/320x180/000000/FFFFFF?text=Pixelate) |
 
 > **💡 Texture Mask（テクスチャマスク）のヒント:**
 > マスクテクスチャをインポートする際は、正確な値を読み取るために **sRGB** のチェックを外し（sRGBオフ）、Compression Settings（圧縮設定）を **Masks (no sRGB)** または **Grayscale** に設定してください。
