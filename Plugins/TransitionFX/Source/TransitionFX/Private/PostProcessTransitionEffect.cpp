@@ -1,4 +1,4 @@
-// Copyright Kurorekishi. All Rights Reserved.
+// Copyright (c) 2026 Kurorekishi (EmbarrassingMoment).
 
 #include "PostProcessTransitionEffect.h"
 #include "TransitionPreset.h"
