@@ -64,6 +64,65 @@ Stops the currently playing transition.
 #### Force Clear
 Forcefully clears all transition states and resets input. Used for emergency stops or resetting.
 
+### Level Transition Nodes
+
+#### Open Level With Transition
+Handles the sequence of "Fade Out -> Open Level -> Fade In". The fade-in on the new level side is automatically started via `PostLoadMapWithWorld`.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **World Context Object** | Input | The world context object. |
+| **Level Name** | Input | The name of the level to open. |
+| **Preset** | Input | The transition preset to use. |
+| **Duration** | Input | The duration of the transition (applies to both fade out and fade in). Default: 1.0. |
+
+#### Open Level With Transition And Wait
+Plays a transition (Fade Out), waits for it to complete, then opens the specified level. The new level will automatically play the reverse transition (Fade In).
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **World Context Object** | Input | The world context object. |
+| **Level Name** | Input | The name of the level to open. |
+| **Preset** | Input | The transition preset to use. |
+| **Duration** | Input | The duration of the transition (applies to both fade out and fade in). |
+| **Completed** | Output | Executed after the fade-out transition completes and `OpenLevel` is called. |
+
+### Utility Nodes
+
+#### Quick Fade To Black
+Quickly fades the screen to black using the default `DA_FadeToBlack` preset.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **World Context Object** | Input | The world context object. |
+| **Duration** | Input | The duration of the fade (Default: 1.0). |
+
+#### Quick Fade From Black
+Quickly fades the screen from black using the default `DA_FadeToBlack` preset.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **World Context Object** | Input | The world context object. |
+| **Duration** | Input | The duration of the fade (Default: 1.0). |
+
+#### Is Any Transition Playing
+Returns true if any transition is currently playing.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **World Context Object** | Input | The world context object. |
+| **Return Value** | Output | True if a transition is active. |
+
+#### Apply Easing
+Applies an easing function to the given alpha value. A pure math node useful for custom animation curves.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **Alpha** | Input | The input alpha value (0.0 to 1.0). |
+| **Easing Type** | Input | The easing type to apply (`ETransitionEasing`). |
+| **Custom Curve** | Input | Optional custom curve to use if EasingType is `Custom`. |
+| **Return Value** | Output | The eased alpha value. |
+
 ## 3. C++ API Reference
 
 From C++, you control transitions via the `UTransitionManagerSubsystem`.
@@ -95,6 +154,62 @@ Stops the current transition.
 
 ```cpp
 void StopTransition();
+```
+
+#### ReverseTransition
+Reverses the playback direction of the current transition (e.g., from Fade Out to Fade In).
+
+```cpp
+void ReverseTransition(bool bAutoStop = true);
+```
+
+#### SetPlaySpeed
+Changes the playback speed multiplier dynamically.
+
+```cpp
+void SetPlaySpeed(float PlaySpeed = 1.0f);
+```
+
+#### GetCurrentProgress
+Returns the current progress of the transition (0.0 to 1.0).
+
+```cpp
+float GetCurrentProgress() const;
+```
+
+#### IsTransitionPlaying
+Returns true if a transition is currently active.
+
+```cpp
+bool IsTransitionPlaying() const;
+```
+
+#### IsCurrentTransitionFinished
+Returns true if the current transition has finished its hold phase or completed. Useful for polling.
+
+```cpp
+bool IsCurrentTransitionFinished() const;
+```
+
+#### ForceClear
+Forcefully clears any active transition and resets input. Used for emergency recovery.
+
+```cpp
+void ForceClear();
+```
+
+#### OpenLevelWithTransition
+Handles the sequence of "Fade Out -> Open Level -> Fade In". Persists state across level transitions.
+
+```cpp
+void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
+```
+
+#### PrepareAutoReverseTransition
+Prepares the subsystem for an auto-reverse transition on the next level load. Does NOT start any transition immediately.
+
+```cpp
+void PrepareAutoReverseTransition(UTransitionPreset* Preset, float Duration = 1.0f);
 ```
 
 ### Delegates / Event Dispatchers

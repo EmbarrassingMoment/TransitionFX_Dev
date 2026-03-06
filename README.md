@@ -29,7 +29,7 @@ It renders high-quality transitions based on SDF (Signed Distance Field) math wi
 Right-click in Content Browser > `Miscellaneous` > `Data Asset`.
 Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
 *   **Effect Class:** Select `PostProcessTransitionEffect`.
-*   **Transition Material:** Select `M_Transition_Master` (or `Iris`, `Diamond`).
+*   **Transition Material:** Select `M_Transition_Master` (or `M_Transition_Iris`, `M_Transition_Diamond`, etc.).
 *   **Default Duration:** Set duration in seconds (e.g., `1.0`).
 *   **Progress Curve:** (Optional) Set a float curve to control the ease-in/out of the transition.
 *   **bAutoBlockInput:** Set to `True` to automatically disable player input during the transition.
@@ -52,6 +52,7 @@ Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.
 You can bind to the following events in the `TransitionManagerSubsystem`:
 *   **OnTransitionStarted:** Fired when the transition begins.
 *   **OnTransitionCompleted:** Fired when the transition finishes.
+*   **OnTransitionHoldStarted:** Fired when the transition holds at max progress (1.0) (if `bHoldAtMax` is true).
 
 ## API Reference
 The `TransitionManagerSubsystem` provides several callable functions for advanced control:
@@ -88,6 +89,8 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Texture Mask** | Uses a grayscale texture to determine the transition order (Black=Start, White=End). Supports custom mask textures via Parameter Overrides. | ![TextureMask](https://via.placeholder.com/320x180/000000/FFFFFF?text=Texture+Mask) |
 | **TV Switch Off** | A retro CRT TV turn-off effect. Collapses vertically into a line, then horizontally into a point. | ![TVSwitchOff](https://via.placeholder.com/320x180/000000/FFFFFF?text=TV+Switch+Off) |
 | **Hexagon** | A sci-fi style honeycomb wipe. A wave of hexagonal cells smoothly shrinks into their centers. | ![Hexagon](https://via.placeholder.com/320x180/000000/FFFFFF?text=Hexagon) |
+| **Checkerboard** | A checkerboard pattern that tiles the screen and expands to cover it. Classic retro feel. | ![Checkerboard](https://via.placeholder.com/320x180/000000/FFFFFF?text=Checkerboard) |
+| **Pixelate** | A pixelation effect that progressively reduces the screen resolution until it fades out. | ![Pixelate](https://via.placeholder.com/320x180/000000/FFFFFF?text=Pixelate) |
 
 > **💡 Tip for Texture Masks:**
 > When importing your mask textures, ensure you uncheck **sRGB** and set Compression Settings to **Masks (no sRGB)** or **Grayscale** for accurate value reading.

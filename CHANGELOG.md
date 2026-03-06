@@ -17,11 +17,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `UPostProcessTransitionEffect` — Concrete post-process volume based transition effect
 - `UTransitionBlueprintLibrary` — Blueprint function library with latent action support
 
-**Built-in Transition Effects (19 effects)**
+**Built-in Transition Effects (23 effects)**
 - Fade, Iris, Heart Iris, Flower Iris, Diamond, Box
-- Linear Wipe, Wavy Curtain, Radial Wipe, Cross Wipe, Zoom Wipe
-- Box Grid, Polka Dots, Blinds, Spiral, Random Tiles, Wind
-- Texture Mask, TV Switch Off
+- Linear Wipe, Split, Wavy Curtain, Radial Wipe, Cross Wipe, Zoom Wipe
+- Tiles, Polka Dots, Blinds, Spiral, Random Tiles, Wind
+- Texture Mask, TV Switch Off, Hexagon, Checkerboard, Pixelate
 
 **Easing System**
 - Linear, Sine (In/Out/InOut), Cubic (In/Out/InOut), Expo (In/Out/InOut)
@@ -42,7 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `PreloadTransitionPresets` — Synchronous shader warmup to prevent first-frame hitching
 - `AsyncLoadTransitionPresets` — Async asset loading with automatic shader warmup and completion callback
 - Object pooling for transition effect instances (capped at 3 per class)
-- `TransitionFX.Clear` console command for emergency recovery
+- `TransitionFX.ForceClear` console command for emergency recovery
 
 **Event System**
 - `OnTransitionStarted` — Fired when transition begins
@@ -60,4 +60,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 **Documentation**
 - README in English and Japanese
 - API Reference in English and Japanese (`API_Reference_EN.md`, `API_Reference_JP.md`)
+- Quick Start Guide in English and Japanese (`QUICKSTART_EN.md`, `QUICKSTART_JP.md`)
 - Performance rationale document (`PERFORMANCE_RATIONALE.md`)

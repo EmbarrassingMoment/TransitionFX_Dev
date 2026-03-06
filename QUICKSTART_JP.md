@@ -31,7 +31,7 @@ TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition
 | プロパティ | 説明 | 推奨値 |
 | :--- | :--- | :--- |
 | `Effect Class` | 使用するエフェクトのクラス | `PostProcessTransitionEffect` |
-| `Transition Material` | 遷移に使用するマテリアル | `M_Transition_Master`、`M_Iris`、`M_Diamond` など |
+| `Transition Material` | 遷移に使用するマテリアル | `M_Transition_Master`、`M_Transition_Iris`、`M_Transition_Diamond` など |
 | `Default Duration` | 遷移の長さ（秒） | `1.0` |
 
 **動作設定**

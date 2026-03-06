@@ -31,7 +31,7 @@ First, create this asset.
 | Property | Description | Recommended Value |
 | :--- | :--- | :--- |
 | `Effect Class` | The class of the effect to use | `PostProcessTransitionEffect` |
-| `Transition Material` | The material used for the transition | `M_Transition_Master`, `M_Iris`, `M_Diamond`, etc. |
+| `Transition Material` | The material used for the transition | `M_Transition_Master`, `M_Transition_Iris`, `M_Transition_Diamond`, etc. |
 | `Default Duration` | The length of the transition (seconds) | `1.0` |
 
 **Behavior Settings**
