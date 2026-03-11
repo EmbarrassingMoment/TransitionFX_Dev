@@ -15,7 +15,7 @@ It renders high-quality transitions based on SDF (Signed Distance Field) math wi
     *   **Forward / Reverse:** Control "Fade Out" and "Fade In" with a single preset using Transition Modes.
     *   **Speed Control:** Dynamic playback speed adjustment via `SetPlaySpeed`.
 *   **🔊 Audio Integration:** Synchronize Sound Effects (SFX) with your transitions. The system manages the audio lifecycle, ensuring sounds play on start and stop automatically if the transition is cancelled.
-*   **Event System:** Access `OnTransitionStarted` and `OnTransitionCompleted` delegates for precise gameplay logic timing.
+*   **Event System:** Access `OnTransitionStarted`, `OnTransitionCompleted`, and `OnTransitionHoldStarted` delegates for precise gameplay logic timing.
 *   **Blueprint Support:** Includes a Latent Action node (`PlayTransitionAndWait`) for clean and easy scripting.
 
 ## Installation

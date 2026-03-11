@@ -40,7 +40,7 @@ TransitionFXは、**インディーや小規模チームの開発者が、制作
     *   **Forward / Reverse:** トランジションモードを使用して、単一のプリセットで「フェードアウト」と「フェードイン」を制御します。
     *   **Speed Control:** `SetPlaySpeed`による動的な再生速度調整が可能です。
 *   **🔊 Audio Integration:** 効果音（SFX）をトランジションと同期させます。システムがオーディオのライフサイクルを管理し、開始時に再生し、トランジションがキャンセルされた場合は自動的に停止します。
-*   **Event System:** `OnTransitionStarted`と`OnTransitionCompleted`デリゲートを使用して、正確なゲームプレイロジックのタイミングを取得できます。
+*   **Event System:** `OnTransitionStarted`、`OnTransitionCompleted`、`OnTransitionHoldStarted`デリゲートを使用して、正確なゲームプレイロジックのタイミングを取得できます。
 *   **Blueprint Support:** クリーンで簡単なスクリプティングのためのLatent Actionノード（`PlayTransitionAndWait`）が含まれています。
 
 ## Installation

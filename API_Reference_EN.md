@@ -56,13 +56,59 @@ Randomly selects one preset from the provided list and plays it.
 | **Override Params** | Input | Structure for dynamically overriding material parameters. |
 | **Completed** | Output | Executed after the transition is complete. |
 
-### Control Nodes
+### Subsystem Nodes
+
+The following nodes are called directly on the `UTransitionManagerSubsystem` instance. Get the subsystem via `Get Game Instance Subsystem`.
+
+#### Start Transition
+Starts a transition with the given preset. Unlike the Latent Action nodes, this does not wait for completion. Supports `bHoldAtMax` for loading screen workflows.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **Preset** | Input | The transition preset (`UTransitionPreset`) to use. |
+| **Mode** | Input | Transition mode (`Forward`: Fade Out/0→1, `Reverse`: Fade In/1→0). |
+| **Play Speed** | Input | Playback speed multiplier (Default: 1.0). |
+| **bInvert** | Input | Whether to invert the mask. |
+| **bHold At Max** | Input | If true, the transition holds at progress 1.0 instead of completing. |
+| **Override Params** | Input | Structure for dynamically overriding material parameters (`FTransitionParameters`). |
 
 #### Stop Transition
 Stops the currently playing transition.
 
 #### Force Clear
 Forcefully clears all transition states and resets input. Used for emergency stops or resetting.
+
+#### Reverse Transition
+Reverses the playback direction of the current transition (e.g., from Fade Out to Fade In). If `bAutoStop` is true (default), the transition will automatically stop when the reverse completes.
+
+#### Set Play Speed
+Changes the playback speed multiplier dynamically.
+
+#### Release Hold
+Releases the hold at max progress, allowing a held transition to complete. Used with the `bHoldAtMax` workflow.
+
+### Query Nodes
+
+#### Get Current Progress
+Returns the current progress of the transition (0.0 to 1.0). Available on the `TransitionManagerSubsystem`.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **Return Value** | Output | The current transition progress (0.0 to 1.0). |
+
+#### Is Transition Playing
+Returns true if a transition is currently active. Available on the `TransitionManagerSubsystem`.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **Return Value** | Output | True if a transition is active. |
+
+#### Is Current Transition Finished
+Returns true if the current transition has finished its hold phase or completed. Useful for polling. Available on the `TransitionManagerSubsystem`.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **Return Value** | Output | True if the transition has finished. |
 
 ### Level Transition Nodes
 
@@ -123,6 +169,23 @@ Applies an easing function to the given alpha value. A pure math node useful for
 | **Custom Curve** | Input | Optional custom curve to use if EasingType is `Custom`. |
 | **Return Value** | Output | The eased alpha value. |
 
+### System Nodes
+
+#### Preload Transition Presets
+Pre-compiles shaders for the given presets to prevent first-frame hitching. Available on the `TransitionManagerSubsystem`.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **Presets** | Input | Array of transition presets to preload. |
+
+#### Async Load Transition Presets
+Asynchronously loads presets from Soft Object References and warms up their shaders. Available on the `TransitionManagerSubsystem`.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **Soft Presets** | Input | Array of soft object references to transition presets. |
+| **On Complete** | Output | Delegate fired when loading and shader warmup is complete. |
+
 ## 3. C++ API Reference
 
 From C++, you control transitions via the `UTransitionManagerSubsystem`.
@@ -154,6 +217,13 @@ Stops the current transition.
 
 ```cpp
 void StopTransition();
+```
+
+#### ReleaseHold
+Releases the hold at max progress, allowing a held transition to complete. Used after `StartTransition` with `bHoldAtMax = true`.
+
+```cpp
+void ReleaseHold();
 ```
 
 #### ReverseTransition
