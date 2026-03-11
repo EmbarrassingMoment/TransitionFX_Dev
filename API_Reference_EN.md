@@ -18,6 +18,9 @@ Primary functionality is provided via `UTransitionBlueprintLibrary`, implemented
 These nodes wait for the transition to complete before proceeding.
 
 #### Play Transition And Wait
+
+<!-- IMAGE: api_play_transition_node.png - Blueprint screenshot of the Play Transition And Wait latent action node -->
+
 Plays a transition using the specified preset and waits for completion.
 
 | Pin Name | Type | Description |
@@ -113,6 +116,9 @@ Returns true if the current transition has finished its hold phase or completed.
 ### Level Transition Nodes
 
 #### Open Level With Transition
+
+<!-- IMAGE: api_open_level_node.png - Blueprint screenshot of the Open Level With Transition node -->
+
 Handles the sequence of "Fade Out -> Open Level -> Fade In". The fade-in on the new level side is automatically started via `PostLoadMapWithWorld`.
 
 | Pin Name | Type | Description |
@@ -136,6 +142,9 @@ Plays a transition (Fade Out), waits for it to complete, then opens the specifie
 ### Utility Nodes
 
 #### Quick Fade To Black
+
+<!-- IMAGE: api_quick_fade_node.png - Blueprint screenshot of the Quick Fade To Black / Quick Fade From Black nodes -->
+
 Quickly fades the screen to black using the default `DA_FadeToBlack` preset.
 
 | Pin Name | Type | Description |
@@ -172,6 +181,9 @@ Applies an easing function to the given alpha value. A pure math node useful for
 ### System Nodes
 
 #### Preload Transition Presets
+
+<!-- IMAGE: api_preload_node.png - Blueprint screenshot of the Preload Transition Presets node -->
+
 Pre-compiles shaders for the given presets to prevent first-frame hitching. Available on the `TransitionManagerSubsystem`.
 
 | Pin Name | Type | Description |

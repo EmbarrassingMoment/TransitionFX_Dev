@@ -1,5 +1,7 @@
 # TransitionFX
 
+<!-- IMAGE: hero_banner.gif - プラグインのヒーロー画像（複数エフェクトのモンタージュ/GIF） -->
+
 ## Description
 TransitionFXは、Unreal Engine 5向けの軽量かつ高度なプロシージャル画面遷移システムです。
 テクスチャを使用せず、SDF（Signed Distance Field）計算に基づいた高品質なトランジションを描画し、ブループリントからたった1つのノードで実装可能です。
@@ -48,11 +50,16 @@ TransitionFXは、**インディーや小規模チームの開発者が、制作
 2.  `TransitionFX`フォルダをプロジェクトの`Plugins`ディレクトリに配置します。
 3.  エディタのプラグインウィンドウで`TransitionFX`を有効にします。
 
+<!-- IMAGE: install_enable_plugin.png - Plugins ウィンドウで TransitionFX を有効にするスクリーンショット -->
+
 ## Quick Start
 
 ### 1. Create a Preset
 コンテンツブラウザで右クリック > `Miscellaneous` (その他) > `Data Asset`。
 `TransitionPreset`クラスを選択し、名前を付けます（例：`DA_FadeBlack`）。
+
+<!-- IMAGE: quickstart_create_data_asset.png - Content Browser で Data Asset を作成する手順のスクリーンショット -->
+
 *   **Effect Class:** `PostProcessTransitionEffect`を選択します。
 *   **Transition Material:** `M_Transition_Master`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。
 *   **Default Duration:** 秒単位で時間を設定します（例：`1.0`）。
@@ -62,8 +69,12 @@ TransitionFXは、**インディーや小規模チームの開発者が、制作
 *   **Priority:** レンダリングの優先順位を設定します（デフォルト：1000）。
 *   **Audio:** (任意) 再生するサウンドアセットを割り当てます。ボリュームとピッチの制御が含まれます。
 
+<!-- IMAGE: quickstart_preset_settings.png - TransitionPreset の設定パネル（プロパティ一覧）のスクリーンショット -->
+
 ### 2. Call from Blueprint
 レベルブループリントまたはGameInstanceで`Play Transition And Wait`ノードを使用します。
+
+<!-- IMAGE: quickstart_bp_play_node.png - Play Transition And Wait ノードの Blueprint スクリーンショット -->
 
 *   **Fade Out (Forward):**
     `Play Transition And Wait` (Preset: `DA_FadeBlack`, Mode: `Forward`, Speed: `1.0`, Invert: `False`)
@@ -96,29 +107,29 @@ TransitionFXは、**インディーや小規模チームの開発者が、制作
 
 | Effect Name | Description | Preview |
 | :--- | :--- | :--- |
-| **Fade** | 標準的な不透明度のフェード。シンプルで軽量です。 | ![Fade](https://via.placeholder.com/320x180/000000/FFFFFF?text=Fade) |
-| **Iris** | 中央に向かって閉じるクラシックな円形ワイプ。アスペクト比補正済み。 | ![Iris](https://via.placeholder.com/320x180/000000/FFFFFF?text=Iris) |
-| **Heart Iris** | プロシージャルSDFを使用したハート型のアイリスワイプ。 | ![HeartIris](https://via.placeholder.com/320x180/000000/FFFFFF?text=Heart+Iris) |
-| **Flower Iris** | 丸い花びらを持つ花形のアイリスワイプ。花びらの数や形状（鋭さ）を調整可能。 | ![FlowerIris](https://via.placeholder.com/320x180/000000/FFFFFF?text=Flower+Iris) |
-| **Diamond** | 中央に向かって閉じるダイヤモンド型のワイプ。レトロなスタイル。 | ![Diamond](https://via.placeholder.com/320x180/000000/FFFFFF?text=Diamond) |
-| **Box** | 中央から拡大するシンプルな正方形。基本的な幾何学的トランジション。 | ![Box](https://via.placeholder.com/320x180/000000/FFFFFF?text=Box) |
-| **Linear Wipe** | 方向性のあるワイプ（角度調整可能）。画面の端から端まで正確に覆います。 | ![Linear](https://via.placeholder.com/320x180/000000/FFFFFF?text=Linear+Wipe) |
-| **Split** | 画面中央から真っ二つに割れて開くスタイリッシュなワイプ。分割する角度（水平、垂直、斜めなど）を自由に調整可能です。 | ![Split](https://via.placeholder.com/320x180/000000/FFFFFF?text=Split) |
-| **Wavy Curtain** | Linear Wipeに似ていますが、カーテンのような波打つ境界線を持つ方向性ワイプです。 | ![WavyCurtain](https://via.placeholder.com/320x180/000000/FFFFFF?text=Wavy+Curtain) |
-| **Radial Wipe** | 時計のような放射状ワイプ。滑らかなエッジと開始角度の調整をサポート。 | ![Radial](https://via.placeholder.com/320x180/000000/FFFFFF?text=Radial+Wipe) |
-| **Tiles** | 画面がグリッド状に分割され、ブロックが中央から波のように拡大します。 | ![Tiles](https://via.placeholder.com/320x180/000000/FFFFFF?text=Tiles) |
-| **Polka Dots** | 拡大する円（ハーフトーンパターン）の波が画面を覆います。ポップでモダンな外観。 | ![PolkaDots](https://via.placeholder.com/320x180/000000/FFFFFF?text=Polka+Dots) |
-| **Blinds** | スタイリッシュなストライプ/ベネチアンブラインド効果。ストライプが拡大・結合して画面を覆います。 | ![Blinds](https://via.placeholder.com/320x180/000000/FFFFFF?text=Blinds) |
-| **Spiral** | 中央に渦巻く催眠的なスパイラル効果。回転スピンと開始角度を調整可能。 | ![Spiral](https://via.placeholder.com/320x180/000000/FFFFFF?text=Spiral) |
-| **Random Tiles** | プロシージャルノイズを使用して、グリッドタイルがランダムな順序で現れる確率的なトランジション。 | ![RandomTiles](https://via.placeholder.com/320x180/000000/FFFFFF?text=Random+Tiles) |
-| **Wind** | ストリークノイズを伴う方向性ワイプで、風が画像を吹き飛ばすような表現。 | ![Wind](https://via.placeholder.com/320x180/000000/FFFFFF?text=Wind) |
-| **Cross Wipe** | 十字の形が中央から拡大し、画像を四隅に押しやって消滅させます。 | ![CrossWipe](https://via.placeholder.com/320x180/000000/FFFFFF?text=Cross+Wipe) |
-| **Zoom Wipe** | フェードアウトしながらシーンを内側に歪めてズームする方向性ワイプ。 | ![ZoomWipe](https://via.placeholder.com/320x180/000000/FFFFFF?text=Zoom+Wipe) |
-| **Texture Mask** | グレースケールテクスチャを使用してトランジションの順序を決定します（黒=開始、白=終了）。パラメータオーバーライドによるカスタムマスクテクスチャをサポート。 | ![TextureMask](https://via.placeholder.com/320x180/000000/FFFFFF?text=Texture+Mask) |
-| **TV Switch Off** | ブラウン管テレビの電源を切った時のように、画面が上下に潰れて横線になり、最後に中央の点に向かって消滅するレトロなエフェクトです。 | ![TVSwitchOff](https://via.placeholder.com/320x180/000000/FFFFFF?text=TV+Switch+Off) |
-| **Hexagon** | SFテイストのハニカム（六角形）ワイプです。画面中央から波紋のように、各セルが滑らかに縮小して消滅します。 | ![Hexagon](https://via.placeholder.com/320x180/000000/FFFFFF?text=Hexagon) |
-| **Checkerboard** | 画面をチェッカーボード（市松模様）パターンで分割し、各タイルが拡大して画面を覆います。クラシックなレトロ風。 | ![Checkerboard](https://via.placeholder.com/320x180/000000/FFFFFF?text=Checkerboard) |
-| **Pixelate** | 画面の解像度を徐々に下げていくピクセル化エフェクト。フェードアウトまでモザイクが進行します。 | ![Pixelate](https://via.placeholder.com/320x180/000000/FFFFFF?text=Pixelate) |
+| **Fade** | 標準的な不透明度のフェード。シンプルで軽量です。 | <!-- IMAGE: effect_fade.gif --> |
+| **Iris** | 中央に向かって閉じるクラシックな円形ワイプ。アスペクト比補正済み。 | <!-- IMAGE: effect_iris.gif --> |
+| **Heart Iris** | プロシージャルSDFを使用したハート型のアイリスワイプ。 | <!-- IMAGE: effect_heart_iris.gif --> |
+| **Flower Iris** | 丸い花びらを持つ花形のアイリスワイプ。花びらの数や形状（鋭さ）を調整可能。 | <!-- IMAGE: effect_flower_iris.gif --> |
+| **Diamond** | 中央に向かって閉じるダイヤモンド型のワイプ。レトロなスタイル。 | <!-- IMAGE: effect_diamond.gif --> |
+| **Box** | 中央から拡大するシンプルな正方形。基本的な幾何学的トランジション。 | <!-- IMAGE: effect_box.gif --> |
+| **Linear Wipe** | 方向性のあるワイプ（角度調整可能）。画面の端から端まで正確に覆います。 | <!-- IMAGE: effect_linear_wipe.gif --> |
+| **Split** | 画面中央から真っ二つに割れて開くスタイリッシュなワイプ。分割する角度（水平、垂直、斜めなど）を自由に調整可能です。 | <!-- IMAGE: effect_split.gif --> |
+| **Wavy Curtain** | Linear Wipeに似ていますが、カーテンのような波打つ境界線を持つ方向性ワイプです。 | <!-- IMAGE: effect_wavy_curtain.gif --> |
+| **Radial Wipe** | 時計のような放射状ワイプ。滑らかなエッジと開始角度の調整をサポート。 | <!-- IMAGE: effect_radial_wipe.gif --> |
+| **Tiles** | 画面がグリッド状に分割され、ブロックが中央から波のように拡大します。 | <!-- IMAGE: effect_tiles.gif --> |
+| **Polka Dots** | 拡大する円（ハーフトーンパターン）の波が画面を覆います。ポップでモダンな外観。 | <!-- IMAGE: effect_polka_dots.gif --> |
+| **Blinds** | スタイリッシュなストライプ/ベネチアンブラインド効果。ストライプが拡大・結合して画面を覆います。 | <!-- IMAGE: effect_blinds.gif --> |
+| **Spiral** | 中央に渦巻く催眠的なスパイラル効果。回転スピンと開始角度を調整可能。 | <!-- IMAGE: effect_spiral.gif --> |
+| **Random Tiles** | プロシージャルノイズを使用して、グリッドタイルがランダムな順序で現れる確率的なトランジション。 | <!-- IMAGE: effect_random_tiles.gif --> |
+| **Wind** | ストリークノイズを伴う方向性ワイプで、風が画像を吹き飛ばすような表現。 | <!-- IMAGE: effect_wind.gif --> |
+| **Cross Wipe** | 十字の形が中央から拡大し、画像を四隅に押しやって消滅させます。 | <!-- IMAGE: effect_cross_wipe.gif --> |
+| **Zoom Wipe** | フェードアウトしながらシーンを内側に歪めてズームする方向性ワイプ。 | <!-- IMAGE: effect_zoom_wipe.gif --> |
+| **Texture Mask** | グレースケールテクスチャを使用してトランジションの順序を決定します（黒=開始、白=終了）。パラメータオーバーライドによるカスタムマスクテクスチャをサポート。 | <!-- IMAGE: effect_texture_mask.gif --> |
+| **TV Switch Off** | ブラウン管テレビの電源を切った時のように、画面が上下に潰れて横線になり、最後に中央の点に向かって消滅するレトロなエフェクトです。 | <!-- IMAGE: effect_tv_switch_off.gif --> |
+| **Hexagon** | SFテイストのハニカム（六角形）ワイプです。画面中央から波紋のように、各セルが滑らかに縮小して消滅します。 | <!-- IMAGE: effect_hexagon.gif --> |
+| **Checkerboard** | 画面をチェッカーボード（市松模様）パターンで分割し、各タイルが拡大して画面を覆います。クラシックなレトロ風。 | <!-- IMAGE: effect_checkerboard.gif --> |
+| **Pixelate** | 画面の解像度を徐々に下げていくピクセル化エフェクト。フェードアウトまでモザイクが進行します。 | <!-- IMAGE: effect_pixelate.gif --> |
 
 > **💡 Texture Mask（テクスチャマスク）のヒント:**
 > マスクテクスチャをインポートする際は、正確な値を読み取るために **sRGB** のチェックを外し（sRGBオフ）、Compression Settings（圧縮設定）を **Masks (no sRGB)** または **Grayscale** に設定してください。
@@ -135,6 +146,8 @@ Transition Presetの`EasingType`プロパティを使用して、トランジシ
 
 *注: `Transition Curve` スロットは、`Custom` が選択された場合にのみ表示されます。*
 
+<!-- IMAGE: easing_curves.png - イージングタイプ比較チャート（Linear, Sine, Cubic, Expo, Bounce, Elastic） -->
+
 これらのカーブの視覚化については、[easings.net](https://easings.net/) を参照してください。
 
 ## 🚀 Performance Tips (パフォーマンス最適化)
@@ -148,6 +161,8 @@ Transition Presetの`EasingType`プロパティを使用して、トランジシ
 **使用方法:**
 **GameInstance Init** や **Level BeginPlay** などの安全な場所で `PreloadTransitionPresets` を呼び出します。
 この関数に、最も頻繁に使用するトランジションプリセットの配列を渡します。
+
+<!-- IMAGE: performance_preload_bp.png - GameInstance Init での PreloadTransitionPresets ノードの Blueprint スクリーンショット -->
 
 ```cpp
 // C++ Example

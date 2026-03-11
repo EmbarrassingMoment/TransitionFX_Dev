@@ -24,6 +24,8 @@ First, create this asset.
 2. Select `TransitionPreset` from the class list
 3. Set the asset name (e.g., `DA_FadeToBlack`, `DA_Iris`, etc.)
 
+<!-- IMAGE: quickstart_create_data_asset.png - Screenshot of Content Browser showing the Data Asset creation flow -->
+
 ### Settings
 
 **Basic Settings (Required)**
@@ -51,6 +53,8 @@ First, create this asset.
 | `Transition Sound` | The Sound asset to play when the transition starts |
 | `Sound Volume` | Volume (default: `1.0`) |
 | `Sound Pitch` | Pitch (default: `1.0`) |
+
+<!-- IMAGE: quickstart_preset_settings.png - Screenshot of the TransitionPreset detail panel showing all properties -->
 
 ### Example Setting: Simple Fade Out
 
@@ -85,6 +89,8 @@ Unreal Engine compiles shaders **the first time they are used**. If nothing is d
 **Blueprint**
 
 Call the node in the `Init` event of the `GameInstance`, or in `BeginPlay` of the first level.
+
+<!-- IMAGE: quickstart_preload_bp.png - Blueprint screenshot of PreloadTransitionPresets node in GameInstance Init -->
 
 ```
 Event Init (GameInstance)
@@ -153,6 +159,8 @@ Both fade-out and fade-in use the same preset, switched via the `Mode` pin.
 
 ### Basic Pattern: Fade Out → Processing → Fade In
 
+<!-- IMAGE: quickstart_fadeout_fadein_bp.png - Blueprint graph showing Fade Out → Processing → Fade In pattern -->
+
 This is the most common configuration. Darken the screen, perform the processing, and return with a fade-in.
 
 ```
@@ -202,6 +210,8 @@ Play Random Transition And Wait
 ```
 
 ### When Making Level Transitions Seamless
+
+<!-- IMAGE: quickstart_open_level_bp.png - Blueprint screenshot of Open Level With Transition And Wait node -->
 
 If you want to complete Fade Out → Open Level → Fade In using a single node, use **`Open Level With Transition And Wait`**.
 
@@ -259,6 +269,8 @@ Normally, a transition completes automatically when progress reaches 1.0, but by
 Once preparations are complete, calling `Release Hold` transitions the Forward transition to the completed state. After that, fade-in is performed by manually calling `Play Transition And Wait` (Mode: Reverse).
 
 ### Implementation Workflow
+
+<!-- IMAGE: quickstart_hold_workflow_bp.png - Blueprint workflow showing bHoldAtMax + ReleaseHold loading screen pattern -->
 
 ```
 [Load Start Event]
@@ -341,6 +353,8 @@ void UMyClass::OnHoldStarted()
 ### Recovery Method 1: Console Command (For Development / QA)
 
 During game execution, open the console window (`@` or `~` key) and enter the following command:
+
+<!-- IMAGE: quickstart_forceclear_console.png - Screenshot of console with TransitionFX.ForceClear command -->
 
 ```
 TransitionFX.ForceClear

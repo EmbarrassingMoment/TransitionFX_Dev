@@ -1,5 +1,7 @@
 # TransitionFX
 
+<!-- IMAGE: hero_banner.gif - Hero banner showing multiple transition effects in action (montage/GIF) -->
+
 ## Description
 TransitionFX is a lightweight and advanced procedural screen transition system for Unreal Engine 5.
 It renders high-quality transitions based on SDF (Signed Distance Field) math without using textures, and can be implemented from Blueprints with just a single node.
@@ -23,11 +25,16 @@ It renders high-quality transitions based on SDF (Signed Distance Field) math wi
 2.  Place the `TransitionFX` folder into your project's `Plugins` directory.
 3.  Enable `TransitionFX` in the editor plugins window.
 
+<!-- IMAGE: install_enable_plugin.png - Screenshot of the Plugins window with TransitionFX enabled -->
+
 ## Quick Start
 
 ### 1. Create a Preset
 Right-click in Content Browser > `Miscellaneous` > `Data Asset`.
 Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
+
+<!-- IMAGE: quickstart_create_data_asset.png - Screenshot of Content Browser showing Data Asset creation flow -->
+
 *   **Effect Class:** Select `PostProcessTransitionEffect`.
 *   **Transition Material:** Select `M_Transition_Master` (or `M_Transition_Iris`, `M_Transition_Diamond`, etc.).
 *   **Default Duration:** Set duration in seconds (e.g., `1.0`).
@@ -37,8 +44,12 @@ Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
 *   **Priority:** Set the rendering priority (default: 1000).
 *   **Audio:** (Optional) Assign a Sound asset to play. Includes Volume and Pitch controls.
 
+<!-- IMAGE: quickstart_preset_settings.png - Screenshot of the TransitionPreset detail panel showing all properties -->
+
 ### 2. Call from Blueprint
 Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.
+
+<!-- IMAGE: quickstart_bp_play_node.png - Screenshot of the Play Transition And Wait Blueprint node -->
 
 *   **Fade Out (Forward):**
     `Play Transition And Wait` (Preset: `DA_FadeBlack`, Mode: `Forward`, Speed: `1.0`)
@@ -68,29 +79,29 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 
 | Effect Name | Description | Preview |
 | :--- | :--- | :--- |
-| **Fade** | Standard opacity fade. Simple and lightweight. | ![Fade](https://via.placeholder.com/320x180/000000/FFFFFF?text=Fade) |
-| **Iris** | Classic circular wipe closing toward the center. Aspect ratio corrected. | ![Iris](https://via.placeholder.com/320x180/000000/FFFFFF?text=Iris) |
-| **Heart Iris** | An iris wipe in the shape of a heart using procedural SDF. | ![HeartIris](https://via.placeholder.com/320x180/000000/FFFFFF?text=Heart+Iris) |
-| **Flower Iris** | An iris wipe in the shape of a flower with rounded petals. The number of petals and the flower's shape (sharpness) are adjustable. | ![FlowerIris](https://via.placeholder.com/320x180/000000/FFFFFF?text=Flower+Iris) |
-| **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | ![Diamond](https://via.placeholder.com/320x180/000000/FFFFFF?text=Diamond) |
-| **Box** | A simple square expanding from the center. Basic geometric transition. | ![Box](https://via.placeholder.com/320x180/000000/FFFFFF?text=Box) |
-| **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | ![Linear](https://via.placeholder.com/320x180/000000/FFFFFF?text=Linear+Wipe) |
-| **Split** | A stylish wipe that splits the screen in half from the center and opens outward. Supports adjustable split angles (horizontal, vertical, diagonal). | ![Split](https://via.placeholder.com/320x180/000000/FFFFFF?text=Split) |
-| **Wavy Curtain** | A directional wipe similar to Linear Wipe, but with an animated wavy boundary like a curtain. | ![WavyCurtain](https://via.placeholder.com/320x180/000000/FFFFFF?text=Wavy+Curtain) |
-| **Radial Wipe** | Clock-like radial wipe. Supports smooth edges and adjustable start angle. | ![Radial](https://via.placeholder.com/320x180/000000/FFFFFF?text=Radial+Wipe) |
-| **Tiles** | The screen is divided into a grid, and blocks expand outward from the center like a wave. | ![Tiles](https://via.placeholder.com/320x180/000000/FFFFFF?text=Tiles) |
-| **Polka Dots** | A wave of expanding circles (halftone pattern) covers the screen. Pop and modern look. | ![PolkaDots](https://via.placeholder.com/320x180/000000/FFFFFF?text=Polka+Dots) |
-| **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | ![Blinds](https://via.placeholder.com/320x180/000000/FFFFFF?text=Blinds) |
-| **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | ![Spiral](https://via.placeholder.com/320x180/000000/FFFFFF?text=Spiral) |
-| **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | ![RandomTiles](https://via.placeholder.com/320x180/000000/FFFFFF?text=Random+Tiles) |
-| **Wind** | A directional wipe with streak noise, simulating wind blowing the image away. | ![Wind](https://via.placeholder.com/320x180/000000/FFFFFF?text=Wind) |
-| **Cross Wipe** | A cross shape expands from the center, pushing the image into the four corners until it vanishes. | ![CrossWipe](https://via.placeholder.com/320x180/000000/FFFFFF?text=Cross+Wipe) |
-| **Zoom Wipe** | A directional wipe that distorts and zooms the scene inward as it fades out. | ![ZoomWipe](https://via.placeholder.com/320x180/000000/FFFFFF?text=Zoom+Wipe) |
-| **Texture Mask** | Uses a grayscale texture to determine the transition order (Black=Start, White=End). Supports custom mask textures via Parameter Overrides. | ![TextureMask](https://via.placeholder.com/320x180/000000/FFFFFF?text=Texture+Mask) |
-| **TV Switch Off** | A retro CRT TV turn-off effect. Collapses vertically into a line, then horizontally into a point. | ![TVSwitchOff](https://via.placeholder.com/320x180/000000/FFFFFF?text=TV+Switch+Off) |
-| **Hexagon** | A sci-fi style honeycomb wipe. A wave of hexagonal cells smoothly shrinks into their centers. | ![Hexagon](https://via.placeholder.com/320x180/000000/FFFFFF?text=Hexagon) |
-| **Checkerboard** | A checkerboard pattern that tiles the screen and expands to cover it. Classic retro feel. | ![Checkerboard](https://via.placeholder.com/320x180/000000/FFFFFF?text=Checkerboard) |
-| **Pixelate** | A pixelation effect that progressively reduces the screen resolution until it fades out. | ![Pixelate](https://via.placeholder.com/320x180/000000/FFFFFF?text=Pixelate) |
+| **Fade** | Standard opacity fade. Simple and lightweight. | <!-- IMAGE: effect_fade.gif --> |
+| **Iris** | Classic circular wipe closing toward the center. Aspect ratio corrected. | <!-- IMAGE: effect_iris.gif --> |
+| **Heart Iris** | An iris wipe in the shape of a heart using procedural SDF. | <!-- IMAGE: effect_heart_iris.gif --> |
+| **Flower Iris** | An iris wipe in the shape of a flower with rounded petals. The number of petals and the flower's shape (sharpness) are adjustable. | <!-- IMAGE: effect_flower_iris.gif --> |
+| **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | <!-- IMAGE: effect_diamond.gif --> |
+| **Box** | A simple square expanding from the center. Basic geometric transition. | <!-- IMAGE: effect_box.gif --> |
+| **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | <!-- IMAGE: effect_linear_wipe.gif --> |
+| **Split** | A stylish wipe that splits the screen in half from the center and opens outward. Supports adjustable split angles (horizontal, vertical, diagonal). | <!-- IMAGE: effect_split.gif --> |
+| **Wavy Curtain** | A directional wipe similar to Linear Wipe, but with an animated wavy boundary like a curtain. | <!-- IMAGE: effect_wavy_curtain.gif --> |
+| **Radial Wipe** | Clock-like radial wipe. Supports smooth edges and adjustable start angle. | <!-- IMAGE: effect_radial_wipe.gif --> |
+| **Tiles** | The screen is divided into a grid, and blocks expand outward from the center like a wave. | <!-- IMAGE: effect_tiles.gif --> |
+| **Polka Dots** | A wave of expanding circles (halftone pattern) covers the screen. Pop and modern look. | <!-- IMAGE: effect_polka_dots.gif --> |
+| **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | <!-- IMAGE: effect_blinds.gif --> |
+| **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | <!-- IMAGE: effect_spiral.gif --> |
+| **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | <!-- IMAGE: effect_random_tiles.gif --> |
+| **Wind** | A directional wipe with streak noise, simulating wind blowing the image away. | <!-- IMAGE: effect_wind.gif --> |
+| **Cross Wipe** | A cross shape expands from the center, pushing the image into the four corners until it vanishes. | <!-- IMAGE: effect_cross_wipe.gif --> |
+| **Zoom Wipe** | A directional wipe that distorts and zooms the scene inward as it fades out. | <!-- IMAGE: effect_zoom_wipe.gif --> |
+| **Texture Mask** | Uses a grayscale texture to determine the transition order (Black=Start, White=End). Supports custom mask textures via Parameter Overrides. | <!-- IMAGE: effect_texture_mask.gif --> |
+| **TV Switch Off** | A retro CRT TV turn-off effect. Collapses vertically into a line, then horizontally into a point. | <!-- IMAGE: effect_tv_switch_off.gif --> |
+| **Hexagon** | A sci-fi style honeycomb wipe. A wave of hexagonal cells smoothly shrinks into their centers. | <!-- IMAGE: effect_hexagon.gif --> |
+| **Checkerboard** | A checkerboard pattern that tiles the screen and expands to cover it. Classic retro feel. | <!-- IMAGE: effect_checkerboard.gif --> |
+| **Pixelate** | A pixelation effect that progressively reduces the screen resolution until it fades out. | <!-- IMAGE: effect_pixelate.gif --> |
 
 > **💡 Tip for Texture Masks:**
 > When importing your mask textures, ensure you uncheck **sRGB** and set Compression Settings to **Masks (no sRGB)** or **Grayscale** for accurate value reading.
@@ -107,6 +118,8 @@ Control how the transition progresses over time using the `EasingType` property 
 
 *Note: The `Transition Curve` slot will only appear when `Custom` is selected.*
 
+<!-- IMAGE: easing_curves.png - Chart comparing all easing types (Linear, Sine, Cubic, Expo, Bounce, Elastic) -->
+
 See [easings.net](https://easings.net/) for visualization of these curves.
 
 ## 🚀 Performance Tips
@@ -120,6 +133,8 @@ To prevent frame drops (hitching) when a transition plays for the first time, yo
 **How to use:**
 Call `PreloadTransitionPresets` in a safe place like **GameInstance Init** or **Level BeginPlay**.
 Pass an array of your most commonly used Transition Presets to this function.
+
+<!-- IMAGE: performance_preload_bp.png - Blueprint screenshot of PreloadTransitionPresets node in GameInstance Init -->
 
 ```cpp
 // C++ Example
