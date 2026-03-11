@@ -33,14 +33,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `PlayRandomTransitionAndWait` — Randomly selects a preset from an array
 - `PlayTransitionAndWaitWithDuration` — Duration override at call site
 - `QuickFadeToBlack` / `QuickFadeFromBlack` — Convenience single-node fades
-- `StopTransition`, `ForceClear`, `ReverseTransition`, `SetPlaySpeed`
-- `IsAnyTransitionPlaying`, `GetCurrentProgress`, `IsCurrentTransitionFinished`
+- `StopTransition`, `ForceClear`, `ReverseTransition`, `SetPlaySpeed`, `ReleaseHold`
+- `IsAnyTransitionPlaying`, `IsTransitionPlaying`, `GetCurrentProgress`, `IsCurrentTransitionFinished`
+- `OpenLevelWithTransition`, `OpenLevelWithTransitionAndWait` — Level transition nodes with auto fade-in
 - `ApplyEasing` — Pure math node for easing calculations
 
 **C++ API**
 - `StartTransition` with `FTransitionParameters` for runtime material parameter overrides
 - `PreloadTransitionPresets` — Synchronous shader warmup to prevent first-frame hitching
 - `AsyncLoadTransitionPresets` — Async asset loading with automatic shader warmup and completion callback
+- `OpenLevelWithTransition` — Seamless level transitions with auto-reverse fade-in
+- `ReleaseHold` — Releases held transitions for loading screen workflows
 - Object pooling for transition effect instances (capped at 3 per class)
 - `TransitionFX.ForceClear` console command for emergency recovery
 
