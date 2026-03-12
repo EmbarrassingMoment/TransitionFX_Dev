@@ -10,6 +10,10 @@
 #include "TransitionFXConfig.h"
 #include "TransitionFX.h"
 
+/**
+ * Creates or reuses a dynamic material instance and post-process volume.
+ * Validates the preset's material and checks for the required "Progress" parameter.
+ */
 void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* Preset)
 {
 	if (!World || !Preset)
@@ -92,6 +96,7 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 	}
 }
 
+/** Sets the Progress scalar parameter on the dynamic material and invokes the virtual extension point. */
 void UPostProcessTransitionEffect::UpdateProgress(float Progress)
 {
 	if (DynamicMaterial)
@@ -101,6 +106,7 @@ void UPostProcessTransitionEffect::UpdateProgress(float Progress)
 	}
 }
 
+/** Disables the post-process volume to hide the effect. The volume and material are kept for reuse. */
 void UPostProcessTransitionEffect::Cleanup()
 {
 	if (SpawnedVolume)
@@ -112,6 +118,7 @@ void UPostProcessTransitionEffect::Cleanup()
 	// Keep DynamicMaterial for potential reuse (or just let it be overwritten in Initialize)
 }
 
+/** Sets the Invert material parameter. The material uses an If node with a 0.5 threshold. */
 void UPostProcessTransitionEffect::SetInvert(bool bInvert)
 {
 	if (DynamicMaterial)
@@ -122,6 +129,7 @@ void UPostProcessTransitionEffect::SetInvert(bool bInvert)
 	}
 }
 
+/** Applies runtime parameter overrides (scalar, vector, texture) to the dynamic material instance. */
 void UPostProcessTransitionEffect::SetParameters(const FTransitionParameters& Params)
 {
 	if (!DynamicMaterial)
@@ -148,6 +156,7 @@ void UPostProcessTransitionEffect::SetParameters(const FTransitionParameters& Pa
 	}
 }
 
+/** Virtual extension point for subclasses to apply additional material parameters each frame. */
 void UPostProcessTransitionEffect::UpdateMaterialParameters(UMaterialInstanceDynamic* MID, float Progress)
 {
 	// Base implementation does nothing. Subclasses can override.

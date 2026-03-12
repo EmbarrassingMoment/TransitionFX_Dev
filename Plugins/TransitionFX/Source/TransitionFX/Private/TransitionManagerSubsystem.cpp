@@ -16,6 +16,7 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "TransitionFX.h"
 
+/** Registers console commands, preloads default assets, and binds the post-load-map delegate. */
 void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -34,6 +35,7 @@ void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UTransitionManagerSubsystem::OnPostLoadMapWithWorld);
 }
 
+/** Lazily loads and caches the default Fade to Black preset from the configured asset path. */
 UTransitionPreset* UTransitionManagerSubsystem::GetDefaultFadePreset()
 {
 	if (!DefaultFadePreset)
@@ -43,6 +45,7 @@ UTransitionPreset* UTransitionManagerSubsystem::GetDefaultFadePreset()
 	return DefaultFadePreset;
 }
 
+/** Lazily loads and caches the default master transition material from the configured asset path. */
 UMaterialInterface* UTransitionManagerSubsystem::GetDefaultMasterMaterial()
 {
 	if (!DefaultMasterMaterial)
@@ -52,6 +55,7 @@ UMaterialInterface* UTransitionManagerSubsystem::GetDefaultMasterMaterial()
 	return DefaultMasterMaterial;
 }
 
+/** Unregisters console commands, removes delegates, and empties the effect pool. */
 void UTransitionManagerSubsystem::Deinitialize()
 {
 	IConsoleManager::Get().UnregisterConsoleObject(TEXT("TransitionFX.ForceClear"));
@@ -63,6 +67,10 @@ void UTransitionManagerSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
+/**
+ * Advances the active transition's progress based on delta time, applies easing,
+ * and handles completion, hold, and reverse logic.
+ */
 void UTransitionManagerSubsystem::Tick(float DeltaTime)
 {
 	if (!bIsTransitionActive || !CurrentPreset)
@@ -136,11 +144,16 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 	}
 }
 
+/** Returns true only when a transition is actively playing. */
 bool UTransitionManagerSubsystem::IsTickable() const
 {
 	return bIsTransitionActive;
 }
 
+/**
+ * Asynchronously streams in soft-referenced presets, then performs synchronous shader warmup.
+ * Fires the OnComplete delegate when all presets are loaded and warmed up.
+ */
 void UTransitionManagerSubsystem::AsyncLoadTransitionPresets(const TArray<TSoftObjectPtr<UTransitionPreset>>& SoftPresets, FTransitionPreloadCompleteDelegate OnComplete)
 {
 	if (SoftPresets.Num() == 0)
@@ -180,6 +193,10 @@ void UTransitionManagerSubsystem::AsyncLoadTransitionPresets(const TArray<TSoftO
 	}));
 }
 
+/**
+ * Orchestrates a "Fade Out -> Open Level -> Fade In" sequence.
+ * Stores level transition state and binds the fade-out completion callback.
+ */
 void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration)
 {
 	if (!Preset)
@@ -212,6 +229,7 @@ void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldCo
 	StartTransition(Preset, ETransitionMode::Forward, PlaySpeed, false);
 }
 
+/** Stores preset and duration for an auto-reverse transition on the next level load without starting playback. */
 void UTransitionManagerSubsystem::PrepareAutoReverseTransition(UTransitionPreset* Preset, float Duration)
 {
 	PendingPreset = Preset;
@@ -219,6 +237,7 @@ void UTransitionManagerSubsystem::PrepareAutoReverseTransition(UTransitionPreset
 	bAutoReverseOnLevelLoad = true;
 }
 
+/** One-shot callback that opens the pending level after the fade-out transition completes. */
 void UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished()
 {
 	// One-shot callback
@@ -227,6 +246,7 @@ void UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished()
 	UGameplayStatics::OpenLevel(this, PendingLevelName);
 }
 
+/** Called after a new level is loaded. Triggers the auto-reverse fade-in if one was prepared. */
 void UTransitionManagerSubsystem::OnPostLoadMapWithWorld(UWorld* LoadedWorld)
 {
 	if (bAutoReverseOnLevelLoad)
@@ -252,6 +272,10 @@ void UTransitionManagerSubsystem::OnPostLoadMapWithWorld(UWorld* LoadedWorld)
 	}
 }
 
+/**
+ * Synchronously creates temporary dynamic material instances for each unique material
+ * to force PSO (Pipeline State Object) compilation and shader cache warmup.
+ */
 void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets)
 {
 	if (Presets.IsEmpty())
@@ -290,6 +314,7 @@ void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransit
 	}
 }
 
+/** Returns a used effect object to the pool, capping at MaxPoolSize to prevent memory bloat. */
 void UTransitionManagerSubsystem::ReturnEffectToPool(UObject* EffectObj)
 {
 	if (!EffectObj)
@@ -312,6 +337,7 @@ void UTransitionManagerSubsystem::ReturnEffectToPool(UObject* EffectObj)
 	}
 }
 
+/** Emergency cleanup: stops the effect, restores player input, stops audio, and resets all state flags. */
 void UTransitionManagerSubsystem::ForceClear()
 {
 	UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: Force Clear Executed."));
@@ -367,26 +393,34 @@ void UTransitionManagerSubsystem::ForceClear()
 	CurrentProgress = 0.0f;
 }
 
+/** Returns true if the completion event has been fired for the current transition. */
 bool UTransitionManagerSubsystem::IsCurrentTransitionFinished() const
 {
 	return bHasCompleted;
 }
 
+/** Returns the current raw (pre-easing) progress value in the range [0.0, 1.0]. */
 float UTransitionManagerSubsystem::GetCurrentProgress() const
 {
 	return CurrentProgress;
 }
 
+/** Returns true if the active transition's preset allows ticking while paused. */
 bool UTransitionManagerSubsystem::IsTickableWhenPaused() const
 {
 	return bIsTransitionActive && CurrentPreset && CurrentPreset->bTickWhenPaused;
 }
 
+/** Returns the stat ID used for profiling this tickable object. */
 TStatId UTransitionManagerSubsystem::GetStatId() const
 {
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UTransitionManagerSubsystem, STATGROUP_Tickables);
 }
 
+/**
+ * Begins a new transition: stops any active one, creates or reuses an effect from the pool,
+ * initializes audio, blocks input if configured, and broadcasts OnTransitionStarted.
+ */
 void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, bool bInvert, bool bHoldAtMax, FTransitionParameters OverrideParams)
 {
 	if (!Preset || !Preset->TransitionMaterial)
@@ -499,6 +533,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	OnTransitionStarted.Broadcast();
 }
 
+/** Releases a held transition, allowing it to proceed to completion. */
 void UTransitionManagerSubsystem::ReleaseHold()
 {
 	if (bIsHolding)
@@ -513,11 +548,13 @@ void UTransitionManagerSubsystem::ReleaseHold()
 	}
 }
 
+/** Updates the playback speed multiplier, clamped to a minimum of 0.01. */
 void UTransitionManagerSubsystem::SetPlaySpeed(float PlaySpeed)
 {
 	CurrentPlaySpeed = FMath::Max(0.01f, PlaySpeed);
 }
 
+/** Switches the current transition to reverse mode, progressing from 1.0 back to 0.0. */
 void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
 {
 	if (!CurrentPreset)
@@ -532,6 +569,7 @@ void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
 	bIsTransitionActive = true;
 }
 
+/** Stops the active transition: cleans up the effect, stops audio, restores input, and resets state. */
 void UTransitionManagerSubsystem::StopTransition()
 {
 	if (!bIsTransitionActive)
@@ -580,6 +618,7 @@ void UTransitionManagerSubsystem::StopTransition()
 	CurrentPreset = nullptr;
 }
 
+/** Returns true if any transition is currently active. */
 bool UTransitionManagerSubsystem::IsTransitionPlaying() const
 {
 	return bIsTransitionActive;

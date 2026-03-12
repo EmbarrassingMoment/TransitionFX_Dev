@@ -14,6 +14,10 @@
 #include "Curves/CurveFloat.h"
 #include "TransitionFX.h"
 
+/**
+ * Latent action that polls the transition manager and completes
+ * when the current transition finishes or the manager becomes invalid.
+ */
 class FTransitionLatentAction : public FPendingLatentAction
 {
 public:
@@ -51,6 +55,10 @@ public:
 #endif
 };
 
+/**
+ * Latent action that starts a fade-out transition, waits for it to finish,
+ * then opens the specified level. Prepares auto-reverse for the new level.
+ */
 class FOpenLevelTransitionLatentAction : public FPendingLatentAction
 {
 public:
@@ -128,6 +136,7 @@ public:
 #endif
 };
 
+/** Starts a transition and registers a latent action that completes when the transition finishes. */
 void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
@@ -145,6 +154,7 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldCont
 	}
 }
 
+/** Selects a random preset from the array and delegates to PlayTransitionAndWait. */
 void UTransitionBlueprintLibrary::PlayRandomTransitionAndWait(const UObject* WorldContextObject, const TArray<UTransitionPreset*>& Presets, ETransitionMode Mode, float PlaySpeed, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
 {
 	if (Presets.IsEmpty())
@@ -170,6 +180,10 @@ void UTransitionBlueprintLibrary::PlayRandomTransitionAndWait(const UObject* Wor
 	PlayTransitionAndWait(WorldContextObject, SelectedPreset, Mode, PlaySpeed, bInvert, OverrideParams, LatentInfo);
 }
 
+/**
+ * Maps a linear alpha value through the specified easing function.
+ * Supports sine, cubic, exponential, elastic, bounce, and custom curve easing.
+ */
 float UTransitionBlueprintLibrary::ApplyEasing(float Alpha, ETransitionEasing EasingType, const UCurveFloat* CustomCurve)
 {
 	// Clamp input
@@ -257,6 +271,7 @@ float UTransitionBlueprintLibrary::ApplyEasing(float Alpha, ETransitionEasing Ea
 	}
 }
 
+/** Queries the transition manager subsystem to check if any transition is active. */
 bool UTransitionBlueprintLibrary::IsAnyTransitionPlaying(const UObject* WorldContextObject)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
@@ -272,6 +287,10 @@ bool UTransitionBlueprintLibrary::IsAnyTransitionPlaying(const UObject* WorldCon
 	return false;
 }
 
+/**
+ * Internal helper that creates a transient preset from the default fade data
+ * and starts a transition in the specified mode with a black color overlay.
+ */
 static void QuickFadeInternal(const UObject* WorldContextObject, float Duration, ETransitionMode Mode)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
@@ -316,16 +335,19 @@ static void QuickFadeInternal(const UObject* WorldContextObject, float Duration,
 	}
 }
 
+/** Convenience function to fade the screen to black (forward direction). */
 void UTransitionBlueprintLibrary::QuickFadeToBlack(const UObject* WorldContextObject, float Duration)
 {
 	QuickFadeInternal(WorldContextObject, Duration, ETransitionMode::Forward);
 }
 
+/** Convenience function to fade the screen from black (reverse direction). */
 void UTransitionBlueprintLibrary::QuickFadeFromBlack(const UObject* WorldContextObject, float Duration)
 {
 	QuickFadeInternal(WorldContextObject, Duration, ETransitionMode::Reverse);
 }
 
+/** Delegates to the manager subsystem to perform a "Fade Out -> Open Level -> Fade In" sequence. */
 void UTransitionBlueprintLibrary::OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
@@ -340,6 +362,7 @@ void UTransitionBlueprintLibrary::OpenLevelWithTransition(const UObject* WorldCo
 	}
 }
 
+/** Starts a fade-out, opens the level when done, and completes the latent action. Falls back to default preset if null. */
 void UTransitionBlueprintLibrary::OpenLevelWithTransitionAndWait(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration, struct FLatentActionInfo LatentInfo)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
@@ -362,6 +385,7 @@ void UTransitionBlueprintLibrary::OpenLevelWithTransitionAndWait(const UObject* 
 	}
 }
 
+/** Converts duration to play speed, starts the transition, and registers a latent action for completion. */
 void UTransitionBlueprintLibrary::PlayTransitionAndWaitWithDuration(const UObject* WorldContextObject, UTransitionPreset* Preset, ETransitionMode Mode, float Duration, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
