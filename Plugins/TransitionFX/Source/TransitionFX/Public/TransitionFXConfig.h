@@ -4,6 +4,10 @@
 
 #include "CoreMinimal.h"
 
+/**
+ * Configuration constants for the TransitionFX plugin.
+ * Contains default asset paths and material parameter names.
+ */
 namespace TransitionFXConfig
 {
 	/** Threshold for duration (in seconds) to treat as nearly zero. */
@@ -18,7 +22,12 @@ namespace TransitionFXConfig
 	/** Default path for the Master Transition Material. */
 	extern TRANSITIONFX_API const TCHAR* const DefaultMasterMaterialPath;
 
+	/** Material parameter name for transition progress (0.0 to 1.0). */
 	extern TRANSITIONFX_API const FName ProgressParamName;
+
+	/** Material parameter name for invert toggle (0.0 or 1.0). */
 	extern TRANSITIONFX_API const FName InvertParamName;
+
+	/** Material parameter name for transition color. */
 	extern TRANSITIONFX_API const FName ColorParamName;
 }

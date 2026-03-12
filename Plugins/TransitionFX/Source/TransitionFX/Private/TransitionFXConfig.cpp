@@ -1,5 +1,10 @@
 // Copyright (c) 2026 Kurorekishi (EmbarrassingMoment).
 
+/**
+ * Defines the exported configuration constants for the TransitionFX plugin,
+ * including default asset paths and material parameter names.
+ */
+
 #include "TransitionFXConfig.h"
 
 namespace TransitionFXConfig

@@ -9,9 +9,16 @@
 #include "ITransitionEffect.h"
 #include "TransitionManagerSubsystem.generated.h"
 
+/** Delegate broadcast when a transition begins playing. */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionStarted);
+
+/** Delegate broadcast when a transition finishes (forward reaches 1.0 or reverse reaches 0.0). */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionCompleted);
+
+/** Delegate broadcast when a transition enters the hold state at max progress. */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTransitionHoldStarted);
+
+/** Delegate called when asynchronous preset preloading completes. */
 DECLARE_DYNAMIC_DELEGATE(FTransitionPreloadCompleteDelegate);
 
 class APlayerController;
@@ -27,6 +34,9 @@ struct FTransitionEffectPool
 	TArray<TObjectPtr<UObject>> Effects;
 };
 
+/**
+ * Direction mode for transition playback.
+ */
 UENUM(BlueprintType)
 enum class ETransitionMode : uint8
 {
@@ -44,13 +54,25 @@ class TRANSITIONFX_API UTransitionManagerSubsystem : public UGameInstanceSubsyst
 
 public:
 	// FTickableGameObject Interface
+
+	/** Updates active transition progress each frame. */
 	virtual void Tick(float DeltaTime) override;
+
+	/** Returns true when a transition is active and needs ticking. */
 	virtual bool IsTickable() const override;
+
+	/** Returns true if the current transition should tick while the game is paused. */
 	virtual bool IsTickableWhenPaused() const override;
+
+	/** Returns the stat ID for profiling. */
 	virtual TStatId GetStatId() const override;
 
 	// USubsystem Interface
+
+	/** Initializes the subsystem, registers console commands, and preloads default assets. */
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
+	/** Cleans up console commands, delegates, and the effect pool. */
 	virtual void Deinitialize() override;
 
 	/** Starts a transition with the given preset. */
@@ -186,15 +208,24 @@ private:
 	TObjectPtr<UMaterialInterface> DefaultMasterMaterial;
 
 	// Level Transition State
+
+	/** Whether to automatically play a reverse transition when a new level finishes loading. */
 	bool bAutoReverseOnLevelLoad = false;
+
+	/** The name of the level to open after the fade-out completes. */
 	FName PendingLevelName;
+
+	/** The duration to use for the pending level transition. */
 	float PendingDuration = 1.0f;
 
+	/** The preset to use for the pending level transition. */
 	UPROPERTY()
 	TObjectPtr<UTransitionPreset> PendingPreset;
 
+	/** Callback fired when the fade-out phase of a level transition completes. Opens the pending level. */
 	UFUNCTION()
 	void OnLevelTransitionFadeOutFinished();
 
+	/** Callback fired after a new level is loaded. Triggers the auto-reverse fade-in if configured. */
 	void OnPostLoadMapWithWorld(UWorld* LoadedWorld);
 };

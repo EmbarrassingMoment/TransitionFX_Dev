@@ -6,15 +6,14 @@
 
 DEFINE_LOG_CATEGORY(LogTransitionFX);
 
+/** Called when the TransitionFX module is loaded into memory. */
 void FTransitionFXModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 }
 
+/** Called when the TransitionFX module is unloaded from memory. */
 void FTransitionFXModule::ShutdownModule()
 {
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -22,10 +22,20 @@ class TRANSITIONFX_API UPostProcessTransitionEffect : public UObject, public ITr
 
 public:
 	// ITransitionEffect Interface
+
+	/** Creates or reuses a dynamic material and post-process volume for the given preset. */
 	virtual void Initialize(UWorld* World, UTransitionPreset* Preset) override;
+
+	/** Updates the material's Progress parameter and calls UpdateMaterialParameters. */
 	virtual void UpdateProgress(float Progress) override;
+
+	/** Disables the post-process volume without destroying it, allowing reuse. */
 	virtual void Cleanup() override;
+
+	/** Sets the material's Invert parameter (1.0 for inverted, 0.0 for normal). */
 	virtual void SetInvert(bool bInvert) override;
+
+	/** Applies scalar, vector, and texture parameter overrides to the dynamic material. */
 	virtual void SetParameters(const FTransitionParameters& Params) override;
 
 	/**
