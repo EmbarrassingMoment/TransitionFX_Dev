@@ -45,6 +45,7 @@ class TRANSITIONFX_API UTransitionPreset : public UDataAsset
 public:
 	UTransitionPreset()
 		: DefaultDuration(1.0f)
+		, EasingType(ETransitionEasing::Linear)
 		, bAutoBlockInput(true)
 		, bTickWhenPaused(false)
 		, Priority(1000.0f)

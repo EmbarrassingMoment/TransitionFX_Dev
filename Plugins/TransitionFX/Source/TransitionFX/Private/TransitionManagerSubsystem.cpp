@@ -139,6 +139,11 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 			{
 				bHasCompleted = true;
 				OnTransitionCompleted.Broadcast();
+
+				// Auto-stop forward transitions that are not holding.
+				// Without this, the PostProcessVolume, AudioComponent, and tick remain active
+				// even though the transition is visually complete.
+				StopTransition();
 			}
 		}
 	}
