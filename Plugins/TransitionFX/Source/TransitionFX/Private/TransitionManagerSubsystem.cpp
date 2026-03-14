@@ -62,6 +62,9 @@ void UTransitionManagerSubsystem::Deinitialize()
 
 	FCoreUObjectDelegates::PostLoadMapWithWorld.RemoveAll(this);
 
+	// Clean up any active transition before releasing the pool
+	ForceClear();
+
 	EffectPool.Empty();
 
 	Super::Deinitialize();

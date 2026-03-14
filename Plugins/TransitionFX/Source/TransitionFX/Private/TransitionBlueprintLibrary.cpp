@@ -177,6 +177,22 @@ void UTransitionBlueprintLibrary::PlayRandomTransitionAndWait(const UObject* Wor
 	int32 Index = FMath::RandRange(0, Presets.Num() - 1);
 	UTransitionPreset* SelectedPreset = Presets[Index];
 
+	if (!SelectedPreset)
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("PlayRandomTransitionAndWait: Selected preset at index %d is null."), Index);
+
+		// Finish immediately to prevent hanging
+		if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+		{
+			FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
+			if (LatentActionManager.FindExistingAction<FTransitionLatentAction>(LatentInfo.CallbackTarget, LatentInfo.UUID) == nullptr)
+			{
+				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionLatentAction(LatentInfo, nullptr));
+			}
+		}
+		return;
+	}
+
 	PlayTransitionAndWait(WorldContextObject, SelectedPreset, Mode, PlaySpeed, bInvert, OverrideParams, LatentInfo);
 }
 
