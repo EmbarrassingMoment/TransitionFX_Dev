@@ -16,7 +16,7 @@ It renders high-quality transitions based on SDF (Signed Distance Field) math wi
 *   **Versatile Control:**
     *   **Forward / Reverse:** Control "Fade Out" and "Fade In" with a single preset using Transition Modes.
     *   **Speed Control:** Dynamic playback speed adjustment via `SetPlaySpeed`.
-*   **🔊 Audio Integration:** Synchronize Sound Effects (SFX) with your transitions. The system manages the audio lifecycle, ensuring sounds play on start and stop automatically if the transition is cancelled.
+*   **Audio Integration:** Synchronize Sound Effects (SFX) with your transitions. The system manages the audio lifecycle, ensuring sounds play on start and stop automatically if the transition is cancelled.
 *   **Event System:** Access `OnTransitionStarted`, `OnTransitionCompleted`, and `OnTransitionHoldStarted` delegates for precise gameplay logic timing.
 *   **Blueprint Support:** Includes a Latent Action node (`PlayTransitionAndWait`) for clean and easy scripting.
 
@@ -103,10 +103,10 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Checkerboard** | A checkerboard pattern that tiles the screen and expands to cover it. Classic retro feel. | <!-- IMAGE: effect_checkerboard.gif --> |
 | **Pixelate** | A pixelation effect that progressively reduces the screen resolution until it fades out. | <!-- IMAGE: effect_pixelate.gif --> |
 
-> **💡 Tip for Texture Masks:**
+> **Tip for Texture Masks:**
 > When importing your mask textures, ensure you uncheck **sRGB** and set Compression Settings to **Masks (no sRGB)** or **Grayscale** for accurate value reading.
 
-## ⏳ Transition Timing & Easing
+## Transition Timing & Easing
 Control how the transition progresses over time using the `EasingType` property in your Transition Preset.
 
 | Easing Type | Description |
@@ -122,7 +122,7 @@ Control how the transition progresses over time using the `EasingType` property 
 
 See [easings.net](https://easings.net/) for visualization of these curves.
 
-## 🚀 Performance Tips
+## Performance Tips
 
 ### Shader Preloading (Warmup)
 To prevent frame drops (hitching) when a transition plays for the first time, you can pre-compile the shaders using the Preload API.
@@ -146,7 +146,7 @@ TransitionSubsystem->PreloadTransitionPresets(MyPresets);
 **API Reference:**
 *   **Function:** `TransitionManagerSubsystem->PreloadTransitionPresets(TArray<UTransitionPreset*> Presets)`
 
-### ⏳ Asynchronous Loading (Soft References)
+### Asynchronous Loading (Soft References)
 If you want to load transition assets on-demand (e.g., during a loading screen) to save memory, use the Async API.
 It loads the assets in the background, then automatically runs the shader warmup, and finally fires a callback event.
 

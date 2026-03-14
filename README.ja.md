@@ -41,7 +41,7 @@ TransitionFXは、**インディーや小規模チームの開発者が、制作
 *   **Versatile Control:**
     *   **Forward / Reverse:** トランジションモードを使用して、単一のプリセットで「フェードアウト」と「フェードイン」を制御します。
     *   **Speed Control:** `SetPlaySpeed`による動的な再生速度調整が可能です。
-*   **🔊 Audio Integration:** 効果音（SFX）をトランジションと同期させます。システムがオーディオのライフサイクルを管理し、開始時に再生し、トランジションがキャンセルされた場合は自動的に停止します。
+*   **Audio Integration:** 効果音（SFX）をトランジションと同期させます。システムがオーディオのライフサイクルを管理し、開始時に再生し、トランジションがキャンセルされた場合は自動的に停止します。
 *   **Event System:** `OnTransitionStarted`、`OnTransitionCompleted`、`OnTransitionHoldStarted`デリゲートを使用して、正確なゲームプレイロジックのタイミングを取得できます。
 *   **Blueprint Support:** クリーンで簡単なスクリプティングのためのLatent Actionノード（`PlayTransitionAndWait`）が含まれています。
 
@@ -131,10 +131,10 @@ TransitionFXは、**インディーや小規模チームの開発者が、制作
 | **Checkerboard** | 画面をチェッカーボード（市松模様）パターンで分割し、各タイルが拡大して画面を覆います。クラシックなレトロ風。 | <!-- IMAGE: effect_checkerboard.gif --> |
 | **Pixelate** | 画面の解像度を徐々に下げていくピクセル化エフェクト。フェードアウトまでモザイクが進行します。 | <!-- IMAGE: effect_pixelate.gif --> |
 
-> **💡 Texture Mask（テクスチャマスク）のヒント:**
+> **Texture Mask（テクスチャマスク）のヒント:**
 > マスクテクスチャをインポートする際は、正確な値を読み取るために **sRGB** のチェックを外し（sRGBオフ）、Compression Settings（圧縮設定）を **Masks (no sRGB)** または **Grayscale** に設定してください。
 
-## ⏳ Transition Timing & Easing (イージングとタイミング)
+## Transition Timing & Easing (イージングとタイミング)
 Transition Presetの`EasingType`プロパティを使用して、トランジションが時間とともにどのように進行するかを制御します。
 
 | Easing Type | Description |
@@ -150,7 +150,7 @@ Transition Presetの`EasingType`プロパティを使用して、トランジシ
 
 これらのカーブの視覚化については、[easings.net](https://easings.net/) を参照してください。
 
-## 🚀 Performance Tips (パフォーマンス最適化)
+## Performance Tips (パフォーマンス最適化)
 
 ### シェーダーのプリロード（ヒッチング回避）
 トランジションが初めて再生される際のフレームドロップ（ヒッチング）を防ぐために、Preload APIを使用してシェーダーを事前コンパイルできます。
@@ -174,7 +174,7 @@ TransitionSubsystem->PreloadTransitionPresets(MyPresets);
 **API リファレンス:**
 *   **関数:** `TransitionManagerSubsystem->PreloadTransitionPresets(TArray<UTransitionPreset*> Presets)`
 
-### ⏳ 非同期ロード（ソフト参照）
+### 非同期ロード（ソフト参照）
 メモリを節約するためにトランジションアセットをオンデマンド（例：ロード画面中）でロードしたい場合は、Async APIを使用します。
 バックグラウンドでアセットをロードし、自動的にシェーダーのウォームアップを実行し、最後にコールバックイベントを発火させます。
 
