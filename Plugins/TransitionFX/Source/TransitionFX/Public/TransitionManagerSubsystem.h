@@ -197,6 +197,7 @@ private:
 	float CurrentPlaySpeed = 1.0f;
 
 	/** Cached player controller to avoid redundant lookups. */
+	UPROPERTY(Transient)
 	TWeakObjectPtr<APlayerController> CachedPlayerController;
 
 	/** Cached default fade preset to avoid runtime loading. */

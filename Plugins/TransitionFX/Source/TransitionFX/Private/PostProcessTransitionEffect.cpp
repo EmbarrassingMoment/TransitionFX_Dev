@@ -111,11 +111,11 @@ void UPostProcessTransitionEffect::Cleanup()
 {
 	if (SpawnedVolume)
 	{
-		// Disable volume instead of destroying to allow reuse
-		SpawnedVolume->bEnabled = false;
+		SpawnedVolume->Destroy();
+		SpawnedVolume = nullptr;
 	}
 
-	// Keep DynamicMaterial for potential reuse (or just let it be overwritten in Initialize)
+	DynamicMaterial = nullptr;
 }
 
 /** Sets the Invert material parameter. The material uses an If node with a 0.5 threshold. */
