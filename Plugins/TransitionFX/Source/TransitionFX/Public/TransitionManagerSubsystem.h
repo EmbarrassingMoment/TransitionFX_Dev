@@ -173,28 +173,28 @@ private:
 	TObjectPtr<UAudioComponent> CurrentAudioComponent;
 
 	/** Current transition mode. */
-	ETransitionMode CurrentMode;
+	ETransitionMode CurrentMode = ETransitionMode::Forward;
 
 	/** Current normalized progress of the transition (0.0 to 1.0). */
-	float CurrentProgress;
+	float CurrentProgress = 0.0f;
 
 	/** Whether a transition is currently active. */
-	bool bIsTransitionActive;
+	bool bIsTransitionActive = false;
 
 	/** Whether to automatically stop the transition when reverse completes. */
-	bool bAutoStopOnReverseComplete;
+	bool bAutoStopOnReverseComplete = false;
 
 	/** Whether the completion event has been triggered for the current transition. */
-	bool bHasCompleted;
+	bool bHasCompleted = false;
 
 	/** Whether the transition should hold when it reaches max progress (1.0). */
-	bool bShouldHoldAtMax;
+	bool bShouldHoldAtMax = false;
 
 	/** Whether the transition is currently holding at max progress. */
-	bool bIsHolding;
+	bool bIsHolding = false;
 
 	/** Current playback speed multiplier. */
-	float CurrentPlaySpeed;
+	float CurrentPlaySpeed = 1.0f;
 
 	/** Cached player controller to avoid redundant lookups. */
 	TWeakObjectPtr<APlayerController> CachedPlayerController;

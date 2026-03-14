@@ -25,6 +25,9 @@ Plugins/*/Intermediate/
 # Windows
 Thumbs.db
 
+# Compiled binaries (開発用ベンチマーク等)
+benchmark
+
 # Large Assets (誤ってコミットしないよう保険)
 # ※ LFSを使う場合はコメントアウトするか、LFS管理下に置く
 # *.mp4
