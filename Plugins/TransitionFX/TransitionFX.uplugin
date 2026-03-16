@@ -19,6 +19,11 @@
 			"Name": "TransitionFX",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "TransitionFXEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
 		}
 	]
 }
