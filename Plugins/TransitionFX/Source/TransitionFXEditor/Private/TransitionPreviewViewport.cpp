@@ -18,6 +18,7 @@ FTransitionPreviewViewportClient::FTransitionPreviewViewportClient(FPreviewScene
 
 	EngineShowFlags.SetGrid(false);
 	EngineShowFlags.SetPostProcessing(true);
+	EngineShowFlags.SetPostProcessMaterial(true);
 
 	SetupPostProcessVolume();
 }
