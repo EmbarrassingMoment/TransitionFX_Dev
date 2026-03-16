@@ -6,11 +6,7 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 
-class FAssetEditorModeManager;
-class FPreviewScene;
-class FTransitionPreviewViewportClient;
-class SViewport;
-class FSceneViewport;
+class STransitionPreviewViewport;
 
 /** Entry in the effect dropdown list. */
 struct FEffectEntry
@@ -65,12 +61,8 @@ private:
 	FText GetSpeedText() const;
 	FText GetLoopButtonText() const;
 
-	// Preview scene and viewport
-	TSharedPtr<FAssetEditorModeManager> ModeManager;
-	TSharedPtr<FPreviewScene> PreviewScene;
-	TSharedPtr<FTransitionPreviewViewportClient> ViewportClient;
-	TSharedPtr<SViewport> ViewportWidget;
-	TSharedPtr<FSceneViewport> SceneViewport;
+	// Preview viewport (manages scene, client, and mode tools internally)
+	TSharedPtr<STransitionPreviewViewport> PreviewViewport;
 
 	// Effect list
 	TArray<FEffectEntry> Effects;

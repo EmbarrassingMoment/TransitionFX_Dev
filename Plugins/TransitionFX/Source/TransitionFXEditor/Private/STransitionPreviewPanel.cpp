@@ -2,9 +2,6 @@
 
 #include "STransitionPreviewPanel.h"
 #include "TransitionPreviewViewport.h"
-#include "PreviewScene.h"
-#include "Widgets/SViewport.h"
-#include "Slate/SceneViewport.h"
 #include "Widgets/Input/SComboBox.h"
 #include "Widgets/Input/SSlider.h"
 #include "Widgets/Input/SSpinBox.h"
@@ -14,7 +11,6 @@
 #include "Widgets/Layout/SSeparator.h"
 #include "Widgets/Text/STextBlock.h"
 #include "AssetRegistry/AssetRegistryModule.h"
-#include "AssetEditorModeManager.h"
 #include "Materials/MaterialInstanceConstant.h"
 
 #define LOCTEXT_NAMESPACE "TransitionFXEditor"
@@ -41,13 +37,6 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 
 	// Discover effects
 	DiscoverEffects();
-
-	// Create preview scene and mode manager
-	ModeManager = MakeShared<FAssetEditorModeManager>();
-	PreviewScene = MakeShared<FPreviewScene>(FPreviewScene::ConstructionValues());
-
-	// Create viewport client with valid mode manager (required by EditorInteractiveToolsFramework)
-	ViewportClient = MakeShared<FTransitionPreviewViewportClient>(ModeManager.Get(), PreviewScene.Get());
 
 	// Build UI
 	ChildSlot
@@ -115,7 +104,7 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 			SNew(SSeparator)
 		]
 
-		// Viewport
+		// Viewport (SEditorViewport subclass - manages lifecycle internally)
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.HAlign(HAlign_Center)
@@ -125,8 +114,7 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 			.WidthOverride_Lambda([this]() { return ViewportWidth; })
 			.HeightOverride_Lambda([this]() { return ViewportHeight; })
 			[
-				SAssignNew(ViewportWidget, SViewport)
-				.EnableGammaCorrection(false)
+				SAssignNew(PreviewViewport, STransitionPreviewViewport)
 			]
 		]
 
@@ -279,10 +267,6 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 		]
 	];
 
-	// Create scene viewport and attach to widget
-	SceneViewport = MakeShared<FSceneViewport>(ViewportClient.Get(), ViewportWidget);
-	ViewportWidget->SetViewportInterface(SceneViewport.ToSharedRef());
-
 	// Select first effect if available
 	if (Effects.Num() > 0)
 	{
@@ -297,10 +281,6 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 STransitionPreviewPanel::~STransitionPreviewPanel()
 {
 	FTSTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
-
-	SceneViewport.Reset();
-	ViewportClient.Reset();
-	PreviewScene.Reset();
 }
 
 void STransitionPreviewPanel::DiscoverEffects()
@@ -356,10 +336,10 @@ void STransitionPreviewPanel::OnEffectSelected(TSharedPtr<FString> NewValue, ESe
 
 	// Load material and set on viewport
 	UMaterialInterface* Material = Cast<UMaterialInterface>(Effects[SelectedIndex].MaterialPath.TryLoad());
-	if (Material && ViewportClient.IsValid())
+	if (Material && PreviewViewport.IsValid())
 	{
-		ViewportClient->SetPreviewMaterial(Material);
-		ViewportClient->SetInvert(bInvert);
+		PreviewViewport->SetPreviewMaterial(Material);
+		PreviewViewport->SetInvert(bInvert);
 		CurrentProgress = 0.0f;
 		bIsPlaying = false;
 	}
@@ -385,7 +365,6 @@ bool STransitionPreviewPanel::OnTick(float DeltaTime)
 		CurrentProgress = 1.0f;
 		if (bLooping)
 		{
-			// Ping-pong
 			bIsReversing = true;
 		}
 		else
@@ -398,7 +377,6 @@ bool STransitionPreviewPanel::OnTick(float DeltaTime)
 		CurrentProgress = 0.0f;
 		if (bLooping)
 		{
-			// Ping-pong
 			bIsReversing = false;
 		}
 		else
@@ -407,9 +385,9 @@ bool STransitionPreviewPanel::OnTick(float DeltaTime)
 		}
 	}
 
-	if (ViewportClient.IsValid())
+	if (PreviewViewport.IsValid())
 	{
-		ViewportClient->SetProgress(CurrentProgress);
+		PreviewViewport->SetProgress(CurrentProgress);
 	}
 
 	return true;
@@ -445,9 +423,9 @@ void STransitionPreviewPanel::Reset()
 	CurrentProgress = 0.0f;
 	bIsPlaying = false;
 	bIsReversing = false;
-	if (ViewportClient.IsValid())
+	if (PreviewViewport.IsValid())
 	{
-		ViewportClient->SetProgress(0.0f);
+		PreviewViewport->SetProgress(0.0f);
 	}
 }
 
@@ -459,9 +437,9 @@ void STransitionPreviewPanel::ToggleLoop()
 void STransitionPreviewPanel::OnProgressChanged(float NewValue)
 {
 	CurrentProgress = NewValue;
-	if (ViewportClient.IsValid())
+	if (PreviewViewport.IsValid())
 	{
-		ViewportClient->SetProgress(CurrentProgress);
+		PreviewViewport->SetProgress(CurrentProgress);
 	}
 }
 
@@ -478,9 +456,9 @@ void STransitionPreviewPanel::OnProgressCaptureEnd()
 void STransitionPreviewPanel::OnInvertChanged(ECheckBoxState NewState)
 {
 	bInvert = (NewState == ECheckBoxState::Checked);
-	if (ViewportClient.IsValid())
+	if (PreviewViewport.IsValid())
 	{
-		ViewportClient->SetInvert(bInvert);
+		PreviewViewport->SetInvert(bInvert);
 	}
 }
 

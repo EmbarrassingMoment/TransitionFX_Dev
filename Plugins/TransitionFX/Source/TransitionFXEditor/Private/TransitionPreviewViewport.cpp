@@ -6,8 +6,10 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "TransitionFXConfig.h"
 
-FTransitionPreviewViewportClient::FTransitionPreviewViewportClient(FAssetEditorModeManager* InModeManager, FPreviewScene* InPreviewScene)
-	: FEditorViewportClient(InModeManager, InPreviewScene)
+// --- FTransitionPreviewViewportClient ---
+
+FTransitionPreviewViewportClient::FTransitionPreviewViewportClient(FEditorModeTools* InModeTools, FPreviewScene* InPreviewScene)
+	: FEditorViewportClient(InModeTools, InPreviewScene)
 	, PreviewScene(InPreviewScene)
 	, PreviewVolume(nullptr)
 	, DynamicMaterial(nullptr)
@@ -97,4 +99,56 @@ void FTransitionPreviewViewportClient::UpdateBlendables()
 
 	PreviewVolume->Settings.WeightedBlendables.Array.Reset();
 	PreviewVolume->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, DynamicMaterial));
+}
+
+// --- STransitionPreviewViewport ---
+
+void STransitionPreviewViewport::Construct(const FArguments& InArgs)
+{
+	PreviewScene = MakeShared<FPreviewScene>(FPreviewScene::ConstructionValues());
+
+	// SEditorViewport::Construct calls MakeEditorViewportClient() internally
+	SEditorViewport::Construct(SEditorViewport::FArguments());
+}
+
+STransitionPreviewViewport::~STransitionPreviewViewport()
+{
+	if (ViewportClient.IsValid())
+	{
+		ViewportClient->Viewport = nullptr;
+	}
+}
+
+TSharedRef<FEditorViewportClient> STransitionPreviewViewport::MakeEditorViewportClient()
+{
+	// SEditorViewport creates ModeTools (FAssetEditorModeManager) in Construct()
+	// before calling MakeEditorViewportClient(), so ModeTools.Get() is valid here.
+	ViewportClient = MakeShareable(new FTransitionPreviewViewportClient(
+		ModeTools.Get(), PreviewScene.Get()));
+
+	return ViewportClient.ToSharedRef();
+}
+
+void STransitionPreviewViewport::SetPreviewMaterial(UMaterialInterface* Material)
+{
+	if (ViewportClient.IsValid())
+	{
+		ViewportClient->SetPreviewMaterial(Material);
+	}
+}
+
+void STransitionPreviewViewport::SetProgress(float Progress)
+{
+	if (ViewportClient.IsValid())
+	{
+		ViewportClient->SetProgress(Progress);
+	}
+}
+
+void STransitionPreviewViewport::SetInvert(bool bInvert)
+{
+	if (ViewportClient.IsValid())
+	{
+		ViewportClient->SetInvert(bInvert);
+	}
 }

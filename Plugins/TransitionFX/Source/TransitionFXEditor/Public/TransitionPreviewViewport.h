@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SEditorViewport.h"
 #include "EditorViewportClient.h"
-#include "AssetEditorModeManager.h"
 
 class FPreviewScene;
 class APostProcessVolume;
@@ -18,22 +18,13 @@ class UMaterialInterface;
 class FTransitionPreviewViewportClient : public FEditorViewportClient
 {
 public:
-	FTransitionPreviewViewportClient(FAssetEditorModeManager* InModeManager, FPreviewScene* InPreviewScene);
+	FTransitionPreviewViewportClient(FEditorModeTools* InModeTools, FPreviewScene* InPreviewScene);
 	virtual ~FTransitionPreviewViewportClient() override;
 
-	/** Set the material to preview. Creates a new DynamicMaterialInstance. */
 	void SetPreviewMaterial(UMaterialInterface* Material);
-
-	/** Update the Progress parameter on the dynamic material. */
 	void SetProgress(float Progress);
-
-	/** Set the Invert parameter on the dynamic material. */
 	void SetInvert(bool bInvert);
 
-	/** Get the current DynamicMaterialInstance. */
-	UMaterialInstanceDynamic* GetDynamicMaterial() const { return DynamicMaterial; }
-
-	/** Override background color to white. */
 	virtual FLinearColor GetBackgroundColor() const override { return FLinearColor::White; }
 
 private:
@@ -43,4 +34,30 @@ private:
 	FPreviewScene* PreviewScene;
 	APostProcessVolume* PreviewVolume;
 	UMaterialInstanceDynamic* DynamicMaterial;
+};
+
+/**
+ * SEditorViewport subclass that manages the viewport client lifecycle.
+ * This is the standard UE5 pattern that properly initializes
+ * FEditorModeTools and the EditorInteractiveToolsFramework.
+ */
+class STransitionPreviewViewport : public SEditorViewport
+{
+public:
+	SLATE_BEGIN_ARGS(STransitionPreviewViewport) {}
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments& InArgs);
+	virtual ~STransitionPreviewViewport() override;
+
+	void SetPreviewMaterial(UMaterialInterface* Material);
+	void SetProgress(float Progress);
+	void SetInvert(bool bInvert);
+
+protected:
+	virtual TSharedRef<FEditorViewportClient> MakeEditorViewportClient() override;
+
+private:
+	TSharedPtr<FPreviewScene> PreviewScene;
+	TSharedPtr<FTransitionPreviewViewportClient> ViewportClient;
 };
