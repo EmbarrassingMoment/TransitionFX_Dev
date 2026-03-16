@@ -6,8 +6,8 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "TransitionFXConfig.h"
 
-FTransitionPreviewViewportClient::FTransitionPreviewViewportClient(FPreviewScene* InPreviewScene)
-	: FEditorViewportClient(nullptr, InPreviewScene)
+FTransitionPreviewViewportClient::FTransitionPreviewViewportClient(FAssetEditorModeManager* InModeManager, FPreviewScene* InPreviewScene)
+	: FEditorViewportClient(InModeManager, InPreviewScene)
 	, PreviewScene(InPreviewScene)
 	, PreviewVolume(nullptr)
 	, DynamicMaterial(nullptr)

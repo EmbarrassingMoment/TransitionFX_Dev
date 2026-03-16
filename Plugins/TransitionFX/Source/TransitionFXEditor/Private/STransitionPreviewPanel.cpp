@@ -14,6 +14,7 @@
 #include "Widgets/Layout/SSeparator.h"
 #include "Widgets/Text/STextBlock.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "AssetEditorModeManager.h"
 #include "Materials/MaterialInstanceConstant.h"
 
 #define LOCTEXT_NAMESPACE "TransitionFXEditor"
@@ -41,11 +42,12 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 	// Discover effects
 	DiscoverEffects();
 
-	// Create preview scene
+	// Create preview scene and mode manager
+	ModeManager = MakeShared<FAssetEditorModeManager>();
 	PreviewScene = MakeShared<FPreviewScene>(FPreviewScene::ConstructionValues());
 
-	// Create viewport client
-	ViewportClient = MakeShared<FTransitionPreviewViewportClient>(PreviewScene.Get());
+	// Create viewport client with valid mode manager (required by EditorInteractiveToolsFramework)
+	ViewportClient = MakeShared<FTransitionPreviewViewportClient>(ModeManager.Get(), PreviewScene.Get());
 
 	// Build UI
 	ChildSlot

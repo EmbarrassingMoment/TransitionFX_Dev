@@ -6,6 +6,7 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 
+class FAssetEditorModeManager;
 class FPreviewScene;
 class FTransitionPreviewViewportClient;
 class SViewport;
@@ -65,6 +66,7 @@ private:
 	FText GetLoopButtonText() const;
 
 	// Preview scene and viewport
+	TSharedPtr<FAssetEditorModeManager> ModeManager;
 	TSharedPtr<FPreviewScene> PreviewScene;
 	TSharedPtr<FTransitionPreviewViewportClient> ViewportClient;
 	TSharedPtr<SViewport> ViewportWidget;

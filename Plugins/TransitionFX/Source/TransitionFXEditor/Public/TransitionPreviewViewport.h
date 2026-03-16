@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "EditorViewportClient.h"
+#include "AssetEditorModeManager.h"
 
 class FPreviewScene;
 class APostProcessVolume;
@@ -17,7 +18,7 @@ class UMaterialInterface;
 class FTransitionPreviewViewportClient : public FEditorViewportClient
 {
 public:
-	FTransitionPreviewViewportClient(FPreviewScene* InPreviewScene);
+	FTransitionPreviewViewportClient(FAssetEditorModeManager* InModeManager, FPreviewScene* InPreviewScene);
 	virtual ~FTransitionPreviewViewportClient() override;
 
 	/** Set the material to preview. Creates a new DynamicMaterialInstance. */
