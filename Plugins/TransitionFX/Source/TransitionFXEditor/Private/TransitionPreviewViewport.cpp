@@ -8,8 +8,8 @@
 
 // --- FTransitionPreviewViewportClient ---
 
-FTransitionPreviewViewportClient::FTransitionPreviewViewportClient(FEditorModeTools* InModeTools, FPreviewScene* InPreviewScene)
-	: FEditorViewportClient(InModeTools, InPreviewScene)
+FTransitionPreviewViewportClient::FTransitionPreviewViewportClient(FPreviewScene* InPreviewScene, const TWeakPtr<SEditorViewport>& InEditorViewportWidget)
+	: FEditorViewportClient(nullptr, InPreviewScene, InEditorViewportWidget)
 	, PreviewScene(InPreviewScene)
 	, PreviewVolume(nullptr)
 	, DynamicMaterial(nullptr)
@@ -121,10 +121,8 @@ STransitionPreviewViewport::~STransitionPreviewViewport()
 
 TSharedRef<FEditorViewportClient> STransitionPreviewViewport::MakeEditorViewportClient()
 {
-	// SEditorViewport creates ModeTools (FAssetEditorModeManager) in Construct()
-	// before calling MakeEditorViewportClient(), so ModeTools.Get() is valid here.
 	ViewportClient = MakeShareable(new FTransitionPreviewViewportClient(
-		ModeTools.Get(), PreviewScene.Get()));
+		PreviewScene.Get(), SharedThis(this)));
 
 	return ViewportClient.ToSharedRef();
 }

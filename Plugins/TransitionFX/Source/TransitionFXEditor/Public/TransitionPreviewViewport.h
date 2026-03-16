@@ -18,7 +18,7 @@ class UMaterialInterface;
 class FTransitionPreviewViewportClient : public FEditorViewportClient
 {
 public:
-	FTransitionPreviewViewportClient(FEditorModeTools* InModeTools, FPreviewScene* InPreviewScene);
+	FTransitionPreviewViewportClient(FPreviewScene* InPreviewScene, const TWeakPtr<SEditorViewport>& InEditorViewportWidget);
 	virtual ~FTransitionPreviewViewportClient() override;
 
 	void SetPreviewMaterial(UMaterialInterface* Material);
