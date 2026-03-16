@@ -100,6 +100,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Texture Mask** | Uses a grayscale texture to determine the transition order (Black=Start, White=End). Supports custom mask textures via Parameter Overrides. | <!-- IMAGE: effect_texture_mask.gif --> |
 | **TV Switch Off** | A retro CRT TV turn-off effect. Collapses vertically into a line, then horizontally into a point. | <!-- IMAGE: effect_tv_switch_off.gif --> |
 | **Hexagon** | A sci-fi style honeycomb wipe. A wave of hexagonal cells smoothly shrinks into their centers. | <!-- IMAGE: effect_hexagon.gif --> |
+| **Triangle** | A stylish polygon-style wipe where sharp triangles shrink and disappear in a ripple effect from the center. | ![Triangle](https://via.placeholder.com/320x180/000000/FFFFFF?text=Triangle) |
 | **Checkerboard** | A checkerboard pattern that tiles the screen and expands to cover it. Classic retro feel. | <!-- IMAGE: effect_checkerboard.gif --> |
 | **Pixelate** | A pixelation effect that progressively reduces the screen resolution until it fades out. | <!-- IMAGE: effect_pixelate.gif --> |
 
