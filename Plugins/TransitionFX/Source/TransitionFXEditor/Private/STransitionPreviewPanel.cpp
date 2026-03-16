@@ -3,6 +3,7 @@
 #include "STransitionPreviewPanel.h"
 #include "TransitionPreviewViewport.h"
 #include "PreviewScene.h"
+#include "Widgets/SViewport.h"
 #include "Slate/SceneViewport.h"
 #include "Widgets/Input/SComboBox.h"
 #include "Widgets/Input/SSlider.h"

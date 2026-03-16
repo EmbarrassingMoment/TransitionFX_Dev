@@ -14,8 +14,6 @@ FTransitionPreviewViewportClient::FTransitionPreviewViewportClient(FPreviewScene
 {
 	SetRealtime(true);
 
-	// White background
-	SetBackgroundColor(FLinearColor::White);
 	EngineShowFlags.SetGrid(false);
 	EngineShowFlags.SetPostProcessing(true);
 

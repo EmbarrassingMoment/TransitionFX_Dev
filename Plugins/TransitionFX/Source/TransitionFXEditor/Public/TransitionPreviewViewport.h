@@ -32,6 +32,9 @@ public:
 	/** Get the current DynamicMaterialInstance. */
 	UMaterialInstanceDynamic* GetDynamicMaterial() const { return DynamicMaterial; }
 
+	/** Override background color to white. */
+	virtual FLinearColor GetBackgroundColor() const override { return FLinearColor::White; }
+
 private:
 	void SetupPostProcessVolume();
 	void UpdateBlendables();
