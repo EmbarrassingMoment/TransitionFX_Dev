@@ -57,6 +57,9 @@ public:
 	/** Read the current viewport pixels (BGRA). Returns true on success. */
 	bool CaptureFrame(TArray<FColor>& OutPixels);
 
+	/** Get the actual render target dimensions (accounts for DPI scaling). */
+	FIntPoint GetViewportSize() const;
+
 protected:
 	virtual TSharedRef<FEditorViewportClient> MakeEditorViewportClient() override;
 

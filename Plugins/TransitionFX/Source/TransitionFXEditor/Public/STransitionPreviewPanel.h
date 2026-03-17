@@ -97,6 +97,7 @@ private:
 	int32 CaptureFrameIndex;
 	int32 TotalCaptureFrames;
 	int32 CaptureFrameRate;
+	int32 CaptureStabilizeFrames;
 	TArray<TArray<FColor>> CapturedFrames;
 
 	// Tick delegate

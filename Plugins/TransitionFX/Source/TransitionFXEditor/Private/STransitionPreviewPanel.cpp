@@ -36,6 +36,7 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 	CaptureFrameIndex = 0;
 	TotalCaptureFrames = 0;
 	CaptureFrameRate = 30;
+	CaptureStabilizeFrames = 0;
 	ViewportWidth = 480.0f;
 	ViewportHeight = 270.0f;
 
@@ -597,6 +598,7 @@ void STransitionPreviewPanel::StartGifCapture()
 	CapturedFrames.Reset();
 	CapturedFrames.Reserve(TotalCaptureFrames);
 	CaptureFrameIndex = 0;
+	CaptureStabilizeFrames = 2; // Wait extra ticks for viewport to stabilize before first capture
 	bCaptureWaitFrame = true; // Wait one frame for the viewport to render progress=0
 	bIsCapturing = true;
 }
@@ -606,6 +608,13 @@ void STransitionPreviewPanel::OnCaptureFrameTick()
 	if (!PreviewViewport.IsValid())
 	{
 		bIsCapturing = false;
+		return;
+	}
+
+	// Wait for viewport to stabilize after capture start
+	if (CaptureStabilizeFrames > 0)
+	{
+		CaptureStabilizeFrames--;
 		return;
 	}
 
@@ -659,24 +668,23 @@ void STransitionPreviewPanel::FinalizeGifCapture()
 		return;
 	}
 
-	// Determine capture dimensions from the first frame
-	// ReadPixels returns data at the actual viewport pixel size
+	// Get actual render target dimensions (accounts for DPI scaling)
+	FIntPoint ActualSize = PreviewViewport->GetViewportSize();
+	int32 CaptureWidth = ActualSize.X;
+	int32 CaptureHeight = ActualSize.Y;
 	int32 FramePixelCount = CapturedFrames[0].Num();
-	int32 CaptureWidth = static_cast<int32>(ViewportWidth);
-	int32 CaptureHeight = FramePixelCount / CaptureWidth;
 
-	if (CaptureWidth * CaptureHeight != FramePixelCount)
+	if (CaptureWidth <= 0 || CaptureHeight <= 0 || CaptureWidth * CaptureHeight != FramePixelCount)
 	{
-		// Fallback: try to infer from viewport
-		CaptureHeight = static_cast<int32>(ViewportHeight);
-		if (CaptureWidth * CaptureHeight != FramePixelCount)
-		{
-			FNotificationInfo Info(LOCTEXT("CaptureSizeMismatch", "GIF capture failed: unexpected frame dimensions."));
-			Info.ExpireDuration = 4.0f;
-			FSlateNotificationManager::Get().AddNotification(Info);
-			CapturedFrames.Reset();
-			return;
-		}
+		FNotificationInfo Info(FText::Format(
+			LOCTEXT("CaptureSizeMismatch", "GIF capture failed: dimension mismatch (viewport {0}x{1}, pixels {2})."),
+			FText::AsNumber(CaptureWidth),
+			FText::AsNumber(CaptureHeight),
+			FText::AsNumber(FramePixelCount)));
+		Info.ExpireDuration = 4.0f;
+		FSlateNotificationManager::Get().AddNotification(Info);
+		CapturedFrames.Reset();
+		return;
 	}
 
 	// Show save file dialog
