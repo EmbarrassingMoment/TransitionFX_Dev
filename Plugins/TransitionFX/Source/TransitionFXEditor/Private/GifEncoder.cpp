@@ -274,11 +274,11 @@ void FGifEncoder::CompressLZW(TArray<uint8>& OutBytes, const TArray<uint8>& Indi
 			if (NextCode < 4096)
 			{
 				Table.Add(Key, NextCode);
-				if (NextCode >= (1 << CodeSize))
+				NextCode++;
+				if (NextCode == (1 << CodeSize) && CodeSize < 12)
 				{
 					CodeSize++;
 				}
-				NextCode++;
 			}
 			else
 			{
