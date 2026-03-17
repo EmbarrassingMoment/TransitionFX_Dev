@@ -21,6 +21,9 @@ FTransitionPreviewViewportClient::FTransitionPreviewViewportClient(FPreviewScene
 	EngineShowFlags.SetPostProcessing(true);
 	EngineShowFlags.SetPostProcessMaterial(true);
 
+	// Hide the XYZ orientation axes indicator so it does not appear in GIF captures
+	bDrawAxes = false;
+
 	SetupPostProcessVolume();
 }
 
