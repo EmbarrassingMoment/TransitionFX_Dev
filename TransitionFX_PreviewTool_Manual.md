@@ -63,7 +63,23 @@ The transition effect is drawn as a post-process material on a white background.
 
 ---
 
-## 4. GIF Capture Workflow
+## 4. GIF Capture
+
+### 4.1 Built-in Capture (Recommended)
+
+The Preview Tool has a built-in **Capture GIF** button that automatically records one loop of the transition and saves it as a GIF file.
+
+1. **Select Effect** -- Choose the transition you want to capture from the dropdown.
+2. **Select Size** -- Choose the resolution from the Size dropdown.
+3. **Click "Capture GIF"** -- The tool will automatically play the transition forward (Progress 0% → 100%) at 30 FPS.
+4. **Wait for capture to complete** -- Progress is shown next to the button (e.g., "Capturing... 15/30").
+5. **Choose save location** -- A file dialog appears when capture is complete. The default filename is the effect name.
+
+> **Note:** The saved GIF loops infinitely, making it ideal for embedding in README files and documentation. During capture, normal playback controls are disabled.
+
+### 4.2 External Capture (Alternative)
+
+You can also use external capture tools like ScreenToGif:
 
 1. **Select Size** -- Choose the resolution you want to capture from the dropdown.
 2. **Select Effect** -- Choose the transition you want to preview from the dropdown.

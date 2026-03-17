@@ -2,6 +2,7 @@
 
 #include "STransitionPreviewPanel.h"
 #include "TransitionPreviewViewport.h"
+#include "GifEncoder.h"
 #include "Widgets/Input/SComboBox.h"
 #include "Widgets/Input/SSlider.h"
 #include "Widgets/Input/SSpinBox.h"
@@ -10,8 +11,11 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SSeparator.h"
 #include "Widgets/Text/STextBlock.h"
+#include "Widgets/Notifications/SNotificationList.h"
+#include "Framework/Notifications/NotificationManager.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Materials/MaterialInstanceConstant.h"
+#include "DesktopPlatformModule.h"
 
 #define LOCTEXT_NAMESPACE "TransitionFXEditor"
 
@@ -27,6 +31,11 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 	bLooping = true;
 	bInvert = false;
 	bSliderCaptured = false;
+	bIsCapturing = false;
+	bCaptureWaitFrame = false;
+	CaptureFrameIndex = 0;
+	TotalCaptureFrames = 0;
+	CaptureFrameRate = 30;
 	ViewportWidth = 480.0f;
 	ViewportHeight = 270.0f;
 
@@ -265,6 +274,48 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 				]
 			]
 		]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(SSeparator)
+		]
+
+		// GIF capture
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(4.0f)
+		[
+			SNew(SHorizontalBox)
+
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			[
+				SNew(SButton)
+				.Text(this, &STransitionPreviewPanel::GetCaptureButtonText)
+				.IsEnabled(this, &STransitionPreviewPanel::IsCaptureButtonEnabled)
+				.OnClicked_Lambda([this]() { StartGifCapture(); return FReply::Handled(); })
+			]
+
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.VAlign(VAlign_Center)
+			.Padding(8, 0, 0, 0)
+			[
+				SNew(STextBlock)
+				.Text_Lambda([this]()
+				{
+					if (bIsCapturing)
+					{
+						return FText::Format(
+							LOCTEXT("CaptureProgress", "Capturing... {0}/{1}"),
+							FText::AsNumber(CaptureFrameIndex),
+							FText::AsNumber(TotalCaptureFrames));
+					}
+					return FText::GetEmpty();
+				})
+			]
+		]
 	];
 
 	// Select first effect if available
@@ -347,6 +398,13 @@ void STransitionPreviewPanel::OnEffectSelected(TSharedPtr<FString> NewValue, ESe
 
 bool STransitionPreviewPanel::OnTick(float DeltaTime)
 {
+	// GIF capture mode — driven by fixed-step frame capture
+	if (bIsCapturing)
+	{
+		OnCaptureFrameTick();
+		return true;
+	}
+
 	if (!bIsPlaying || bSliderCaptured)
 	{
 		return true;
@@ -509,6 +567,192 @@ FText STransitionPreviewPanel::GetSpeedText() const
 FText STransitionPreviewPanel::GetLoopButtonText() const
 {
 	return bLooping ? LOCTEXT("LoopOn", "Loop: ON") : LOCTEXT("LoopOff", "Loop: OFF");
+}
+
+// ─────────────────────────────────────────────
+// GIF Capture
+// ─────────────────────────────────────────────
+
+void STransitionPreviewPanel::StartGifCapture()
+{
+	if (bIsCapturing || !PreviewViewport.IsValid() || Effects.Num() == 0)
+	{
+		return;
+	}
+
+	// Calculate total frames: forward only (0 → 1) at CaptureFrameRate fps
+	TotalCaptureFrames = FMath::RoundToInt32(CaptureFrameRate * Duration);
+	if (TotalCaptureFrames < 2)
+	{
+		TotalCaptureFrames = 2;
+	}
+
+	// Stop normal playback and reset
+	bIsPlaying = false;
+	bIsReversing = false;
+	CurrentProgress = 0.0f;
+	PreviewViewport->SetProgress(0.0f);
+
+	// Initialize capture state
+	CapturedFrames.Reset();
+	CapturedFrames.Reserve(TotalCaptureFrames);
+	CaptureFrameIndex = 0;
+	bCaptureWaitFrame = true; // Wait one frame for the viewport to render progress=0
+	bIsCapturing = true;
+}
+
+void STransitionPreviewPanel::OnCaptureFrameTick()
+{
+	if (!PreviewViewport.IsValid())
+	{
+		bIsCapturing = false;
+		return;
+	}
+
+	// Wait one frame after setting progress so the viewport can render
+	if (bCaptureWaitFrame)
+	{
+		bCaptureWaitFrame = false;
+		return;
+	}
+
+	// Capture the current frame
+	TArray<FColor> Pixels;
+	if (PreviewViewport->CaptureFrame(Pixels))
+	{
+		CapturedFrames.Add(MoveTemp(Pixels));
+	}
+	else
+	{
+		// Capture failed — abort
+		bIsCapturing = false;
+		CapturedFrames.Reset();
+
+		FNotificationInfo Info(LOCTEXT("CaptureFailedNotification", "GIF capture failed: could not read viewport pixels."));
+		Info.ExpireDuration = 4.0f;
+		FSlateNotificationManager::Get().AddNotification(Info);
+		return;
+	}
+
+	CaptureFrameIndex++;
+
+	if (CaptureFrameIndex >= TotalCaptureFrames)
+	{
+		// All frames captured — finalize
+		FinalizeGifCapture();
+		return;
+	}
+
+	// Set progress for the next frame
+	float Progress = static_cast<float>(CaptureFrameIndex) / static_cast<float>(TotalCaptureFrames - 1);
+	CurrentProgress = Progress;
+	PreviewViewport->SetProgress(Progress);
+	bCaptureWaitFrame = true; // Wait for render
+}
+
+void STransitionPreviewPanel::FinalizeGifCapture()
+{
+	bIsCapturing = false;
+
+	if (CapturedFrames.Num() == 0)
+	{
+		return;
+	}
+
+	// Determine capture dimensions from the first frame
+	// ReadPixels returns data at the actual viewport pixel size
+	int32 FramePixelCount = CapturedFrames[0].Num();
+	int32 CaptureWidth = static_cast<int32>(ViewportWidth);
+	int32 CaptureHeight = FramePixelCount / CaptureWidth;
+
+	if (CaptureWidth * CaptureHeight != FramePixelCount)
+	{
+		// Fallback: try to infer from viewport
+		CaptureHeight = static_cast<int32>(ViewportHeight);
+		if (CaptureWidth * CaptureHeight != FramePixelCount)
+		{
+			FNotificationInfo Info(LOCTEXT("CaptureSizeMismatch", "GIF capture failed: unexpected frame dimensions."));
+			Info.ExpireDuration = 4.0f;
+			FSlateNotificationManager::Get().AddNotification(Info);
+			CapturedFrames.Reset();
+			return;
+		}
+	}
+
+	// Show save file dialog
+	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+	if (!DesktopPlatform)
+	{
+		CapturedFrames.Reset();
+		return;
+	}
+
+	// Default filename: EffectName.gif
+	FString DefaultName = TEXT("Transition");
+	if (EffectNames.IsValidIndex(SelectedIndex))
+	{
+		DefaultName = *EffectNames[SelectedIndex];
+	}
+
+	TArray<FString> OutFiles;
+	bool bSaved = DesktopPlatform->SaveFileDialog(
+		FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr),
+		TEXT("Save GIF"),
+		FPaths::ProjectSavedDir(),
+		DefaultName + TEXT(".gif"),
+		TEXT("GIF Files (*.gif)|*.gif"),
+		0,
+		OutFiles);
+
+	if (!bSaved || OutFiles.Num() == 0)
+	{
+		CapturedFrames.Reset();
+		return;
+	}
+
+	FString SavePath = OutFiles[0];
+	if (!SavePath.EndsWith(TEXT(".gif"), ESearchCase::IgnoreCase))
+	{
+		SavePath += TEXT(".gif");
+	}
+
+	// Encode GIF (delay in centiseconds: 100 / fps)
+	int32 FrameDelayCentiseconds = FMath::Max(1, FMath::RoundToInt32(100.0f / CaptureFrameRate));
+	FGifEncoder Encoder(CaptureWidth, CaptureHeight, FrameDelayCentiseconds);
+
+	for (const TArray<FColor>& Frame : CapturedFrames)
+	{
+		Encoder.AddFrame(Frame);
+	}
+
+	CapturedFrames.Reset();
+
+	if (Encoder.WriteToFile(SavePath))
+	{
+		FNotificationInfo Info(FText::Format(
+			LOCTEXT("CaptureSuccessNotification", "GIF saved: {0}"),
+			FText::FromString(FPaths::GetCleanFilename(SavePath))));
+		Info.ExpireDuration = 5.0f;
+		FSlateNotificationManager::Get().AddNotification(Info);
+	}
+	else
+	{
+		FNotificationInfo Info(LOCTEXT("CaptureWriteFailedNotification", "GIF capture failed: could not write file."));
+		Info.ExpireDuration = 4.0f;
+		FSlateNotificationManager::Get().AddNotification(Info);
+	}
+}
+
+FText STransitionPreviewPanel::GetCaptureButtonText() const
+{
+	return bIsCapturing
+		? LOCTEXT("CaptureButtonCapturing", "Capturing...")
+		: LOCTEXT("CaptureButtonIdle", "Capture GIF");
+}
+
+bool STransitionPreviewPanel::IsCaptureButtonEnabled() const
+{
+	return !bIsCapturing && Effects.Num() > 0;
 }
 
 #undef LOCTEXT_NAMESPACE

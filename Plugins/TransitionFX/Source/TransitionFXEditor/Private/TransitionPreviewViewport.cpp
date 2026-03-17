@@ -151,3 +151,12 @@ void STransitionPreviewViewport::SetInvert(bool bInvert)
 		ViewportClient->SetInvert(bInvert);
 	}
 }
+
+bool STransitionPreviewViewport::CaptureFrame(TArray<FColor>& OutPixels)
+{
+	if (ViewportClient.IsValid() && ViewportClient->Viewport)
+	{
+		return ViewportClient->Viewport->ReadPixels(OutPixels);
+	}
+	return false;
+}

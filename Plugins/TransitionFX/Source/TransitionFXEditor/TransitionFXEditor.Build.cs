@@ -29,7 +29,8 @@ public class TransitionFXEditor : ModuleRules
                 "RHI",
                 "ToolMenus",
                 "EditorFramework",
-                "Projects"
+                "Projects",
+                "DesktopPlatform"
             }
         );
     }

@@ -54,6 +54,9 @@ public:
 	void SetProgress(float Progress);
 	void SetInvert(bool bInvert);
 
+	/** Read the current viewport pixels (BGRA). Returns true on success. */
+	bool CaptureFrame(TArray<FColor>& OutPixels);
+
 protected:
 	virtual TSharedRef<FEditorViewportClient> MakeEditorViewportClient() override;
 

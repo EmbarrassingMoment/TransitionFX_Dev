@@ -56,6 +56,13 @@ private:
 	// Resolution
 	void OnResolutionSelected(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo);
 
+	// GIF capture
+	void StartGifCapture();
+	void OnCaptureFrameTick();
+	void FinalizeGifCapture();
+	FText GetCaptureButtonText() const;
+	bool IsCaptureButtonEnabled() const;
+
 	// UI helpers
 	FText GetProgressText() const;
 	FText GetSpeedText() const;
@@ -83,6 +90,14 @@ private:
 	TArray<TSharedPtr<FString>> ResolutionOptions;
 	float ViewportWidth;
 	float ViewportHeight;
+
+	// GIF capture state
+	bool bIsCapturing;
+	bool bCaptureWaitFrame;
+	int32 CaptureFrameIndex;
+	int32 TotalCaptureFrames;
+	int32 CaptureFrameRate;
+	TArray<TArray<FColor>> CapturedFrames;
 
 	// Tick delegate
 	FTSTicker::FDelegateHandle TickDelegateHandle;
