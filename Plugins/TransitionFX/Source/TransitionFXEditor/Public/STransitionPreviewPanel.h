@@ -99,6 +99,7 @@ private:
 	int32 CaptureFrameRate;
 	int32 CaptureStabilizeFrames;
 	TArray<TArray<FColor>> CapturedFrames;
+	float GifPlaySpeed;
 
 	// Tick delegate
 	FTSTicker::FDelegateHandle TickDelegateHandle;
