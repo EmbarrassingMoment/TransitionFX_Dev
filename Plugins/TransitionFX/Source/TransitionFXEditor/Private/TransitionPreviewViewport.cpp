@@ -4,6 +4,7 @@
 #include "PreviewScene.h"
 #include "Engine/PostProcessVolume.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "RenderingThread.h"
 #include "TransitionFXConfig.h"
 
 // --- FTransitionPreviewViewportClient ---
@@ -150,4 +151,23 @@ void STransitionPreviewViewport::SetInvert(bool bInvert)
 	{
 		ViewportClient->SetInvert(bInvert);
 	}
+}
+
+bool STransitionPreviewViewport::CaptureFrame(TArray<FColor>& OutPixels)
+{
+	if (ViewportClient.IsValid() && ViewportClient->Viewport)
+	{
+		FlushRenderingCommands();
+		return ViewportClient->Viewport->ReadPixels(OutPixels);
+	}
+	return false;
+}
+
+FIntPoint STransitionPreviewViewport::GetViewportSize() const
+{
+	if (ViewportClient.IsValid() && ViewportClient->Viewport)
+	{
+		return ViewportClient->Viewport->GetSizeXY();
+	}
+	return FIntPoint::ZeroValue;
 }
