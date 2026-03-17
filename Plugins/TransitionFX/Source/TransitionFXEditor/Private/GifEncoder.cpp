@@ -226,10 +226,11 @@ void FGifEncoder::CompressLZW(TArray<uint8>& OutBytes, const TArray<uint8>& Indi
 	auto ResetTable = [&]()
 	{
 		Table.Reset();
-		for (int32 i = 0; i < ClearCode; ++i)
-		{
-			Table.Add(static_cast<int64>(i), i);
-		}
+		// Single-byte codes (0..ClearCode-1) are NOT added to the table.
+		// They serve only as the initial value of CurrentPrefix and are emitted
+		// directly.  Adding them would cause key collisions: composite keys are
+		// (Prefix << 16) | Suffix, so when Prefix == 0 the composite key equals
+		// Suffix, colliding with a single-byte entry Table[Suffix].
 		NextCode = EoiCode + 1;
 		CodeSize = MinCodeSize + 1;
 	};
