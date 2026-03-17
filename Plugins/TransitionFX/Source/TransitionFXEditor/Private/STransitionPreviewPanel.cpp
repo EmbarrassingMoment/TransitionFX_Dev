@@ -37,6 +37,7 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 	TotalCaptureFrames = 0;
 	CaptureFrameRate = 30;
 	CaptureStabilizeFrames = 0;
+	GifPlaySpeed = 0.5f;
 	ViewportWidth = 480.0f;
 	ViewportHeight = 270.0f;
 
@@ -296,6 +297,29 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 				.Text(this, &STransitionPreviewPanel::GetCaptureButtonText)
 				.IsEnabled(this, &STransitionPreviewPanel::IsCaptureButtonEnabled)
 				.OnClicked_Lambda([this]() { StartGifCapture(); return FReply::Handled(); })
+			]
+
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.VAlign(VAlign_Center)
+			.Padding(8, 0, 4, 0)
+			[
+				SNew(STextBlock)
+				.Text(LOCTEXT("GifSpeedLabel", "GIF Speed"))
+			]
+
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.Padding(0, 0, 8, 0)
+			[
+				SNew(SSpinBox<float>)
+				.MinValue(0.1f)
+				.MaxValue(2.0f)
+				.Delta(0.1f)
+				.Value_Lambda([this]() { return GifPlaySpeed; })
+				.OnValueChanged_Lambda([this](float NewValue) { GifPlaySpeed = NewValue; })
+				.OnValueCommitted_Lambda([this](float NewValue, ETextCommit::Type) { GifPlaySpeed = NewValue; })
+				.MinDesiredWidth(60.0f)
 			]
 
 			+ SHorizontalBox::Slot()
@@ -725,7 +749,7 @@ void STransitionPreviewPanel::FinalizeGifCapture()
 	}
 
 	// Encode GIF (delay in centiseconds: 100 / fps)
-	int32 FrameDelayCentiseconds = FMath::Max(1, FMath::RoundToInt32(100.0f / CaptureFrameRate));
+	int32 FrameDelayCentiseconds = FMath::Max(1, FMath::RoundToInt32(100.0f / CaptureFrameRate / GifPlaySpeed));
 	FGifEncoder Encoder(CaptureWidth, CaptureHeight, FrameDelayCentiseconds);
 
 	for (const TArray<FColor>& Frame : CapturedFrames)
