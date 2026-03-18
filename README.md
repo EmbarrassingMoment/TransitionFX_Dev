@@ -79,30 +79,30 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 
 | Effect Name | Description | Preview |
 | :--- | :--- | :--- |
-| **Fade** | Standard opacity fade. Simple and lightweight. | <!-- IMAGE: effect_fade.gif --> |
-| **Iris** | Classic circular wipe closing toward the center. Aspect ratio corrected. | <!-- IMAGE: effect_iris.gif --> |
-| **Heart Iris** | An iris wipe in the shape of a heart using procedural SDF. | <!-- IMAGE: effect_heart_iris.gif --> |
-| **Flower Iris** | An iris wipe in the shape of a flower with rounded petals. The number of petals and the flower's shape (sharpness) are adjustable. | <!-- IMAGE: effect_flower_iris.gif --> |
-| **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | <!-- IMAGE: effect_diamond.gif --> |
-| **Box** | A simple square expanding from the center. Basic geometric transition. | <!-- IMAGE: effect_box.gif --> |
-| **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | <!-- IMAGE: effect_linear_wipe.gif --> |
-| **Split** | A stylish wipe that splits the screen in half from the center and opens outward. Supports adjustable split angles (horizontal, vertical, diagonal). | <!-- IMAGE: effect_split.gif --> |
-| **Wavy Curtain** | A directional wipe similar to Linear Wipe, but with an animated wavy boundary like a curtain. | <!-- IMAGE: effect_wavy_curtain.gif --> |
-| **Radial Wipe** | Clock-like radial wipe. Supports smooth edges and adjustable start angle. | <!-- IMAGE: effect_radial_wipe.gif --> |
-| **Tiles** | The screen is divided into a grid, and blocks expand outward from the center like a wave. | <!-- IMAGE: effect_tiles.gif --> |
-| **Polka Dots** | A wave of expanding circles (halftone pattern) covers the screen. Pop and modern look. | <!-- IMAGE: effect_polka_dots.gif --> |
-| **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | <!-- IMAGE: effect_blinds.gif --> |
-| **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | <!-- IMAGE: effect_spiral.gif --> |
-| **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | <!-- IMAGE: effect_random_tiles.gif --> |
-| **Wind** | A directional wipe with streak noise, simulating wind blowing the image away. | <!-- IMAGE: effect_wind.gif --> |
-| **Cross Wipe** | A cross shape expands from the center, pushing the image into the four corners until it vanishes. | <!-- IMAGE: effect_cross_wipe.gif --> |
-| **Zoom Wipe** | A directional wipe that distorts and zooms the scene inward as it fades out. | <!-- IMAGE: effect_zoom_wipe.gif --> |
-| **Texture Mask** | Uses a grayscale texture to determine the transition order (Black=Start, White=End). Supports custom mask textures via Parameter Overrides. | <!-- IMAGE: effect_texture_mask.gif --> |
-| **TV Switch Off** | A retro CRT TV turn-off effect. Collapses vertically into a line, then horizontally into a point. | <!-- IMAGE: effect_tv_switch_off.gif --> |
-| **Hexagon** | A sci-fi style honeycomb wipe. A wave of hexagonal cells smoothly shrinks into their centers. | <!-- IMAGE: effect_hexagon.gif --> |
+| **Fade** | Standard opacity fade. Simple and lightweight. | ![Fade](docs/images/effect_fade.gif) |
+| **Iris** | Classic circular wipe closing toward the center. Aspect ratio corrected. | ![Iris](docs/images/effect_iris.gif) |
+| **Heart Iris** | An iris wipe in the shape of a heart using procedural SDF. | ![Heart Iris](docs/images/effect_heart_iris.gif) |
+| **Flower Iris** | An iris wipe in the shape of a flower with rounded petals. The number of petals and the flower's shape (sharpness) are adjustable. | ![Flower Iris](docs/images/effect_flower_iris.gif) |
+| **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | ![Diamond](docs/images/effect_diamond.gif) |
+| **Box** | A simple square expanding from the center. Basic geometric transition. | ![Box](docs/images/effect_box.gif) |
+| **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | ![Linear Wipe](docs/images/effect_linear_wipe.gif) |
+| **Split** | A stylish wipe that splits the screen in half from the center and opens outward. Supports adjustable split angles (horizontal, vertical, diagonal). | ![Split](docs/images/effect_split.gif) |
+| **Wavy Curtain** | A directional wipe similar to Linear Wipe, but with an animated wavy boundary like a curtain. | ![Wavy Curtain](docs/images/effect_wavy_curtain.gif) |
+| **Radial Wipe** | Clock-like radial wipe. Supports smooth edges and adjustable start angle. | ![Radial Wipe](docs/images/effect_radial_wipe.gif) |
+| **Tiles** | The screen is divided into a grid, and blocks expand outward from the center like a wave. | ![Tiles](docs/images/effect_tiles.gif) |
+| **Polka Dots** | A wave of expanding circles (halftone pattern) covers the screen. Pop and modern look. | ![Polka Dots](docs/images/effect_polka_dots.gif) |
+| **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | ![Blinds](docs/images/effect_blinds.gif) |
+| **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | ![Spiral](docs/images/effect_spiral.gif) |
+| **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | ![Random Tiles](docs/images/effect_random_tiles.gif) |
+| **Wind** | A directional wipe with streak noise, simulating wind blowing the image away. | ![Wind](docs/images/effect_wind.gif) |
+| **Cross Wipe** | A cross shape expands from the center, pushing the image into the four corners until it vanishes. | ![Cross Wipe](docs/images/effect_cross_wipe.gif) |
+| **Zoom Wipe** | A directional wipe that distorts and zooms the scene inward as it fades out. | ![Zoom Wipe](docs/images/effect_zoom_wipe.gif) |
+| **Texture Mask** | Uses a grayscale texture to determine the transition order (Black=Start, White=End). Supports custom mask textures via Parameter Overrides. | ![Texture Mask](docs/images/effect_texture_mask.gif) |
+| **TV Switch Off** | A retro CRT TV turn-off effect. Collapses vertically into a line, then horizontally into a point. | ![TV Switch Off](docs/images/effect_tv_switch_off.gif) |
+| **Hexagon** | A sci-fi style honeycomb wipe. A wave of hexagonal cells smoothly shrinks into their centers. | ![Hexagon](docs/images/effect_hexagon.gif) |
 | **Triangle** | A stylish polygon-style wipe where sharp triangles shrink and disappear in a ripple effect from the center. | ![Triangle](https://via.placeholder.com/320x180/000000/FFFFFF?text=Triangle) |
-| **Checkerboard** | A checkerboard pattern that tiles the screen and expands to cover it. Classic retro feel. | <!-- IMAGE: effect_checkerboard.gif --> |
-| **Pixelate** | A pixelation effect that progressively reduces the screen resolution until it fades out. | <!-- IMAGE: effect_pixelate.gif --> |
+| **Checkerboard** | A checkerboard pattern that tiles the screen and expands to cover it. Classic retro feel. | ![Checkerboard](docs/images/effect_checkerboard.gif) |
+| **Pixelate** | A pixelation effect that progressively reduces the screen resolution until it fades out. | ![Pixelate](docs/images/effect_pixelate.gif) |
 
 > **Tip for Texture Masks:**
 > When importing your mask textures, ensure you uncheck **sRGB** and set Compression Settings to **Masks (no sRGB)** or **Grayscale** for accurate value reading.
