@@ -3,44 +3,55 @@
 All documentation files contain `<!-- IMAGE: ... -->` placeholder comments for images that need to be captured.
 These images should be placed in `docs/images/` and the HTML comments should be replaced with markdown image syntax.
 
-## Progress: 24 / 40 images captured (60%)
+## Progress: 29 / 40 images captured (73%)
 
 - Effect Preview GIFs: **24/24** complete
-- README Hero & Overview: **0/4**
-- Quick Start Guide: **0/8**
-- API Reference: **0/4**
+- README Hero & Overview: **1/4** (1 placeholder)
+- Quick Start Guide: **3/8** (3 placeholders)
+- API Reference: **2/4** (2 placeholders)
+
+> **Note:** "Placeholder" means the file exists but contains only stub data (130 bytes). These need to be replaced with actual screenshots.
 
 ---
 
-## Still Missing Images
+## Still Missing Images (11 files not yet created)
 
 ### README (EN/JP) — Hero & Overview
 | Filename | Description | Status |
 |---|---|---|
-| `hero_banner.gif` | Montage/GIF showing multiple transition effects in action | Missing |
-| `install_enable_plugin.png` | Plugins window with TransitionFX enabled | Missing |
-| `easing_curves.png` | Chart comparing all easing types (Linear, Sine, Cubic, Expo, Bounce, Elastic) | Missing |
-| `performance_preload_bp.png` | PreloadTransitionPresets node in GameInstance Init Blueprint | Missing |
+| `hero_banner.gif` | Montage/GIF showing multiple transition effects in action | **Missing** |
+| `easing_curves.png` | Chart comparing all easing types (Linear, Sine, Cubic, Expo, Bounce, Elastic) | **Missing** |
+| `performance_preload_bp.png` | PreloadTransitionPresets node in GameInstance Init Blueprint | **Missing** |
 
 ### Quick Start Guide (EN/JP)
 | Filename | Description | Status |
 |---|---|---|
-| `quickstart_create_data_asset.png` | Content Browser — Data Asset creation flow | Missing |
-| `quickstart_preset_settings.png` | TransitionPreset detail panel showing all properties | Missing |
-| `quickstart_bp_play_node.png` | Play Transition And Wait Blueprint node | Missing |
-| `quickstart_preload_bp.png` | PreloadTransitionPresets node in GameInstance Init | Missing |
-| `quickstart_fadeout_fadein_bp.png` | Fade Out → Processing → Fade In Blueprint graph | Missing |
-| `quickstart_open_level_bp.png` | Open Level With Transition And Wait node | Missing |
-| `quickstart_hold_workflow_bp.png` | bHoldAtMax + ReleaseHold loading screen Blueprint workflow | Missing |
-| `quickstart_forceclear_console.png` | Console with TransitionFX.ForceClear command | Missing |
+| `quickstart_create_data_asset.png` | Content Browser — Data Asset creation flow | **Missing** |
+| `quickstart_preset_settings.png` | TransitionPreset detail panel showing all properties | **Missing** |
+| `quickstart_preload_bp.png` | PreloadTransitionPresets node in GameInstance Init | **Missing** |
+| `quickstart_fadeout_fadein_bp.png` | Fade Out → Processing → Fade In Blueprint graph | **Missing** |
+| `quickstart_hold_workflow_bp.png` | bHoldAtMax + ReleaseHold loading screen Blueprint workflow | **Missing** |
+| `quickstart_forceclear_console.png` | Console with TransitionFX.ForceClear command | **Missing** |
 
 ### API Reference (EN/JP)
 | Filename | Description | Status |
 |---|---|---|
-| `api_play_transition_node.png` | Play Transition And Wait latent action node | Missing |
-| `api_open_level_node.png` | Open Level With Transition node | Missing |
-| `api_quick_fade_node.png` | Quick Fade To Black / Quick Fade From Black nodes | Missing |
-| `api_preload_node.png` | Preload Transition Presets node | Missing |
+| `api_play_transition_node.png` | Play Transition And Wait latent action node | **Missing** |
+| `api_quick_fade_node.png` | Quick Fade To Black / Quick Fade From Black nodes | **Missing** |
+
+---
+
+## Placeholder Images (5 files — exist but need real screenshots)
+
+These files exist in `docs/images/` but are 130-byte stubs. Replace them with actual Unreal Editor screenshots.
+
+| Filename | Description | Status |
+|---|---|---|
+| `install_enable_plugin.png` | Plugins window with TransitionFX enabled | **Placeholder** |
+| `quickstart_bp_play_node.png` | Play Transition And Wait Blueprint node | **Placeholder** |
+| `quickstart_open_level_bp.png` | Open Level With Transition And Wait node | **Placeholder** |
+| `api_open_level_node.png` | Open Level With Transition node | **Placeholder** |
+| `api_preload_node.png` | Preload Transition Presets node | **Placeholder** |
 
 ---
 
@@ -73,6 +84,12 @@ These images should be placed in `docs/images/` and the HTML comments should be 
 | `effect_hexagon.gif` | Hexagon | Done |
 | `effect_checkerboard.gif` | Checkerboard | Done |
 | `effect_pixelate.gif` | Pixelate | Done |
+
+---
+
+## Known Issues
+
+- **README.ja.md line 131**: Uses external placeholder URL (`via.placeholder.com`) for Triangle effect instead of the local `docs/images/effect_triangle.gif` which already exists. This should be fixed.
 
 ---
 
