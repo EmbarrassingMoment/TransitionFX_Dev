@@ -211,7 +211,7 @@ Play Random Transition And Wait
 
 ### When Making Level Transitions Seamless
 
-<!-- IMAGE: quickstart_open_level_bp.png - Blueprint screenshot of Open Level With Transition And Wait node -->
+![Open Level With Transition And Wait node](docs/images/quickstart_open_level_bp.png)
 
 If you want to complete Fade Out → Open Level → Fade In using a single node, use **`Open Level With Transition And Wait`**.
 

@@ -25,7 +25,7 @@ It renders high-quality transitions based on SDF (Signed Distance Field) math wi
 2.  Place the `TransitionFX` folder into your project's `Plugins` directory.
 3.  Enable `TransitionFX` in the editor plugins window.
 
-<!-- IMAGE: install_enable_plugin.png - Screenshot of the Plugins window with TransitionFX enabled -->
+![Plugins window with TransitionFX enabled](docs/images/install_enable_plugin.png)
 
 ## Quick Start
 
@@ -49,7 +49,7 @@ Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
 ### 2. Call from Blueprint
 Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.
 
-<!-- IMAGE: quickstart_bp_play_node.png - Screenshot of the Play Transition And Wait Blueprint node -->
+![Play Transition And Wait Blueprint node](docs/images/quickstart_bp_play_node.png)
 
 *   **Fade Out (Forward):**
     `Play Transition And Wait` (Preset: `DA_FadeBlack`, Mode: `Forward`, Speed: `1.0`)
