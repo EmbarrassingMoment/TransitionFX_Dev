@@ -40,6 +40,8 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 	GifPlaySpeed = 0.5f;
 	ViewportWidth = 480.0f;
 	ViewportHeight = 270.0f;
+	bIsBatchCapturing = false;
+	BatchCaptureIndex = 0;
 
 	// Resolution options
 	ResolutionOptions.Add(MakeShared<FString>(TEXT("480 x 270")));
@@ -324,12 +326,31 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
+			.Padding(8, 0, 0, 0)
+			[
+				SNew(SButton)
+				.Text(this, &STransitionPreviewPanel::GetBatchCaptureButtonText)
+				.IsEnabled(this, &STransitionPreviewPanel::IsBatchCaptureButtonEnabled)
+				.OnClicked_Lambda([this]() { StartBatchCapture(); return FReply::Handled(); })
+			]
+
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
 			.VAlign(VAlign_Center)
 			.Padding(8, 0, 0, 0)
 			[
 				SNew(STextBlock)
 				.Text_Lambda([this]()
 				{
+					if (bIsCapturing && bIsBatchCapturing)
+					{
+						return FText::Format(
+							LOCTEXT("BatchCaptureProgress", "Batch {0}/{1} — Frame {2}/{3}"),
+							FText::AsNumber(BatchCaptureIndex + 1),
+							FText::AsNumber(Effects.Num()),
+							FText::AsNumber(CaptureFrameIndex),
+							FText::AsNumber(TotalCaptureFrames));
+					}
 					if (bIsCapturing)
 					{
 						return FText::Format(
@@ -711,41 +732,52 @@ void STransitionPreviewPanel::FinalizeGifCapture()
 		return;
 	}
 
-	// Show save file dialog
-	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
-	if (!DesktopPlatform)
+	// Determine save path
+	FString SavePath;
+
+	if (bIsBatchCapturing)
 	{
-		CapturedFrames.Reset();
-		return;
+		// Batch mode: auto-save with mapped filename
+		FString GifFilename = GetGifFilenameForEffect(Effects[SelectedIndex].DisplayName);
+		SavePath = BatchOutputDir / GifFilename;
 	}
-
-	// Default filename: EffectName.gif
-	FString DefaultName = TEXT("Transition");
-	if (EffectNames.IsValidIndex(SelectedIndex))
+	else
 	{
-		DefaultName = *EffectNames[SelectedIndex];
-	}
+		// Single mode: show save file dialog
+		IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+		if (!DesktopPlatform)
+		{
+			CapturedFrames.Reset();
+			return;
+		}
 
-	TArray<FString> OutFiles;
-	bool bSaved = DesktopPlatform->SaveFileDialog(
-		FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr),
-		TEXT("Save GIF"),
-		FPaths::ProjectSavedDir(),
-		DefaultName + TEXT(".gif"),
-		TEXT("GIF Files (*.gif)|*.gif"),
-		0,
-		OutFiles);
+		FString DefaultName = TEXT("Transition");
+		if (EffectNames.IsValidIndex(SelectedIndex))
+		{
+			DefaultName = *EffectNames[SelectedIndex];
+		}
 
-	if (!bSaved || OutFiles.Num() == 0)
-	{
-		CapturedFrames.Reset();
-		return;
-	}
+		TArray<FString> OutFiles;
+		bool bSaved = DesktopPlatform->SaveFileDialog(
+			FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr),
+			TEXT("Save GIF"),
+			FPaths::ProjectSavedDir(),
+			DefaultName + TEXT(".gif"),
+			TEXT("GIF Files (*.gif)|*.gif"),
+			0,
+			OutFiles);
 
-	FString SavePath = OutFiles[0];
-	if (!SavePath.EndsWith(TEXT(".gif"), ESearchCase::IgnoreCase))
-	{
-		SavePath += TEXT(".gif");
+		if (!bSaved || OutFiles.Num() == 0)
+		{
+			CapturedFrames.Reset();
+			return;
+		}
+
+		SavePath = OutFiles[0];
+		if (!SavePath.EndsWith(TEXT(".gif"), ESearchCase::IgnoreCase))
+		{
+			SavePath += TEXT(".gif");
+		}
 	}
 
 	// Encode GIF (delay in centiseconds: 100 / fps)
@@ -761,17 +793,28 @@ void STransitionPreviewPanel::FinalizeGifCapture()
 
 	if (Encoder.WriteToFile(SavePath))
 	{
-		FNotificationInfo Info(FText::Format(
-			LOCTEXT("CaptureSuccessNotification", "GIF saved: {0}"),
-			FText::FromString(FPaths::GetCleanFilename(SavePath))));
-		Info.ExpireDuration = 5.0f;
-		FSlateNotificationManager::Get().AddNotification(Info);
+		if (!bIsBatchCapturing)
+		{
+			FNotificationInfo Info(FText::Format(
+				LOCTEXT("CaptureSuccessNotification", "GIF saved: {0}"),
+				FText::FromString(FPaths::GetCleanFilename(SavePath))));
+			Info.ExpireDuration = 5.0f;
+			FSlateNotificationManager::Get().AddNotification(Info);
+		}
 	}
 	else
 	{
-		FNotificationInfo Info(LOCTEXT("CaptureWriteFailedNotification", "GIF capture failed: could not write file."));
+		FNotificationInfo Info(FText::Format(
+			LOCTEXT("CaptureWriteFailedNotification2", "GIF capture failed: could not write {0}"),
+			FText::FromString(FPaths::GetCleanFilename(SavePath))));
 		Info.ExpireDuration = 4.0f;
 		FSlateNotificationManager::Get().AddNotification(Info);
+	}
+
+	// Advance batch if in batch mode
+	if (bIsBatchCapturing)
+	{
+		AdvanceBatchCapture();
 	}
 }
 
@@ -784,7 +827,150 @@ FText STransitionPreviewPanel::GetCaptureButtonText() const
 
 bool STransitionPreviewPanel::IsCaptureButtonEnabled() const
 {
-	return !bIsCapturing && Effects.Num() > 0;
+	return !bIsCapturing && !bIsBatchCapturing && Effects.Num() > 0;
+}
+
+// ─────────────────────────────────────────────
+// Batch GIF Capture
+// ─────────────────────────────────────────────
+
+FString STransitionPreviewPanel::GetGifFilenameForEffect(const FString& DisplayName)
+{
+	// Mapping from dropdown DisplayName to MISSING_IMAGES.md filenames
+	static const TMap<FString, FString> NameToFile = {
+		{ TEXT("Fade"),          TEXT("effect_fade.gif") },
+		{ TEXT("Iris"),          TEXT("effect_iris.gif") },
+		{ TEXT("Heart"),         TEXT("effect_heart_iris.gif") },
+		{ TEXT("FlowerIris"),    TEXT("effect_flower_iris.gif") },
+		{ TEXT("Diamond"),       TEXT("effect_diamond.gif") },
+		{ TEXT("Box"),           TEXT("effect_box.gif") },
+		{ TEXT("LinearWipe"),    TEXT("effect_linear_wipe.gif") },
+		{ TEXT("Split"),         TEXT("effect_split.gif") },
+		{ TEXT("WavyCurtain"),   TEXT("effect_wavy_curtain.gif") },
+		{ TEXT("RadialWipe"),    TEXT("effect_radial_wipe.gif") },
+		{ TEXT("Tiles"),         TEXT("effect_tiles.gif") },
+		{ TEXT("PolkaDots"),     TEXT("effect_polka_dots.gif") },
+		{ TEXT("Blinds"),        TEXT("effect_blinds.gif") },
+		{ TEXT("Spiral"),        TEXT("effect_spiral.gif") },
+		{ TEXT("RandomTiles"),   TEXT("effect_random_tiles.gif") },
+		{ TEXT("Wind"),          TEXT("effect_wind.gif") },
+		{ TEXT("CrossWipe"),     TEXT("effect_cross_wipe.gif") },
+		{ TEXT("ZoomWipe"),      TEXT("effect_zoom_wipe.gif") },
+		{ TEXT("TextureMask"),   TEXT("effect_texture_mask.gif") },
+		{ TEXT("TVSwitchOff"),   TEXT("effect_tv_switch_off.gif") },
+		{ TEXT("Hexagon"),       TEXT("effect_hexagon.gif") },
+		{ TEXT("Checkerboard"),  TEXT("effect_checkerboard.gif") },
+		{ TEXT("Pixelate"),      TEXT("effect_pixelate.gif") },
+	};
+
+	const FString* Found = NameToFile.Find(DisplayName);
+	if (Found)
+	{
+		return *Found;
+	}
+
+	// Fallback: convert PascalCase to snake_case
+	FString Result = TEXT("effect_");
+	for (int32 i = 0; i < DisplayName.Len(); ++i)
+	{
+		TCHAR Ch = DisplayName[i];
+		if (FChar::IsUpper(Ch) && i > 0)
+		{
+			Result += TEXT("_");
+		}
+		Result += FChar::ToLower(Ch);
+	}
+	Result += TEXT(".gif");
+	return Result;
+}
+
+void STransitionPreviewPanel::StartBatchCapture()
+{
+	if (bIsCapturing || bIsBatchCapturing || Effects.Num() == 0)
+	{
+		return;
+	}
+
+	// Ask user for output directory
+	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+	if (!DesktopPlatform)
+	{
+		return;
+	}
+
+	// Default to docs/images/ under project root
+	FString DefaultDir = FPaths::ProjectDir() / TEXT("docs") / TEXT("images");
+	FString ChosenDir;
+	bool bChosen = DesktopPlatform->OpenDirectoryDialog(
+		FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr),
+		TEXT("Select Batch GIF Output Folder"),
+		DefaultDir,
+		ChosenDir);
+
+	if (!bChosen)
+	{
+		return;
+	}
+
+	// Ensure directory exists
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	PlatformFile.CreateDirectoryTree(*ChosenDir);
+
+	BatchOutputDir = ChosenDir;
+	BatchCaptureIndex = 0;
+	bIsBatchCapturing = true;
+
+	FNotificationInfo Info(FText::Format(
+		LOCTEXT("BatchCaptureStartNotification", "Batch capture started: {0} effects"),
+		FText::AsNumber(Effects.Num())));
+	Info.ExpireDuration = 3.0f;
+	FSlateNotificationManager::Get().AddNotification(Info);
+
+	// Select the first effect and start capturing
+	SelectedIndex = BatchCaptureIndex;
+	OnEffectSelected(EffectNames[SelectedIndex], ESelectInfo::Direct);
+	StartGifCapture();
+}
+
+void STransitionPreviewPanel::AdvanceBatchCapture()
+{
+	BatchCaptureIndex++;
+
+	if (BatchCaptureIndex >= Effects.Num())
+	{
+		// Batch complete
+		bIsBatchCapturing = false;
+
+		FNotificationInfo Info(FText::Format(
+			LOCTEXT("BatchCaptureCompleteNotification", "Batch capture complete! {0} GIFs saved to {1}"),
+			FText::AsNumber(Effects.Num()),
+			FText::FromString(BatchOutputDir)));
+		Info.ExpireDuration = 8.0f;
+		FSlateNotificationManager::Get().AddNotification(Info);
+		return;
+	}
+
+	// Select next effect and start capture
+	SelectedIndex = BatchCaptureIndex;
+	OnEffectSelected(EffectNames[SelectedIndex], ESelectInfo::Direct);
+	StartGifCapture();
+}
+
+FText STransitionPreviewPanel::GetBatchCaptureButtonText() const
+{
+	if (bIsBatchCapturing)
+	{
+		return FText::Format(
+			LOCTEXT("BatchCapturing", "Batch... ({0}/{1})"),
+			FText::AsNumber(BatchCaptureIndex + 1),
+			FText::AsNumber(Effects.Num()));
+	}
+	return LOCTEXT("BatchCaptureButton", "Batch Capture All");
+}
+
+bool STransitionPreviewPanel::IsBatchCaptureButtonEnabled() const
+{
+	return !bIsCapturing && !bIsBatchCapturing && Effects.Num() > 0;
 }
 
 #undef LOCTEXT_NAMESPACE
