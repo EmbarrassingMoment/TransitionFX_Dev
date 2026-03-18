@@ -860,6 +860,7 @@ FString STransitionPreviewPanel::GetGifFilenameForEffect(const FString& DisplayN
 		{ TEXT("TVSwitchOff"),   TEXT("effect_tv_switch_off.gif") },
 		{ TEXT("Hexagon"),       TEXT("effect_hexagon.gif") },
 		{ TEXT("Checkerboard"),  TEXT("effect_checkerboard.gif") },
+		{ TEXT("Triangle"),      TEXT("effect_triangle.gif") },
 		{ TEXT("Pixelate"),      TEXT("effect_pixelate.gif") },
 	};
 
