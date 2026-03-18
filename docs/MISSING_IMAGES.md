@@ -3,9 +3,9 @@
 All documentation files contain `<!-- IMAGE: ... -->` placeholder comments for images that need to be captured.
 These images should be placed in `docs/images/` and the HTML comments should be replaced with markdown image syntax.
 
-## Progress: 23 / 40 images captured (57%)
+## Progress: 24 / 40 images captured (60%)
 
-- Effect Preview GIFs: **23/24** complete (Triangle missing)
+- Effect Preview GIFs: **24/24** complete
 - README Hero & Overview: **0/4**
 - Quick Start Guide: **0/8**
 - API Reference: **0/4**
@@ -42,16 +42,11 @@ These images should be placed in `docs/images/` and the HTML comments should be 
 | `api_quick_fade_node.png` | Quick Fade To Black / Quick Fade From Black nodes | Missing |
 | `api_preload_node.png` | Preload Transition Presets node | Missing |
 
-### Effect Preview GIFs (missing)
-| Filename | Effect | Status |
-|---|---|---|
-| `effect_triangle.gif` | Triangle | Missing |
-
 ---
 
 ## Captured Images (Complete)
 
-### Effect Preview GIFs — 23/23 done
+### Effect Preview GIFs — 24/24 done
 | Filename | Effect | Status |
 |---|---|---|
 | `effect_fade.gif` | Fade | Done |
@@ -73,6 +68,7 @@ These images should be placed in `docs/images/` and the HTML comments should be 
 | `effect_cross_wipe.gif` | Cross Wipe | Done |
 | `effect_zoom_wipe.gif` | Zoom Wipe | Done |
 | `effect_texture_mask.gif` | Texture Mask | Done |
+| `effect_triangle.gif` | Triangle | Done |
 | `effect_tv_switch_off.gif` | TV Switch Off | Done |
 | `effect_hexagon.gif` | Hexagon | Done |
 | `effect_checkerboard.gif` | Checkerboard | Done |
