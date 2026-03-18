@@ -211,7 +211,7 @@ Play Random Transition And Wait
 
 ### レベル遷移をシームレスに行いたい場合
 
-<!-- IMAGE: quickstart_open_level_bp.png - Open Level With Transition And Wait ノードの Blueprint スクリーンショット -->
+![Open Level With Transition And Wait ノード](docs/images/quickstart_open_level_bp.png)
 
 フェードアウト → レベルオープン → フェードインを 1 ノードで完結させたい場合は **`Open Level With Transition And Wait`** を使います。
 

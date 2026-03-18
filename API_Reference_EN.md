@@ -117,7 +117,7 @@ Returns true if the current transition has finished its hold phase or completed.
 
 #### Open Level With Transition
 
-<!-- IMAGE: api_open_level_node.png - Blueprint screenshot of the Open Level With Transition node -->
+![Open Level With Transition node](docs/images/api_open_level_node.png)
 
 Handles the sequence of "Fade Out -> Open Level -> Fade In". The fade-in on the new level side is automatically started via `PostLoadMapWithWorld`.
 
@@ -182,7 +182,7 @@ Applies an easing function to the given alpha value. A pure math node useful for
 
 #### Preload Transition Presets
 
-<!-- IMAGE: api_preload_node.png - Blueprint screenshot of the Preload Transition Presets node -->
+![Preload Transition Presets node](docs/images/api_preload_node.png)
 
 Pre-compiles shaders for the given presets to prevent first-frame hitching. Available on the `TransitionManagerSubsystem`.
 
