@@ -63,6 +63,13 @@ private:
 	FText GetCaptureButtonText() const;
 	bool IsCaptureButtonEnabled() const;
 
+	// Batch GIF capture (captures all effects with filenames from MISSING_IMAGES.md)
+	static FString GetGifFilenameForEffect(const FString& DisplayName);
+	void StartBatchCapture();
+	void AdvanceBatchCapture();
+	FText GetBatchCaptureButtonText() const;
+	bool IsBatchCaptureButtonEnabled() const;
+
 	// UI helpers
 	FText GetProgressText() const;
 	FText GetSpeedText() const;
@@ -100,6 +107,11 @@ private:
 	int32 CaptureStabilizeFrames;
 	TArray<TArray<FColor>> CapturedFrames;
 	float GifPlaySpeed;
+
+	// Batch capture state
+	bool bIsBatchCapturing;
+	int32 BatchCaptureIndex;
+	FString BatchOutputDir;
 
 	// Tick delegate
 	FTSTicker::FDelegateHandle TickDelegateHandle;
