@@ -63,7 +63,7 @@ public:
 	TObjectPtr<UMaterialInterface> TransitionMaterial;
 
 	/** Default duration of the transition in seconds. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX", meta = (ClampMin = "0.0"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX", meta = (ClampMin = "0.01"))
 	float DefaultDuration;
 
 	/** The easing function to apply to the progress. */

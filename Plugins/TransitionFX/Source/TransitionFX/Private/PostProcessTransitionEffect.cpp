@@ -6,7 +6,6 @@
 #include "Engine/PostProcessVolume.h"
 #include "Kismet/KismetMaterialLibrary.h"
 #include "Engine/World.h"
-#include "Engine/Texture.h"
 #include "TransitionFXConfig.h"
 #include "TransitionFX.h"
 
@@ -45,8 +44,7 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 
 	// Check for "Progress" Parameter
 	float TempVal = 0.0f;
-	static const FName ProgressParamName(TEXT("Progress"));
-	static const FMaterialParameterInfo ProgressInfo(ProgressParamName);
+	static const FMaterialParameterInfo ProgressInfo(TransitionFXConfig::ProgressParamName);
 	if (!DynamicMaterial->GetScalarParameterValue(ProgressInfo, TempVal))
 	{
 		UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: Material '%s' is missing 'Progress' parameter. Transition will not animate."), *Preset->TransitionMaterial->GetName());
