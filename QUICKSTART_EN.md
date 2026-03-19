@@ -54,7 +54,7 @@ First, create this asset.
 | `Sound Volume` | Volume (default: `1.0`) |
 | `Sound Pitch` | Pitch (default: `1.0`) |
 
-<!-- IMAGE: quickstart_preset_settings.png - Screenshot of the TransitionPreset detail panel showing all properties -->
+![Screenshot of the TransitionPreset detail panel showing all properties](docs/images/quickstart_preset_settings.png)
 
 ### Example Setting: Simple Fade Out
 
@@ -159,7 +159,7 @@ Both fade-out and fade-in use the same preset, switched via the `Mode` pin.
 
 ### Basic Pattern: Fade Out → Processing → Fade In
 
-<!-- IMAGE: quickstart_fadeout_fadein_bp.png - Blueprint graph showing Fade Out → Processing → Fade In pattern -->
+![Blueprint graph showing Fade Out → Processing → Fade In pattern](docs/images/quickstart_fadeout_fadein_bp.png)
 
 This is the most common configuration. Darken the screen, perform the processing, and return with a fade-in.
 

@@ -19,7 +19,7 @@ These nodes wait for the transition to complete before proceeding.
 
 #### Play Transition And Wait
 
-<!-- IMAGE: api_play_transition_node.png - Blueprint screenshot of the Play Transition And Wait latent action node -->
+![Blueprint screenshot of the Play Transition And Wait latent action node](docs/images/api_play_transition_node.png)
 
 Plays a transition using the specified preset and waits for completion.
 
@@ -143,7 +143,7 @@ Plays a transition (Fade Out), waits for it to complete, then opens the specifie
 
 #### Quick Fade To Black
 
-<!-- IMAGE: api_quick_fade_node.png - Blueprint screenshot of the Quick Fade To Black / Quick Fade From Black nodes -->
+![Blueprint screenshot of the Quick Fade To Black / Quick Fade From Black nodes](docs/images/api_quick_fade_node.png)
 
 Quickly fades the screen to black using the default `DA_FadeToBlack` preset.
 

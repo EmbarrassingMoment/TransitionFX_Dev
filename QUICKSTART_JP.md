@@ -54,7 +54,7 @@ TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition
 | `Sound Volume` | 音量（デフォルト: `1.0`） |
 | `Sound Pitch` | ピッチ（デフォルト: `1.0`） |
 
-<!-- IMAGE: quickstart_preset_settings.png - TransitionPreset の詳細パネルのスクリーンショット -->
+![TransitionPreset の詳細パネルのスクリーンショット](docs/images/quickstart_preset_settings.png)
 
 ### 設定例：シンプルなフェードアウト
 
@@ -159,7 +159,7 @@ TransitionSystem->AsyncLoadTransitionPresets(SoftPresets,
 
 ### 基本パターン：フェードアウト → 処理 → フェードイン
 
-<!-- IMAGE: quickstart_fadeout_fadein_bp.png - フェードアウト → 処理 → フェードインの Blueprint グラフ全体 -->
+![フェードアウト → 処理 → フェードインの Blueprint グラフ全体](docs/images/quickstart_fadeout_fadein_bp.png)
 
 最もよく使う構成です。画面を暗転させてから処理を行い、フェードインで戻します。
 
