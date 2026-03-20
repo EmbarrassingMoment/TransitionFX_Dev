@@ -44,7 +44,7 @@ Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
 *   **Priority:** Set the rendering priority (default: 1000).
 *   **Audio:** (Optional) Assign a Sound asset to play. Includes Volume and Pitch controls.
 
-<!-- IMAGE: quickstart_preset_settings.png - Screenshot of the TransitionPreset detail panel showing all properties -->
+![Screenshot of the TransitionPreset detail panel showing all properties](docs/images/quickstart_preset_settings.png)
 
 ### 2. Call from Blueprint
 Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.

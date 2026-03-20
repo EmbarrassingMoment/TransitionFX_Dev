@@ -3,11 +3,11 @@
 All documentation files contain `<!-- IMAGE: ... -->` placeholder comments for images that need to be captured.
 These images should be placed in `docs/images/` and the HTML comments should be replaced with markdown image syntax.
 
-## Progress: 32 / 40 images captured (80%)
+## Progress: 34 / 40 images captured (85%)
 
 - Effect Preview GIFs: **24/24** complete
 - README Hero & Overview: **1/4**
-- Quick Start Guide: **3/8**
+- Quick Start Guide: **5/8**
 - API Reference: **4/4**
 
 ---
@@ -26,9 +26,9 @@ These images should be placed in `docs/images/` and the HTML comments should be 
 | Filename | Description | Status |
 |---|---|---|
 | `quickstart_create_data_asset.png` | Content Browser — Data Asset creation flow | Missing |
-| `quickstart_preset_settings.png` | TransitionPreset detail panel showing all properties | Missing |
+| `quickstart_preset_settings.png` | TransitionPreset detail panel showing all properties | Done |
 | `quickstart_bp_play_node.png` | Play Transition And Wait Blueprint node | Done |
-| `quickstart_preload_bp.png` | PreloadTransitionPresets node in GameInstance Init | Missing |
+| `quickstart_preload_bp.png` | PreloadTransitionPresets node in GameInstance Init | Done |
 | `quickstart_fadeout_fadein_bp.png` | Fade Out → Processing → Fade In Blueprint graph | Done |
 | `quickstart_open_level_bp.png` | Open Level With Transition And Wait node | Done |
 | `quickstart_hold_workflow_bp.png` | bHoldAtMax + ReleaseHold loading screen Blueprint workflow | Missing |
