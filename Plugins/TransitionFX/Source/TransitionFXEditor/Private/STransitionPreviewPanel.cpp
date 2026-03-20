@@ -422,13 +422,10 @@ void STransitionPreviewPanel::OnEffectSelected(TSharedPtr<FString> NewValue, ESe
 		return;
 	}
 
-	for (int32 i = 0; i < EffectNames.Num(); ++i)
+	int32 FoundIndex = EffectNames.IndexOfByKey(NewValue);
+	if (FoundIndex != INDEX_NONE)
 	{
-		if (*EffectNames[i] == *NewValue)
-		{
-			SelectedIndex = i;
-			break;
-		}
+		SelectedIndex = FoundIndex;
 	}
 
 	// Load material and set on viewport
