@@ -110,16 +110,25 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 ## Transition Timing & Easing
 Control how the transition progresses over time using the `EasingType` property in your Transition Preset.
 
-| Easing Type | Description |
-| :--- | :--- |
-| **Linear** | Constant speed (Default). Good for simple fades. |
-| **Sine / Cubic / Expo** | Smooth acceleration and deceleration. (In, Out, InOut variants available). |
-| **Bounce / Elastic** | Adds a bouncing or elastic effect at the end of the transition. |
-| **Custom** | Allows you to supply your own `FloatCurve` asset. |
+> All previews below use the **Fade** effect to isolate the difference in easing behavior.
+
+| Easing Type | Description | Preview |
+| :--- | :--- | :--- |
+| **Linear** | Constant speed (Default). Good for simple fades. | ![Linear](docs/images/easing_linear.gif) |
+| **EaseInSine** | Starts slow, accelerates smoothly. | ![EaseInSine](docs/images/easing_ease_in_sine.gif) |
+| **EaseOutSine** | Starts fast, decelerates smoothly. | ![EaseOutSine](docs/images/easing_ease_out_sine.gif) |
+| **EaseInOutSine** | Smooth acceleration at start and deceleration at end. | ![EaseInOutSine](docs/images/easing_ease_in_out_sine.gif) |
+| **EaseInCubic** | Starts slow with stronger acceleration. | ![EaseInCubic](docs/images/easing_ease_in_cubic.gif) |
+| **EaseOutCubic** | Starts fast with stronger deceleration. | ![EaseOutCubic](docs/images/easing_ease_out_cubic.gif) |
+| **EaseInOutCubic** | Pronounced ease at both ends. | ![EaseInOutCubic](docs/images/easing_ease_in_out_cubic.gif) |
+| **EaseInExpo** | Near-still start, exponential acceleration. | ![EaseInExpo](docs/images/easing_ease_in_expo.gif) |
+| **EaseOutExpo** | Fast start, exponential deceleration. | ![EaseOutExpo](docs/images/easing_ease_out_expo.gif) |
+| **EaseInOutExpo** | Dramatic ease at both ends. | ![EaseInOutExpo](docs/images/easing_ease_in_out_expo.gif) |
+| **EaseOutElastic** | Elastic overshoot at the end of the transition. | ![EaseOutElastic](docs/images/easing_ease_out_elastic.gif) |
+| **EaseOutBounce** | Bouncing effect at the end of the transition. | ![EaseOutBounce](docs/images/easing_ease_out_bounce.gif) |
+| **Custom** | Allows you to supply your own `FloatCurve` asset. | — |
 
 *Note: The `Transition Curve` slot will only appear when `Custom` is selected.*
-
-<!-- IMAGE: easing_curves.png - Chart comparing all easing types (Linear, Sine, Cubic, Expo, Bounce, Elastic) -->
 
 See [easings.net](https://easings.net/) for visualization of these curves.
 

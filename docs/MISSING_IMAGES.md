@@ -3,10 +3,11 @@
 All documentation files contain `<!-- IMAGE: ... -->` placeholder comments for images that need to be captured.
 These images should be placed in `docs/images/` and the HTML comments should be replaced with markdown image syntax.
 
-## Progress: 34 / 40 images captured (85%)
+## Progress: 34 / 51 images captured (67%)
 
 - Effect Preview GIFs: **24/24** complete
-- README Hero & Overview: **1/4**
+- README Hero & Overview: **1/3**
+- Easing Preview GIFs: **0/12**
 - Quick Start Guide: **5/8**
 - API Reference: **4/4**
 
@@ -19,8 +20,23 @@ These images should be placed in `docs/images/` and the HTML comments should be 
 |---|---|---|
 | `hero_banner.gif` | Montage/GIF showing multiple transition effects in action | Missing |
 | `install_enable_plugin.png` | Plugins window with TransitionFX enabled | Done |
-| `easing_curves.png` | Chart comparing all easing types (Linear, Sine, Cubic, Expo, Bounce, Elastic) | Missing |
 | `performance_preload_bp.png` | PreloadTransitionPresets node in GameInstance Init Blueprint | Missing |
+
+### README (EN/JP) — Easing Preview GIFs
+| Filename | Description | Status |
+|---|---|---|
+| `easing_linear.gif` | Fade with Linear easing | Missing |
+| `easing_ease_in_sine.gif` | Fade with EaseInSine easing | Missing |
+| `easing_ease_out_sine.gif` | Fade with EaseOutSine easing | Missing |
+| `easing_ease_in_out_sine.gif` | Fade with EaseInOutSine easing | Missing |
+| `easing_ease_in_cubic.gif` | Fade with EaseInCubic easing | Missing |
+| `easing_ease_out_cubic.gif` | Fade with EaseOutCubic easing | Missing |
+| `easing_ease_in_out_cubic.gif` | Fade with EaseInOutCubic easing | Missing |
+| `easing_ease_in_expo.gif` | Fade with EaseInExpo easing | Missing |
+| `easing_ease_out_expo.gif` | Fade with EaseOutExpo easing | Missing |
+| `easing_ease_in_out_expo.gif` | Fade with EaseInOutExpo easing | Missing |
+| `easing_ease_out_elastic.gif` | Fade with EaseOutElastic easing | Missing |
+| `easing_ease_out_bounce.gif` | Fade with EaseOutBounce easing | Missing |
 
 ### Quick Start Guide (EN/JP)
 | Filename | Description | Status |
