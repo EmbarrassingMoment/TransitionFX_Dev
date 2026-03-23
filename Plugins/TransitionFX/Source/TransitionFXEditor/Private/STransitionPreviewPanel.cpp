@@ -43,6 +43,10 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 	ViewportHeight = 270.0f;
 	bIsBatchCapturing = false;
 	BatchCaptureIndex = 0;
+	bIsBatchCapturingEasing = false;
+	BatchEasingIndex = 0;
+	SavedEffectIndex = 0;
+	SavedEasing = ETransitionEasing::Linear;
 
 	// Resolution options
 	ResolutionOptions.Add(MakeShared<FString>(TEXT("480 x 270")));
@@ -377,12 +381,31 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
+			.Padding(8, 0, 0, 0)
+			[
+				SNew(SButton)
+				.Text(this, &STransitionPreviewPanel::GetBatchCaptureEasingButtonText)
+				.IsEnabled(this, &STransitionPreviewPanel::IsBatchCaptureEasingButtonEnabled)
+				.OnClicked_Lambda([this]() { StartBatchCaptureEasing(); return FReply::Handled(); })
+			]
+
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
 			.VAlign(VAlign_Center)
 			.Padding(8, 0, 0, 0)
 			[
 				SNew(STextBlock)
 				.Text_Lambda([this]()
 				{
+					if (bIsCapturing && bIsBatchCapturingEasing)
+					{
+						return FText::Format(
+							LOCTEXT("EasingBatchCaptureProgress", "Easing {0}/{1} — Frame {2}/{3}"),
+							FText::AsNumber(BatchEasingIndex + 1),
+							FText::AsNumber(BatchEasingList.Num()),
+							FText::AsNumber(CaptureFrameIndex),
+							FText::AsNumber(TotalCaptureFrames));
+					}
 					if (bIsCapturing && bIsBatchCapturing)
 					{
 						return FText::Format(
@@ -831,7 +854,13 @@ void STransitionPreviewPanel::FinalizeGifCapture()
 	// Determine save path
 	FString SavePath;
 
-	if (bIsBatchCapturing)
+	if (bIsBatchCapturingEasing)
+	{
+		// Easing batch mode: auto-save with easing-mapped filename
+		FString GifFilename = GetGifFilenameForEasing(SelectedEasing);
+		SavePath = BatchOutputDir / GifFilename;
+	}
+	else if (bIsBatchCapturing)
 	{
 		// Batch mode: auto-save with mapped filename
 		FString GifFilename = GetGifFilenameForEffect(Effects[SelectedIndex].DisplayName);
@@ -889,7 +918,7 @@ void STransitionPreviewPanel::FinalizeGifCapture()
 
 	if (Encoder.WriteToFile(SavePath))
 	{
-		if (!bIsBatchCapturing)
+		if (!bIsBatchCapturing && !bIsBatchCapturingEasing)
 		{
 			FNotificationInfo Info(FText::Format(
 				LOCTEXT("CaptureSuccessNotification", "GIF saved: {0}"),
@@ -908,7 +937,11 @@ void STransitionPreviewPanel::FinalizeGifCapture()
 	}
 
 	// Advance batch if in batch mode
-	if (bIsBatchCapturing)
+	if (bIsBatchCapturingEasing)
+	{
+		AdvanceBatchCaptureEasing();
+	}
+	else if (bIsBatchCapturing)
 	{
 		AdvanceBatchCapture();
 	}
@@ -923,7 +956,7 @@ FText STransitionPreviewPanel::GetCaptureButtonText() const
 
 bool STransitionPreviewPanel::IsCaptureButtonEnabled() const
 {
-	return !bIsCapturing && !bIsBatchCapturing && Effects.Num() > 0;
+	return !bIsCapturing && !bIsBatchCapturing && !bIsBatchCapturingEasing && Effects.Num() > 0;
 }
 
 // ─────────────────────────────────────────────
@@ -983,7 +1016,7 @@ FString STransitionPreviewPanel::GetGifFilenameForEffect(const FString& DisplayN
 
 void STransitionPreviewPanel::StartBatchCapture()
 {
-	if (bIsCapturing || bIsBatchCapturing || Effects.Num() == 0)
+	if (bIsCapturing || bIsBatchCapturing || bIsBatchCapturingEasing || Effects.Num() == 0)
 	{
 		return;
 	}
@@ -1067,7 +1100,190 @@ FText STransitionPreviewPanel::GetBatchCaptureButtonText() const
 
 bool STransitionPreviewPanel::IsBatchCaptureButtonEnabled() const
 {
-	return !bIsCapturing && !bIsBatchCapturing && Effects.Num() > 0;
+	return !bIsCapturing && !bIsBatchCapturing && !bIsBatchCapturingEasing && Effects.Num() > 0;
+}
+
+// ─────────────────────────────────────────────
+// Batch Easing GIF Capture
+// ─────────────────────────────────────────────
+
+FString STransitionPreviewPanel::GetGifFilenameForEasing(ETransitionEasing Easing)
+{
+	static const TMap<ETransitionEasing, FString> EasingToFile = {
+		{ ETransitionEasing::Linear,          TEXT("easing_linear.gif") },
+		{ ETransitionEasing::EaseInSine,      TEXT("easing_ease_in_sine.gif") },
+		{ ETransitionEasing::EaseOutSine,     TEXT("easing_ease_out_sine.gif") },
+		{ ETransitionEasing::EaseInOutSine,   TEXT("easing_ease_in_out_sine.gif") },
+		{ ETransitionEasing::EaseInCubic,     TEXT("easing_ease_in_cubic.gif") },
+		{ ETransitionEasing::EaseOutCubic,    TEXT("easing_ease_out_cubic.gif") },
+		{ ETransitionEasing::EaseInOutCubic,  TEXT("easing_ease_in_out_cubic.gif") },
+		{ ETransitionEasing::EaseInExpo,      TEXT("easing_ease_in_expo.gif") },
+		{ ETransitionEasing::EaseOutExpo,     TEXT("easing_ease_out_expo.gif") },
+		{ ETransitionEasing::EaseInOutExpo,   TEXT("easing_ease_in_out_expo.gif") },
+		{ ETransitionEasing::EaseOutElastic,  TEXT("easing_ease_out_elastic.gif") },
+		{ ETransitionEasing::EaseOutBounce,   TEXT("easing_ease_out_bounce.gif") },
+	};
+
+	const FString* Found = EasingToFile.Find(Easing);
+	if (Found)
+	{
+		return *Found;
+	}
+
+	// Fallback: convert enum display name to snake_case
+	const UEnum* EnumPtr = StaticEnum<ETransitionEasing>();
+	FString DisplayName = EnumPtr ? EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(Easing)).ToString() : TEXT("unknown");
+	FString Result = TEXT("easing_");
+	for (int32 i = 0; i < DisplayName.Len(); ++i)
+	{
+		TCHAR Ch = DisplayName[i];
+		if (FChar::IsUpper(Ch) && i > 0)
+		{
+			Result += TEXT("_");
+		}
+		Result += FChar::ToLower(Ch);
+	}
+	Result += TEXT(".gif");
+	return Result;
+}
+
+void STransitionPreviewPanel::StartBatchCaptureEasing()
+{
+	if (bIsCapturing || bIsBatchCapturing || bIsBatchCapturingEasing || Effects.Num() == 0)
+	{
+		return;
+	}
+
+	// Ask user for output directory
+	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+	if (!DesktopPlatform)
+	{
+		return;
+	}
+
+	FString DefaultDir = FPaths::ProjectDir() / TEXT("docs") / TEXT("images");
+	FString ChosenDir;
+	bool bChosen = DesktopPlatform->OpenDirectoryDialog(
+		FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr),
+		TEXT("Select Easing GIF Output Folder"),
+		DefaultDir,
+		ChosenDir);
+
+	if (!bChosen)
+	{
+		return;
+	}
+
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	PlatformFile.CreateDirectoryTree(*ChosenDir);
+
+	// Build list of easing types (skip Custom)
+	BatchEasingList.Reset();
+	const UEnum* EnumPtr = StaticEnum<ETransitionEasing>();
+	if (EnumPtr)
+	{
+		for (int32 i = 0; i < EnumPtr->NumEnums() - 1; ++i)
+		{
+			ETransitionEasing Value = static_cast<ETransitionEasing>(EnumPtr->GetValueByIndex(i));
+			if (Value == ETransitionEasing::Custom)
+			{
+				continue;
+			}
+			BatchEasingList.Add(Value);
+		}
+	}
+
+	if (BatchEasingList.Num() == 0)
+	{
+		return;
+	}
+
+	// Find the Iris effect
+	int32 IrisIndex = INDEX_NONE;
+	for (int32 i = 0; i < Effects.Num(); ++i)
+	{
+		if (Effects[i].DisplayName == TEXT("Iris"))
+		{
+			IrisIndex = i;
+			break;
+		}
+	}
+
+	if (IrisIndex == INDEX_NONE)
+	{
+		FNotificationInfo Info(LOCTEXT("EasingBatchNoIris", "Easing batch capture failed: Iris effect not found."));
+		Info.ExpireDuration = 4.0f;
+		FSlateNotificationManager::Get().AddNotification(Info);
+		return;
+	}
+
+	// Save current user selection
+	SavedEffectIndex = SelectedIndex;
+	SavedEasing = SelectedEasing;
+
+	// Select Iris effect
+	SelectedIndex = IrisIndex;
+	OnEffectSelected(EffectNames[IrisIndex], ESelectInfo::Direct);
+
+	// Start easing batch
+	BatchOutputDir = ChosenDir;
+	BatchEasingIndex = 0;
+	bIsBatchCapturingEasing = true;
+	SelectedEasing = BatchEasingList[0];
+
+	FNotificationInfo Info(FText::Format(
+		LOCTEXT("EasingBatchStartNotification", "Easing batch capture started: {0} easing curves"),
+		FText::AsNumber(BatchEasingList.Num())));
+	Info.ExpireDuration = 3.0f;
+	FSlateNotificationManager::Get().AddNotification(Info);
+
+	StartGifCapture();
+}
+
+void STransitionPreviewPanel::AdvanceBatchCaptureEasing()
+{
+	BatchEasingIndex++;
+
+	if (BatchEasingIndex >= BatchEasingList.Num())
+	{
+		// Batch complete — restore user's previous selection
+		bIsBatchCapturingEasing = false;
+		SelectedEasing = SavedEasing;
+		SelectedIndex = SavedEffectIndex;
+		if (EffectNames.IsValidIndex(SavedEffectIndex))
+		{
+			OnEffectSelected(EffectNames[SavedEffectIndex], ESelectInfo::Direct);
+		}
+
+		FNotificationInfo Info(FText::Format(
+			LOCTEXT("EasingBatchCompleteNotification", "Easing batch complete! {0} GIFs saved to {1}"),
+			FText::AsNumber(BatchEasingList.Num()),
+			FText::FromString(BatchOutputDir)));
+		Info.ExpireDuration = 8.0f;
+		FSlateNotificationManager::Get().AddNotification(Info);
+		return;
+	}
+
+	// Set next easing and start capture
+	SelectedEasing = BatchEasingList[BatchEasingIndex];
+	StartGifCapture();
+}
+
+FText STransitionPreviewPanel::GetBatchCaptureEasingButtonText() const
+{
+	if (bIsBatchCapturingEasing)
+	{
+		return FText::Format(
+			LOCTEXT("EasingBatchCapturing", "Easing... ({0}/{1})"),
+			FText::AsNumber(BatchEasingIndex + 1),
+			FText::AsNumber(BatchEasingList.Num()));
+	}
+	return LOCTEXT("BatchCaptureEasingButton", "Batch Capture Easing");
+}
+
+bool STransitionPreviewPanel::IsBatchCaptureEasingButtonEnabled() const
+{
+	return !bIsCapturing && !bIsBatchCapturing && !bIsBatchCapturingEasing && Effects.Num() > 0;
 }
 
 #undef LOCTEXT_NAMESPACE
