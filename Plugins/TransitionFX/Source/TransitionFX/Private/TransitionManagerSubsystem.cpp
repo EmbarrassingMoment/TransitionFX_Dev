@@ -30,7 +30,6 @@ void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 
 	// Preload default assets to avoid hitching during gameplay
 	GetDefaultFadePreset();
-	GetDefaultMasterMaterial();
 
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UTransitionManagerSubsystem::OnPostLoadMapWithWorld);
 }
@@ -43,16 +42,6 @@ UTransitionPreset* UTransitionManagerSubsystem::GetDefaultFadePreset()
 		DefaultFadePreset = LoadObject<UTransitionPreset>(nullptr, TransitionFXConfig::DefaultFadePresetPath);
 	}
 	return DefaultFadePreset;
-}
-
-/** Lazily loads and caches the default master transition material from the configured asset path. */
-UMaterialInterface* UTransitionManagerSubsystem::GetDefaultMasterMaterial()
-{
-	if (!DefaultMasterMaterial)
-	{
-		DefaultMasterMaterial = LoadObject<UMaterialInterface>(nullptr, TransitionFXConfig::DefaultMasterMaterialPath);
-	}
-	return DefaultMasterMaterial;
 }
 
 /** Unregisters console commands, removes delegates, and empties the effect pool. */

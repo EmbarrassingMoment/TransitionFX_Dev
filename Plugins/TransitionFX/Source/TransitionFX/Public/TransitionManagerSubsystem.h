@@ -114,9 +114,6 @@ public:
 	/** Returns the default Fade preset (DA_FadeToBlack), loading it if necessary. */
 	UTransitionPreset* GetDefaultFadePreset();
 
-	/** Returns the default master material (M_Transition_Master), loading it if necessary. */
-	UMaterialInterface* GetDefaultMasterMaterial();
-
 	/** Preloads a list of transition presets to warm up shaders. */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX|System")
 	void PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets);
@@ -203,10 +200,6 @@ private:
 	/** Cached default fade preset to avoid runtime loading. */
 	UPROPERTY(Transient)
 	TObjectPtr<UTransitionPreset> DefaultFadePreset;
-
-	/** Cached default master material to avoid runtime loading. */
-	UPROPERTY(Transient)
-	TObjectPtr<UMaterialInterface> DefaultMasterMaterial;
 
 	// Level Transition State
 
