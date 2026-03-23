@@ -163,7 +163,7 @@ Transition Presetの`EasingType`プロパティを使用して、トランジシ
 **GameInstance Init** や **Level BeginPlay** などの安全な場所で `PreloadTransitionPresets` を呼び出します。
 この関数に、最も頻繁に使用するトランジションプリセットの配列を渡します。
 
-<!-- IMAGE: performance_preload_bp.png - GameInstance Init での PreloadTransitionPresets ノードの Blueprint スクリーンショット -->
+![Preload Transition Presets Blueprint](docs/images/performance_preload_bp.png)
 
 ```cpp
 // C++ Example
