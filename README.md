@@ -110,7 +110,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 ## Transition Timing & Easing
 Control how the transition progresses over time using the `EasingType` property in your Transition Preset.
 
-> All previews below use the **Fade** effect to isolate the difference in easing behavior.
+> All previews below use the **Iris** effect to isolate the difference in easing behavior.
 
 | Easing Type | Description | Preview |
 | :--- | :--- | :--- |

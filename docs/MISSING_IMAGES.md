@@ -25,18 +25,18 @@ These images should be placed in `docs/images/` and the HTML comments should be 
 ### README (EN/JP) — Easing Preview GIFs
 | Filename | Description | Status |
 |---|---|---|
-| `easing_linear.gif` | Fade with Linear easing | Missing |
-| `easing_ease_in_sine.gif` | Fade with EaseInSine easing | Missing |
-| `easing_ease_out_sine.gif` | Fade with EaseOutSine easing | Missing |
-| `easing_ease_in_out_sine.gif` | Fade with EaseInOutSine easing | Missing |
-| `easing_ease_in_cubic.gif` | Fade with EaseInCubic easing | Missing |
-| `easing_ease_out_cubic.gif` | Fade with EaseOutCubic easing | Missing |
-| `easing_ease_in_out_cubic.gif` | Fade with EaseInOutCubic easing | Missing |
-| `easing_ease_in_expo.gif` | Fade with EaseInExpo easing | Missing |
-| `easing_ease_out_expo.gif` | Fade with EaseOutExpo easing | Missing |
-| `easing_ease_in_out_expo.gif` | Fade with EaseInOutExpo easing | Missing |
-| `easing_ease_out_elastic.gif` | Fade with EaseOutElastic easing | Missing |
-| `easing_ease_out_bounce.gif` | Fade with EaseOutBounce easing | Missing |
+| `easing_linear.gif` | Iris with Linear easing | Missing |
+| `easing_ease_in_sine.gif` | Iris with EaseInSine easing | Missing |
+| `easing_ease_out_sine.gif` | Iris with EaseOutSine easing | Missing |
+| `easing_ease_in_out_sine.gif` | Iris with EaseInOutSine easing | Missing |
+| `easing_ease_in_cubic.gif` | Iris with EaseInCubic easing | Missing |
+| `easing_ease_out_cubic.gif` | Iris with EaseOutCubic easing | Missing |
+| `easing_ease_in_out_cubic.gif` | Iris with EaseInOutCubic easing | Missing |
+| `easing_ease_in_expo.gif` | Iris with EaseInExpo easing | Missing |
+| `easing_ease_out_expo.gif` | Iris with EaseOutExpo easing | Missing |
+| `easing_ease_in_out_expo.gif` | Iris with EaseInOutExpo easing | Missing |
+| `easing_ease_out_elastic.gif` | Iris with EaseOutElastic easing | Missing |
+| `easing_ease_out_bounce.gif` | Iris with EaseOutBounce easing | Missing |
 
 ### Quick Start Guide (EN/JP)
 | Filename | Description | Status |
