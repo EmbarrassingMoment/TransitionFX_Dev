@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
+#include "TransitionFXTypes.h"
 
 class STransitionPreviewViewport;
 
@@ -32,6 +33,11 @@ private:
 	// Effect discovery
 	void DiscoverEffects();
 	void OnEffectSelected(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo);
+
+	// Easing
+	void PopulateEasingOptions();
+	void OnEasingSelected(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo);
+	float GetEasedProgress(float RawProgress) const;
 
 	// Playback
 	bool OnTick(float DeltaTime);
@@ -82,6 +88,10 @@ private:
 	TArray<FEffectEntry> Effects;
 	TArray<TSharedPtr<FString>> EffectNames;
 	int32 SelectedIndex;
+
+	// Easing
+	TArray<TSharedPtr<FString>> EasingNames;
+	ETransitionEasing SelectedEasing;
 
 	// Playback state
 	float CurrentProgress;
