@@ -76,6 +76,13 @@ private:
 	FText GetBatchCaptureButtonText() const;
 	bool IsBatchCaptureButtonEnabled() const;
 
+	// Batch easing GIF capture (captures Iris effect with all easing types)
+	static FString GetGifFilenameForEasing(ETransitionEasing Easing);
+	void StartBatchCaptureEasing();
+	void AdvanceBatchCaptureEasing();
+	FText GetBatchCaptureEasingButtonText() const;
+	bool IsBatchCaptureEasingButtonEnabled() const;
+
 	// UI helpers
 	FText GetProgressText() const;
 	FText GetSpeedText() const;
@@ -122,6 +129,13 @@ private:
 	bool bIsBatchCapturing;
 	int32 BatchCaptureIndex;
 	FString BatchOutputDir;
+
+	// Easing batch capture state
+	bool bIsBatchCapturingEasing;
+	int32 BatchEasingIndex;
+	TArray<ETransitionEasing> BatchEasingList;
+	int32 SavedEffectIndex;
+	ETransitionEasing SavedEasing;
 
 	// Tick delegate
 	FTSTicker::FDelegateHandle TickDelegateHandle;
