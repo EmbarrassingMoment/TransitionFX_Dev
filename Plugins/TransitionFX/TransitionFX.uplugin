@@ -10,10 +10,11 @@
 	"DocsURL": "https://github.com/EmbarrassingMoment/TransitionFX",
 	"MarketplaceURL": "",
 	"SupportURL": "https://github.com/EmbarrassingMoment/TransitionFX/issues",
+	"EngineVersion": "5.5",
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
-	"Installed": false,
+	"Installed": true,
 	"Modules": [
 		{
 			"Name": "TransitionFX",
