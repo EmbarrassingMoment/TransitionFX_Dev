@@ -13,6 +13,7 @@
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Notifications/SNotificationList.h"
 #include "Framework/Notifications/NotificationManager.h"
+#include "TransitionBlueprintLibrary.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "DesktopPlatformModule.h"
@@ -47,6 +48,10 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 	ResolutionOptions.Add(MakeShared<FString>(TEXT("480 x 270")));
 	ResolutionOptions.Add(MakeShared<FString>(TEXT("640 x 360")));
 	ResolutionOptions.Add(MakeShared<FString>(TEXT("800 x 450")));
+
+	// Easing options
+	SelectedEasing = ETransitionEasing::Linear;
+	PopulateEasingOptions();
 
 	// Discover effects
 	DiscoverEffects();
@@ -85,6 +90,42 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 						}
 						return FText::GetEmpty();
 					})
+				]
+			]
+
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.VAlign(VAlign_Center)
+			.Padding(0, 0, 8, 0)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				.VAlign(VAlign_Center)
+				.Padding(0, 0, 4, 0)
+				[
+					SNew(STextBlock)
+					.Text(LOCTEXT("EasingLabel", "Easing"))
+				]
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				[
+					SNew(SComboBox<TSharedPtr<FString>>)
+					.OptionsSource(&EasingNames)
+					.OnSelectionChanged(this, &STransitionPreviewPanel::OnEasingSelected)
+					.OnGenerateWidget_Lambda([](TSharedPtr<FString> Item)
+					{
+						return SNew(STextBlock).Text(FText::FromString(*Item));
+					})
+					.Content()
+					[
+						SNew(STextBlock)
+						.Text_Lambda([this]()
+						{
+							const UEnum* EnumPtr = StaticEnum<ETransitionEasing>();
+							return EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(SelectedEasing));
+						})
+					]
 				]
 			]
 
@@ -488,7 +529,7 @@ bool STransitionPreviewPanel::OnTick(float DeltaTime)
 
 	if (PreviewViewport.IsValid())
 	{
-		PreviewViewport->SetProgress(CurrentProgress);
+		PreviewViewport->SetProgress(GetEasedProgress(CurrentProgress));
 	}
 
 	return true;
@@ -540,7 +581,7 @@ void STransitionPreviewPanel::OnProgressChanged(float NewValue)
 	CurrentProgress = NewValue;
 	if (PreviewViewport.IsValid())
 	{
-		PreviewViewport->SetProgress(CurrentProgress);
+		PreviewViewport->SetProgress(GetEasedProgress(CurrentProgress));
 	}
 }
 
@@ -595,6 +636,64 @@ void STransitionPreviewPanel::OnResolutionSelected(TSharedPtr<FString> NewValue,
 		ViewportWidth = 800.0f;
 		ViewportHeight = 450.0f;
 	}
+}
+
+void STransitionPreviewPanel::PopulateEasingOptions()
+{
+	const UEnum* EnumPtr = StaticEnum<ETransitionEasing>();
+	if (!EnumPtr)
+	{
+		return;
+	}
+
+	for (int32 i = 0; i < EnumPtr->NumEnums() - 1; ++i) // -1 to skip _MAX
+	{
+		ETransitionEasing Value = static_cast<ETransitionEasing>(EnumPtr->GetValueByIndex(i));
+
+		// Skip Custom — requires a UCurveFloat asset
+		if (Value == ETransitionEasing::Custom)
+		{
+			continue;
+		}
+
+		FText DisplayName = EnumPtr->GetDisplayNameTextByIndex(i);
+		EasingNames.Add(MakeShared<FString>(DisplayName.ToString()));
+	}
+}
+
+void STransitionPreviewPanel::OnEasingSelected(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo)
+{
+	if (!NewValue.IsValid())
+	{
+		return;
+	}
+
+	const UEnum* EnumPtr = StaticEnum<ETransitionEasing>();
+	if (!EnumPtr)
+	{
+		return;
+	}
+
+	for (int32 i = 0; i < EnumPtr->NumEnums() - 1; ++i)
+	{
+		FText DisplayName = EnumPtr->GetDisplayNameTextByIndex(i);
+		if (DisplayName.ToString() == *NewValue)
+		{
+			SelectedEasing = static_cast<ETransitionEasing>(EnumPtr->GetValueByIndex(i));
+			break;
+		}
+	}
+
+	// Re-apply easing to current progress
+	if (PreviewViewport.IsValid())
+	{
+		PreviewViewport->SetProgress(GetEasedProgress(CurrentProgress));
+	}
+}
+
+float STransitionPreviewPanel::GetEasedProgress(float RawProgress) const
+{
+	return UTransitionBlueprintLibrary::ApplyEasing(RawProgress, SelectedEasing);
 }
 
 FText STransitionPreviewPanel::GetProgressText() const
@@ -697,7 +796,7 @@ void STransitionPreviewPanel::OnCaptureFrameTick()
 	// Set progress for the next frame
 	float Progress = static_cast<float>(CaptureFrameIndex) / static_cast<float>(TotalCaptureFrames - 1);
 	CurrentProgress = Progress;
-	PreviewViewport->SetProgress(Progress);
+	PreviewViewport->SetProgress(GetEasedProgress(Progress));
 	bCaptureWaitFrame = true; // Wait for render
 }
 
