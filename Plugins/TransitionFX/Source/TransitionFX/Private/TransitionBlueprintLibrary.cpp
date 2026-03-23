@@ -330,13 +330,13 @@ static void QuickFadeInternal(const UObject* WorldContextObject, float Duration,
 					// Fallback to manual setup if DataAsset is missing
 					TempPreset->EffectClass = UPostProcessTransitionEffect::StaticClass();
 
-					// Try to load the Master material mentioned in docs
-					TempPreset->TransitionMaterial = Manager->GetDefaultMasterMaterial();
+					// Try to load the Fade material as fallback
+					TempPreset->TransitionMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/TransitionFX/Materials/M_Transition_Fade.M_Transition_Fade"));
 
 					if (!TempPreset->TransitionMaterial)
 					{
 						// Last resort: Log warning
-						UE_LOG(LogTransitionFX, Warning, TEXT("QuickFade: Could not find DA_FadeToBlack or M_Transition_Master. Transition may not be visible."));
+						UE_LOG(LogTransitionFX, Warning, TEXT("QuickFade: Could not find DA_FadeToBlack or M_Transition_Fade. Transition may not be visible."));
 					}
 				}
 
