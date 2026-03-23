@@ -1,7 +1,7 @@
 # Missing Documentation Images
 
 All documentation files contain `<!-- IMAGE: ... -->` placeholder comments for images that need to be captured.
-These images should be placed in `docs/images/` and the HTML comments should be replaced with markdown image syntax.
+These images should be placed in `images/` and the HTML comments should be replaced with markdown image syntax.
 
 ## Progress: 47 / 51 images captured (92%)
 
@@ -99,7 +99,7 @@ After capturing images, replace each HTML comment with markdown syntax:
 ```markdown
 <!-- IMAGE: effect_fade.gif -->
 ↓
-![Fade Effect](docs/images/effect_fade.gif)
+![Fade Effect](images/effect_fade.gif)
 ```
 
 ## Capture Tips

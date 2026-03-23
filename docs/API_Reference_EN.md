@@ -19,7 +19,7 @@ These nodes wait for the transition to complete before proceeding.
 
 #### Play Transition And Wait
 
-![Blueprint screenshot of the Play Transition And Wait latent action node](docs/images/api_play_transition_node.png)
+![Blueprint screenshot of the Play Transition And Wait latent action node](images/api_play_transition_node.png)
 
 Plays a transition using the specified preset and waits for completion.
 
@@ -117,7 +117,7 @@ Returns true if the current transition has finished its hold phase or completed.
 
 #### Open Level With Transition
 
-![Open Level With Transition node](docs/images/api_open_level_node.png)
+![Open Level With Transition node](images/api_open_level_node.png)
 
 Handles the sequence of "Fade Out -> Open Level -> Fade In". The fade-in on the new level side is automatically started via `PostLoadMapWithWorld`.
 
@@ -143,7 +143,7 @@ Plays a transition (Fade Out), waits for it to complete, then opens the specifie
 
 #### Quick Fade To Black
 
-![Blueprint screenshot of the Quick Fade To Black / Quick Fade From Black nodes](docs/images/api_quick_fade_node.png)
+![Blueprint screenshot of the Quick Fade To Black / Quick Fade From Black nodes](images/api_quick_fade_node.png)
 
 Quickly fades the screen to black using the default `DA_FadeToBlack` preset.
 
@@ -182,7 +182,7 @@ Applies an easing function to the given alpha value. A pure math node useful for
 
 #### Preload Transition Presets
 
-![Preload Transition Presets node](docs/images/api_preload_node.png)
+![Preload Transition Presets node](images/api_preload_node.png)
 
 Pre-compiles shaders for the given presets to prevent first-frame hitching. Available on the `TransitionManagerSubsystem`.
 
