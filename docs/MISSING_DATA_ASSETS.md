@@ -1,6 +1,6 @@
 # Missing Data Asset Presets
 
-The following 15 transition effects have materials and material instances but lack Data Asset presets (`UTransitionPreset`).
+The following transition effects have materials and material instances but lack Data Asset presets (`UTransitionPreset`).
 These must be created in the Unreal Editor.
 
 ## How to Create a Data Asset Preset
@@ -21,37 +21,48 @@ These must be created in the Unreal Editor.
 | bTickWhenPaused | `false` |
 | Priority | `1000.0` |
 
-## Missing Presets
+## Progress: 17 / 25 data assets created (68%)
 
-| Data Asset Name | TransitionMaterial (Material Instance) |
-|---|---|
-| `DA_Blinds` | `MI_Transition_Blinds` |
-| `DA_Box` | `MI_Transition_Box` |
-| `DA_Diamond` | `MI_Transition_Diamond` |
-| `DA_FlowerIris` | `MI_Transition_FlowerIris` |
-| `DA_Iris` | `MI_Transition_Iris` |
-| `DA_Pixelate` | `MI_Transition_Pixelate` |
-| `DA_PolkaDots` | `MI_Transition_PolkaDots` |
-| `DA_RadialWipe` | `MI_Transition_RadialWipe` |
-| `DA_RandomTiles` | `MI_Transition_RandomTiles` |
-| `DA_Split` | `MI_Transition_Split` |
-| `DA_Spiral` | `MI_Transition_Spiral` |
-| `DA_TVSwitchOff` | `MI_Transition_TVSwitchOff` |
-| `DA_TextureMask` | `MI_Transition_TextureMask` |
-| `DA_WavyCurtain` | `MI_Transition_WavyCurtain` |
-| `DA_ZoomWipe` | `MI_Transition_ZoomWipe` |
+- Transition Presets: **17/25** complete
 
-## Existing Presets (9)
+---
 
-- `DA_CheckerBoard` → `MI_Transition_Checkerboard`
-- `DA_CrossWipe` → `MI_Transition_CrossWipe`
-- `DA_Fade` → `MI_Transition_Fade`
-- `DA_FadeToBlack` → `MI_Transition_Fade`
-- `DA_Heart` → `MI_Transition_Heart`
-- `DA_Hexagon` → `MI_Transition_Hexagon`
-- `DA_LinearWipe` → `MI_Transition_LinearWipe`
-- `DA_Tiles` → `MI_Transition_Tiles`
-- `DA_Wind` → `MI_Transition_Wind`
+## Still Missing Presets
+
+| Data Asset Name | TransitionMaterial (Material Instance) | Status |
+|---|---|---|
+| `DA_FlowerIris` | `MI_Transition_FlowerIris` | Missing |
+| `DA_Iris` | `MI_Transition_Iris` | Missing |
+| `DA_PolkaDots` | `MI_Transition_PolkaDots` | Missing |
+| `DA_RandomTiles` | `MI_Transition_RandomTiles` | Missing |
+| `DA_Spiral` | `MI_Transition_Spiral` | Missing |
+| `DA_Split` | `MI_Transition_Split` | Missing |
+| `DA_TextureMask` | `MI_Transition_TextureMask` | Missing |
+| `DA_WavyCurtain` | `MI_Transition_WavyCurtain` | Missing |
+
+---
+
+## Created Presets (Complete)
+
+| Data Asset Name | TransitionMaterial (Material Instance) | Status |
+|---|---|---|
+| `DA_Blinds` | `MI_Transition_Blinds` | Done |
+| `DA_Box` | `MI_Transition_Box` | Done |
+| `DA_CheckerBoard` | `MI_Transition_Checkerboard` | Done |
+| `DA_CrossWipe` | `MI_Transition_CrossWipe` | Done |
+| `DA_Diamond` | `MI_Transition_Diamond` | Done |
+| `DA_Fade` | `MI_Transition_Fade` | Done |
+| `DA_FadeToBlack` | `MI_Transition_Fade` | Done |
+| `DA_Heart` | `MI_Transition_Heart` | Done |
+| `DA_Hexagon` | `MI_Transition_Hexagon` | Done |
+| `DA_LinearWipe` | `MI_Transition_LinearWipe` | Done |
+| `DA_Pixelate` | `MI_Transition_Pixelate` | Done |
+| `DA_RadialWipe` | `MI_Transition_RadialWipe` | Done |
+| `DA_TVSwitchOff` | `MI_Transition_TVSwitchOff` | Done |
+| `DA_Tiles` | `MI_Transition_Tiles` | Done |
+| `DA_Triangle` | `MI_Transition_Triangle` | Done |
+| `DA_Wind` | `MI_Transition_Wind` | Done |
+| `DA_ZoomWipe` | `MI_Transition_ZoomWipe` | Done |
 
 ## Notes
 
