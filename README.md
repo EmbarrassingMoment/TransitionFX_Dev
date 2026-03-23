@@ -144,7 +144,7 @@ To prevent frame drops (hitching) when a transition plays for the first time, yo
 Call `PreloadTransitionPresets` in a safe place like **GameInstance Init** or **Level BeginPlay**.
 Pass an array of your most commonly used Transition Presets to this function.
 
-<!-- IMAGE: performance_preload_bp.png - Blueprint screenshot of PreloadTransitionPresets node in GameInstance Init -->
+![Preload Transition Presets Blueprint](docs/images/performance_preload_bp.png)
 
 ```cpp
 // C++ Example
