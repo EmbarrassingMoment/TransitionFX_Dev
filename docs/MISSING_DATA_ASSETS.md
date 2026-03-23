@@ -21,9 +21,9 @@ These must be created in the Unreal Editor.
 | bTickWhenPaused | `false` |
 | Priority | `1000.0` |
 
-## Progress: 17 / 25 data assets created (68%)
+## Progress: 24 / 25 data assets created (96%)
 
-- Transition Presets: **17/25** complete
+- Transition Presets: **24/25** complete
 
 ---
 
@@ -31,13 +31,6 @@ These must be created in the Unreal Editor.
 
 | Data Asset Name | TransitionMaterial (Material Instance) | Status |
 |---|---|---|
-| `DA_FlowerIris` | `MI_Transition_FlowerIris` | Missing |
-| `DA_Iris` | `MI_Transition_Iris` | Missing |
-| `DA_PolkaDots` | `MI_Transition_PolkaDots` | Missing |
-| `DA_RandomTiles` | `MI_Transition_RandomTiles` | Missing |
-| `DA_Spiral` | `MI_Transition_Spiral` | Missing |
-| `DA_Split` | `MI_Transition_Split` | Missing |
-| `DA_TextureMask` | `MI_Transition_TextureMask` | Missing |
 | `DA_WavyCurtain` | `MI_Transition_WavyCurtain` | Missing |
 
 ---
@@ -53,12 +46,19 @@ These must be created in the Unreal Editor.
 | `DA_Diamond` | `MI_Transition_Diamond` | Done |
 | `DA_Fade` | `MI_Transition_Fade` | Done |
 | `DA_FadeToBlack` | `MI_Transition_Fade` | Done |
+| `DA_FlowerIris` | `MI_Transition_FlowerIris` | Done |
 | `DA_Heart` | `MI_Transition_Heart` | Done |
 | `DA_Hexagon` | `MI_Transition_Hexagon` | Done |
+| `DA_Iris` | `MI_Transition_Iris` | Done |
 | `DA_LinearWipe` | `MI_Transition_LinearWipe` | Done |
 | `DA_Pixelate` | `MI_Transition_Pixelate` | Done |
+| `DA_PolkaDots` | `MI_Transition_PolkaDots` | Done |
 | `DA_RadialWipe` | `MI_Transition_RadialWipe` | Done |
+| `DA_RandomTiles` | `MI_Transition_RandomTiles` | Done |
+| `DA_Spiral` | `MI_Transition_Spiral` | Done |
+| `DA_Split` | `MI_Transition_Split` | Done |
 | `DA_TVSwitchOff` | `MI_Transition_TVSwitchOff` | Done |
+| `DA_TextureMask` | `MI_Transition_TextureMask` | Done |
 | `DA_Tiles` | `MI_Transition_Tiles` | Done |
 | `DA_Triangle` | `MI_Transition_Triangle` | Done |
 | `DA_Wind` | `MI_Transition_Wind` | Done |
