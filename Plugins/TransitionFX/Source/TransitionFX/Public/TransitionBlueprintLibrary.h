@@ -123,4 +123,7 @@ public:
 	 */
 	UFUNCTION(BlueprintPure, Category = "TransitionFX|Math")
 	static float ApplyEasing(float Alpha, ETransitionEasing EasingType, const UCurveFloat* CustomCurve = nullptr);
+
+	/** Retrieves the TransitionManagerSubsystem from the world context. Returns nullptr on failure. */
+	static UTransitionManagerSubsystem* GetTransitionManager(const UObject* WorldContextObject);
 };

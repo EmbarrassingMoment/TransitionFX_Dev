@@ -211,16 +211,7 @@ void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldCo
 	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
 	OnTransitionCompleted.AddDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
 
-	// Calculate PlaySpeed based on duration
-	float PlaySpeed = 1.0f;
-	if (Duration <= TransitionFXConfig::MinDurationThreshold)
-	{
-		PlaySpeed = TransitionFXConfig::FallbackPlaySpeed;
-	}
-	else
-	{
-		PlaySpeed = Preset->DefaultDuration / Duration;
-	}
+	float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(Preset->DefaultDuration, Duration);
 
 	// Start Fade Out (Forward, Invert=False)
 	StartTransition(Preset, ETransitionMode::Forward, PlaySpeed, false);
@@ -252,16 +243,7 @@ void UTransitionManagerSubsystem::OnPostLoadMapWithWorld(UWorld* LoadedWorld)
 
 		if (PendingPreset)
 		{
-			// Calculate PlaySpeed based on duration
-			float PlaySpeed = 1.0f;
-			if (PendingDuration <= TransitionFXConfig::MinDurationThreshold)
-			{
-				PlaySpeed = TransitionFXConfig::FallbackPlaySpeed;
-			}
-			else
-			{
-				PlaySpeed = PendingPreset->DefaultDuration / PendingDuration;
-			}
+			float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(PendingPreset->DefaultDuration, PendingDuration);
 
 			// Start Fade In (Forward, Invert=True to go from Black to Clear if using standard mask behavior)
 			StartTransition(PendingPreset, ETransitionMode::Forward, PlaySpeed, true);
@@ -334,12 +316,22 @@ void UTransitionManagerSubsystem::ReturnEffectToPool(UObject* EffectObj)
 	}
 }
 
-/** Emergency cleanup: stops the effect, restores player input, stops audio, and resets all state flags. */
-void UTransitionManagerSubsystem::ForceClear()
+/** Stops the current audio component and releases the reference. */
+void UTransitionManagerSubsystem::StopAndClearAudio()
 {
-	UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: Force Clear Executed."));
+	if (CurrentAudioComponent)
+	{
+		if (CurrentAudioComponent->IsPlaying())
+		{
+			CurrentAudioComponent->Stop();
+		}
+		CurrentAudioComponent = nullptr;
+	}
+}
 
-	// Cleanup Effect
+/** Cleans up the current effect, returns it to the pool, and clears the reference. */
+void UTransitionManagerSubsystem::CleanupAndPoolCurrentEffect()
+{
 	if (CurrentEffect)
 	{
 		CurrentEffect->Cleanup();
@@ -352,8 +344,11 @@ void UTransitionManagerSubsystem::ForceClear()
 
 		CurrentEffect = nullptr;
 	}
+}
 
-	// Reset Input
+/** Returns the cached player controller, refreshing the cache from PlayerIndex 0 if stale. */
+APlayerController* UTransitionManagerSubsystem::GetOrCachePlayerController()
+{
 	APlayerController* PC = CachedPlayerController.Get();
 	if (!PC)
 	{
@@ -363,22 +358,24 @@ void UTransitionManagerSubsystem::ForceClear()
 			CachedPlayerController = PC;
 		}
 	}
+	return PC;
+}
 
-	if (PC)
+/** Emergency cleanup: stops the effect, restores player input, stops audio, and resets all state flags. */
+void UTransitionManagerSubsystem::ForceClear()
+{
+	UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: Force Clear Executed."));
+
+	CleanupAndPoolCurrentEffect();
+
+	// Reset Input
+	if (APlayerController* PC = GetOrCachePlayerController())
 	{
 		// Force disable cinematic mode
 		PC->SetCinematicMode(false, true, true, true, true);
 	}
 
-	// Stop Audio
-	if (CurrentAudioComponent)
-	{
-		if (CurrentAudioComponent->IsPlaying())
-		{
-			CurrentAudioComponent->Stop();
-		}
-		CurrentAudioComponent = nullptr;
-	}
+	StopAndClearAudio();
 
 	// Reset Flags
 	bIsTransitionActive = false;
@@ -434,14 +431,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	}
 
 	// Ensure previous audio is stopped
-	if (CurrentAudioComponent)
-	{
-		if (CurrentAudioComponent->IsPlaying())
-		{
-			CurrentAudioComponent->Stop();
-		}
-		CurrentAudioComponent = nullptr;
-	}
+	StopAndClearAudio();
 
 	CurrentPreset = Preset;
 	CurrentMode = Mode;
@@ -515,13 +505,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	// Block Input
 	if (CurrentPreset->bAutoBlockInput)
 	{
-		// Refresh cache if invalid (e.g. level change, or first run)
-		if (!CachedPlayerController.IsValid())
-		{
-			CachedPlayerController = UGameplayStatics::GetPlayerController(this, 0);
-		}
-
-		if (APlayerController* PC = CachedPlayerController.Get())
+		if (APlayerController* PC = GetOrCachePlayerController())
 		{
 			PC->SetCinematicMode(true, true, true, true, true);
 		}
@@ -574,29 +558,8 @@ void UTransitionManagerSubsystem::StopTransition()
 		return;
 	}
 
-	// Stop Audio
-	if (CurrentAudioComponent)
-	{
-		if (CurrentAudioComponent->IsPlaying())
-		{
-			CurrentAudioComponent->Stop();
-		}
-		CurrentAudioComponent = nullptr;
-	}
-
-	// Cleanup Effect
-	if (CurrentEffect)
-	{
-		CurrentEffect->Cleanup();
-
-		// Return to pool
-		if (UObject* EffectObj = CurrentEffect.GetObject())
-		{
-			ReturnEffectToPool(EffectObj);
-		}
-
-		CurrentEffect = nullptr;
-	}
+	StopAndClearAudio();
+	CleanupAndPoolCurrentEffect();
 
 	// Restore Input
 	if (CurrentPreset && CurrentPreset->bAutoBlockInput)
