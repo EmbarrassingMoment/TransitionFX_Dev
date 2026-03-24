@@ -82,16 +82,7 @@ public:
 			// Prepare Auto Reverse for the NEXT level
 			Manager->PrepareAutoReverseTransition(Preset, Duration);
 
-			// Calculate PlaySpeed
-			float PlaySpeed = 1.0f;
-			if (Duration <= TransitionFXConfig::MinDurationThreshold)
-			{
-				PlaySpeed = TransitionFXConfig::FallbackPlaySpeed;
-			}
-			else
-			{
-				PlaySpeed = Preset->DefaultDuration / Duration;
-			}
+			float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(Preset->DefaultDuration, Duration);
 
 			// Start Fade Out (Forward, Invert=False)
 			Manager->StartTransition(Preset, ETransitionMode::Forward, PlaySpeed, false);
@@ -287,18 +278,25 @@ float UTransitionBlueprintLibrary::ApplyEasing(float Alpha, ETransitionEasing Ea
 	}
 }
 
-/** Queries the transition manager subsystem to check if any transition is active. */
-bool UTransitionBlueprintLibrary::IsAnyTransitionPlaying(const UObject* WorldContextObject)
+/** Retrieves the TransitionManagerSubsystem from the world context. Returns nullptr on failure. */
+UTransitionManagerSubsystem* UTransitionBlueprintLibrary::GetTransitionManager(const UObject* WorldContextObject)
 {
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
 	{
 		if (UGameInstance* GameInstance = World->GetGameInstance())
 		{
-			if (UTransitionManagerSubsystem* Manager = GameInstance->GetSubsystem<UTransitionManagerSubsystem>())
-			{
-				return Manager->IsTransitionPlaying();
-			}
+			return GameInstance->GetSubsystem<UTransitionManagerSubsystem>();
 		}
+	}
+	return nullptr;
+}
+
+/** Queries the transition manager subsystem to check if any transition is active. */
+bool UTransitionBlueprintLibrary::IsAnyTransitionPlaying(const UObject* WorldContextObject)
+{
+	if (UTransitionManagerSubsystem* Manager = GetTransitionManager(WorldContextObject))
+	{
+		return Manager->IsTransitionPlaying();
 	}
 	return false;
 }
@@ -309,45 +307,39 @@ bool UTransitionBlueprintLibrary::IsAnyTransitionPlaying(const UObject* WorldCon
  */
 static void QuickFadeInternal(const UObject* WorldContextObject, float Duration, ETransitionMode Mode)
 {
-	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	if (UTransitionManagerSubsystem* Manager = UTransitionBlueprintLibrary::GetTransitionManager(WorldContextObject))
 	{
-		if (UGameInstance* GameInstance = World->GetGameInstance())
+		UTransitionPreset* TempPreset = NewObject<UTransitionPreset>(Manager);
+
+		// Try to load default Fade data to get the material
+		UTransitionPreset* FadeData = Manager->GetDefaultFadePreset();
+
+		if (FadeData)
 		{
-			if (UTransitionManagerSubsystem* Manager = GameInstance->GetSubsystem<UTransitionManagerSubsystem>())
+			TempPreset->EffectClass = FadeData->EffectClass;
+			TempPreset->TransitionMaterial = FadeData->TransitionMaterial;
+		}
+		else
+		{
+			// Fallback to manual setup if DataAsset is missing
+			TempPreset->EffectClass = UPostProcessTransitionEffect::StaticClass();
+
+			// Try to load the Fade material as fallback
+			TempPreset->TransitionMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/TransitionFX/Materials/M_Transition_Fade.M_Transition_Fade"));
+
+			if (!TempPreset->TransitionMaterial)
 			{
-				UTransitionPreset* TempPreset = NewObject<UTransitionPreset>(Manager);
-
-				// Try to load default Fade data to get the material
-				UTransitionPreset* FadeData = Manager->GetDefaultFadePreset();
-
-				if (FadeData)
-				{
-					TempPreset->EffectClass = FadeData->EffectClass;
-					TempPreset->TransitionMaterial = FadeData->TransitionMaterial;
-				}
-				else
-				{
-					// Fallback to manual setup if DataAsset is missing
-					TempPreset->EffectClass = UPostProcessTransitionEffect::StaticClass();
-
-					// Try to load the Fade material as fallback
-					TempPreset->TransitionMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/TransitionFX/Materials/M_Transition_Fade.M_Transition_Fade"));
-
-					if (!TempPreset->TransitionMaterial)
-					{
-						// Last resort: Log warning
-						UE_LOG(LogTransitionFX, Warning, TEXT("QuickFade: Could not find DA_FadeToBlack or M_Transition_Fade. Transition may not be visible."));
-					}
-				}
-
-				TempPreset->DefaultDuration = Duration;
-
-				FTransitionParameters Params;
-				Params.VectorParams.Add(TransitionFXConfig::ColorParamName, FLinearColor::Black);
-
-				Manager->StartTransition(TempPreset, Mode, 1.0f, false, false, Params);
+				// Last resort: Log warning
+				UE_LOG(LogTransitionFX, Warning, TEXT("QuickFade: Could not find DA_FadeToBlack or M_Transition_Fade. Transition may not be visible."));
 			}
 		}
+
+		TempPreset->DefaultDuration = Duration;
+
+		FTransitionParameters Params;
+		Params.VectorParams.Add(TransitionFXConfig::ColorParamName, FLinearColor::Black);
+
+		Manager->StartTransition(TempPreset, Mode, 1.0f, false, false, Params);
 	}
 }
 
@@ -366,15 +358,9 @@ void UTransitionBlueprintLibrary::QuickFadeFromBlack(const UObject* WorldContext
 /** Delegates to the manager subsystem to perform a "Fade Out -> Open Level -> Fade In" sequence. */
 void UTransitionBlueprintLibrary::OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration)
 {
-	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	if (UTransitionManagerSubsystem* Manager = GetTransitionManager(WorldContextObject))
 	{
-		if (UGameInstance* GameInstance = World->GetGameInstance())
-		{
-			if (UTransitionManagerSubsystem* Manager = GameInstance->GetSubsystem<UTransitionManagerSubsystem>())
-			{
-				Manager->OpenLevelWithTransition(WorldContextObject, LevelName, Preset, Duration);
-			}
-		}
+		Manager->OpenLevelWithTransition(WorldContextObject, LevelName, Preset, Duration);
 	}
 }
 
@@ -414,15 +400,7 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWaitWithDuration(const UObjec
 			{
 				if (Preset)
 				{
-					float PlaySpeed = 1.0f;
-					if (Duration <= TransitionFXConfig::MinDurationThreshold)
-					{
-						PlaySpeed = TransitionFXConfig::FallbackPlaySpeed;
-					}
-					else
-					{
-						PlaySpeed = Preset->DefaultDuration / Duration;
-					}
+					float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(Preset->DefaultDuration, Duration);
 
 					Manager->StartTransition(Preset, Mode, PlaySpeed, bInvert, false, OverrideParams);
 					LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionLatentAction(LatentInfo, Manager));

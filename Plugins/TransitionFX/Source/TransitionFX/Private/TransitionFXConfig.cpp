@@ -14,4 +14,13 @@ namespace TransitionFXConfig
 	const FName ProgressParamName(TEXT("Progress"));
 	const FName InvertParamName(TEXT("Invert"));
 	const FName ColorParamName(TEXT("Color"));
+
+	float CalculatePlaySpeed(float DefaultDuration, float Duration)
+	{
+		if (Duration <= MinDurationThreshold)
+		{
+			return FallbackPlaySpeed;
+		}
+		return DefaultDuration / Duration;
+	}
 }

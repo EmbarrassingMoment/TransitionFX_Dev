@@ -150,6 +150,15 @@ public:
 	FTransitionHoldStarted OnTransitionHoldStarted;
 
 private:
+	/** Stops and releases the current audio component. */
+	void StopAndClearAudio();
+
+	/** Cleans up the current effect and returns it to the object pool. */
+	void CleanupAndPoolCurrentEffect();
+
+	/** Returns the cached player controller, refreshing the cache if stale. */
+	APlayerController* GetOrCachePlayerController();
+
 	/** Internal helper to return an effect to the pool with size checks. */
 	void ReturnEffectToPool(UObject* EffectObj);
 

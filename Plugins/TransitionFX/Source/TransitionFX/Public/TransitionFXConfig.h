@@ -27,4 +27,7 @@ namespace TransitionFXConfig
 
 	/** Material parameter name for transition color. */
 	extern TRANSITIONFX_API const FName ColorParamName;
+
+	/** Converts a duration (in seconds) to a play speed multiplier relative to a preset's default duration. */
+	TRANSITIONFX_API float CalculatePlaySpeed(float DefaultDuration, float Duration);
 }
