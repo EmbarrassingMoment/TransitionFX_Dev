@@ -29,7 +29,7 @@ public:
 	/** Updates the material's Progress parameter and calls UpdateMaterialParameters. */
 	virtual void UpdateProgress(float Progress) override;
 
-	/** Disables the post-process volume without destroying it, allowing reuse. */
+	/** Destroys the post-process volume and clears the dynamic material reference. */
 	virtual void Cleanup() override;
 
 	/** Sets the material's Invert parameter (1.0 for inverted, 0.0 for normal). */

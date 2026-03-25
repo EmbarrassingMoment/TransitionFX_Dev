@@ -142,8 +142,7 @@ TransitionSystem->AsyncLoadTransitionPresets(SoftPresets,
 | Action | Timing |
 | :--- | :--- |
 | Registration of `TransitionFX.ForceClear` console command | Subsystem initialization |
-| Loading of the default fade preset `DA_FadeToBlack` | Subsystem initialization |
-| Loading of the default master material `M_Transition_Master` | Subsystem initialization |
+| Loading of the default fade preset `DA_FadeToBlack` (and its referenced material) | Subsystem initialization |
 | Preparation for automatic fade-in after a level transition | Automatically bound to `PostLoadMapWithWorld` |
 
 > **💡 Tip**
@@ -241,6 +240,9 @@ Quick Fade From Black ── Duration: 1.0
 > **💡 Tip**
 > `Quick Fade` internally uses the default `DA_FadeToBlack`.
 > If an effect other than a black fade is required, please create a dedicated DataAsset and use `Play Transition And Wait`.
+
+> **⚠️ Warning**
+> `Quick Fade To Black` and `Quick Fade From Black` are **fire-and-forget** functions. They start the transition but **do not wait for completion**. If you need to execute logic after the fade finishes, use `Play Transition And Wait` instead, or bind to the `OnTransitionCompleted` delegate.
 
 ### When Dynamically Changing Material Parameters
 
