@@ -142,8 +142,7 @@ TransitionSystem->AsyncLoadTransitionPresets(SoftPresets,
 | 処理 | タイミング |
 | :--- | :--- |
 | `TransitionFX.ForceClear` コンソールコマンドの登録 | サブシステム初期化時 |
-| デフォルトフェードプリセット `DA_FadeToBlack` のロード | サブシステム初期化時 |
-| デフォルトマスターマテリアル `M_Transition_Master` のロード | サブシステム初期化時 |
+| デフォルトフェードプリセット `DA_FadeToBlack`（および参照先マテリアル）のロード | サブシステム初期化時 |
 | レベル遷移後の自動フェードイン準備 | `PostLoadMapWithWorld` に自動バインド |
 
 > **💡 Tip**
@@ -241,6 +240,9 @@ Quick Fade From Black ── Duration: 1.0
 > **💡 Tip**
 > `Quick Fade` は内部的にデフォルトの `DA_FadeToBlack` を使用します。
 > 黒フェード以外のエフェクトが必要な場合は、専用の DataAsset を作成して `Play Transition And Wait` を使ってください。
+
+> **⚠️ 注意**
+> `Quick Fade To Black` と `Quick Fade From Black` は**完了を待たない（Fire-and-Forget）** 関数です。遷移を開始しますが、**完了まで待機しません**。フェード完了後にロジックを実行する必要がある場合は、代わりに `Play Transition And Wait` を使用するか、`OnTransitionCompleted` デリゲートにバインドしてください。
 
 ### マテリアルパラメータを動的に変えたい場合
 

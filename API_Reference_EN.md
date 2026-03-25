@@ -47,7 +47,7 @@ Plays a transition with a specific duration (in seconds) instead of using play s
 | **Completed** | Output | Executed after the transition is complete. |
 
 #### Play Random Transition And Wait
-Randomly selects one preset from the provided list and plays it.
+Randomly selects one preset from the provided list and plays it. If the array is empty or the selected preset is null, the node completes immediately without playing a transition.
 
 | Pin Name | Type | Description |
 | :--- | :--- | :--- |
@@ -66,11 +66,13 @@ The following nodes are called directly on the `UTransitionManagerSubsystem` ins
 #### Start Transition
 Starts a transition with the given preset. Unlike the Latent Action nodes, this does not wait for completion. Supports `bHoldAtMax` for loading screen workflows.
 
+When a Forward transition completes (progress reaches 1.0 without `bHoldAtMax`), it automatically stops and cleans up. Reverse transitions also auto-stop on completion.
+
 | Pin Name | Type | Description |
 | :--- | :--- | :--- |
-| **Preset** | Input | The transition preset (`UTransitionPreset`) to use. |
+| **Preset** | Input | The transition preset (`UTransitionPreset`) to use. If null, `ForceClear` is called and an error is logged. |
 | **Mode** | Input | Transition mode (`Forward`: Fade Out/0→1, `Reverse`: Fade In/1→0). |
-| **Play Speed** | Input | Playback speed multiplier (Default: 1.0). |
+| **Play Speed** | Input | Playback speed multiplier (Default: 1.0). Clamped to a minimum of 0.01. |
 | **bInvert** | Input | Whether to invert the mask. |
 | **bHold At Max** | Input | If true, the transition holds at progress 1.0 instead of completing. |
 | **Override Params** | Input | Structure for dynamically overriding material parameters (`FTransitionParameters`). |
@@ -85,7 +87,7 @@ Forcefully clears all transition states and resets input. Used for emergency sto
 Reverses the playback direction of the current transition (e.g., from Fade Out to Fade In). If `bAutoStop` is true (default), the transition will automatically stop when the reverse completes.
 
 #### Set Play Speed
-Changes the playback speed multiplier dynamically.
+Changes the playback speed multiplier dynamically. The value is clamped to a minimum of 0.01.
 
 #### Release Hold
 Releases the hold at max progress, allowing a held transition to complete. Used with the `bHoldAtMax` workflow.
@@ -121,6 +123,8 @@ Returns true if the current transition has finished its hold phase or completed.
 
 Handles the sequence of "Fade Out -> Open Level -> Fade In". The fade-in on the new level side is automatically started via `PostLoadMapWithWorld`.
 
+*Note: Internally, the auto fade-in uses `Forward` mode with `bInvert=true` rather than `Reverse` mode. The visual result is equivalent.*
+
 | Pin Name | Type | Description |
 | :--- | :--- | :--- |
 | **World Context Object** | Input | The world context object. |
@@ -145,7 +149,7 @@ Plays a transition (Fade Out), waits for it to complete, then opens the specifie
 
 ![Blueprint screenshot of the Quick Fade To Black / Quick Fade From Black nodes](docs/images/api_quick_fade_node.png)
 
-Quickly fades the screen to black using the default `DA_FadeToBlack` preset.
+Quickly fades the screen to black using the default `DA_FadeToBlack` preset. This is a **fire-and-forget** function that does not wait for the transition to complete.
 
 | Pin Name | Type | Description |
 | :--- | :--- | :--- |
@@ -153,7 +157,7 @@ Quickly fades the screen to black using the default `DA_FadeToBlack` preset.
 | **Duration** | Input | The duration of the fade (Default: 1.0). |
 
 #### Quick Fade From Black
-Quickly fades the screen from black using the default `DA_FadeToBlack` preset.
+Quickly fades the screen from black using the default `DA_FadeToBlack` preset. This is a **fire-and-forget** function that does not wait for the transition to complete.
 
 | Pin Name | Type | Description |
 | :--- | :--- | :--- |
@@ -211,7 +215,7 @@ UTransitionManagerSubsystem* TransitionSystem = GetGameInstance()->GetSubsystem<
 ### Key Functions
 
 #### StartTransition
-Starts a transition.
+Starts a transition. If `Preset` is null or its material is missing, `ForceClear` is called and an error is logged. `PlaySpeed` is clamped to a minimum of 0.01. Both Forward and Reverse transitions automatically stop and clean up when they reach their end state.
 
 ```cpp
 void StartTransition(
@@ -246,7 +250,7 @@ void ReverseTransition(bool bAutoStop = true);
 ```
 
 #### SetPlaySpeed
-Changes the playback speed multiplier dynamically.
+Changes the playback speed multiplier dynamically. The value is clamped to a minimum of 0.01.
 
 ```cpp
 void SetPlaySpeed(float PlaySpeed = 1.0f);
@@ -294,6 +298,20 @@ Prepares the subsystem for an auto-reverse transition on the next level load. Do
 void PrepareAutoReverseTransition(UTransitionPreset* Preset, float Duration = 1.0f);
 ```
 
+#### GetDefaultFadePreset
+Returns the default `DA_FadeToBlack` preset, loading it lazily if necessary.
+
+```cpp
+UTransitionPreset* GetDefaultFadePreset();
+```
+
+#### GetTransitionManager (Static Helper)
+Retrieves the `UTransitionManagerSubsystem` from the given world context. Returns `nullptr` on failure. Available on `UTransitionBlueprintLibrary`.
+
+```cpp
+static UTransitionManagerSubsystem* GetTransitionManager(const UObject* WorldContextObject);
+```
+
 ### Delegates / Event Dispatchers
 
 The subsystem provides the following event dispatchers:
@@ -312,6 +330,9 @@ Using `AsyncLoadTransitionPresets`, you can asynchronously load presets using a 
 ```cpp
 void AsyncLoadTransitionPresets(const TArray<TSoftObjectPtr<UTransitionPreset>>& SoftPresets, FTransitionPreloadCompleteDelegate OnComplete);
 ```
+
+### Object Pooling
+The subsystem pools transition effect instances for reuse, capped at **3 instances per effect class** to prevent memory bloat. Excess instances are released for garbage collection.
 
 ### Preloading
 `PreloadTransitionPresets` uses loaded presets to warm up shaders in advance, preventing hitches (stuttering) during transition execution.

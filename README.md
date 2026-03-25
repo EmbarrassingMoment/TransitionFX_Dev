@@ -6,6 +6,19 @@
 TransitionFX is a lightweight and advanced procedural screen transition system for Unreal Engine 5.
 It renders high-quality transitions based on SDF (Signed Distance Field) math without using textures, and can be implemented from Blueprints with just a single node.
 
+## Design Philosophy
+
+TransitionFX is designed with the top priority of enabling **indie and small-team developers to easily add transition effects to their games after the fact**. The goal is to incorporate high-quality transitions into games without requiring a dedicated tech artist and with minimal additional code.
+
+### Data-Driven Design
+All transition settings — effect type, duration, easing, audio — are consolidated into **Transition Preset (Data Asset)**. From Blueprints, simply pass the preset to the `Play Transition And Wait` node. Designers can swap presets to change effects without programmers modifying any calling code.
+
+### Latent Action Pattern
+TransitionFX uses **Latent Actions** for Blueprint nodes, eliminating the need for manual callback functions or flag management. Simply connect logic after the Completed pin for sequential execution. Combined with `bHoldAtMax` and `ReleaseHold`, loading screen patterns are also achievable.
+
+### GameInstance Subsystem
+The manager runs as a **GameInstance Subsystem**, persisting state across level transitions. The sequence of Fade Out → Level Transition → Fade In is managed automatically by the plugin. Input blocking and effect pool management are also handled automatically, minimizing interference with existing game code.
+
 ## Features
 *   **UE 5.5+ Native:** Optimized for the latest Unreal Engine features.
 *   **Procedural Rendering:** Texture-less SDF-based rendering ensures no degradation at any resolution and automatically corrects aspect ratio distortion.
@@ -58,6 +71,9 @@ Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.
 *   **Fade In (Reverse):**
     `Play Transition And Wait` (Preset: `DA_FadeBlack`, Mode: `Reverse`, Speed: `1.0`)
     *(Effect is removed automatically upon completion)*
+
+*   **Random Play:**
+    Use the `Play Random Transition And Wait` node to play a random transition from an array of presets.
 
 ### 3. Events
 You can bind to the following events in the `TransitionManagerSubsystem`:
