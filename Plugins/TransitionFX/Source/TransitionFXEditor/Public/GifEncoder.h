@@ -27,6 +27,7 @@ public:
 
 private:
 	// --- Color quantization (median-cut) ---
+	/** Axis-aligned bounding box of colors for median-cut quantization. */
 	struct FColorBox
 	{
 		TArray<FColor> Colors;

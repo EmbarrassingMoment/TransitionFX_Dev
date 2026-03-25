@@ -9,6 +9,7 @@
 class UTransitionPreset;
 struct FTransitionParameters;
 
+/** UInterface boilerplate for ITransitionEffect. */
 UINTERFACE(MinimalAPI, BlueprintType)
 class UTransitionEffect : public UInterface
 {

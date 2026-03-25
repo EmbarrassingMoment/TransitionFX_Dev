@@ -5,6 +5,10 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
+/**
+ * Editor module for the TransitionFX plugin.
+ * Registers the transition preview tab and editor menus.
+ */
 class FTransitionFXEditorModule : public IModuleInterface
 {
 public:
