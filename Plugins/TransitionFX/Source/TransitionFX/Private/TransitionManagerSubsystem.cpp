@@ -572,7 +572,7 @@ void UTransitionManagerSubsystem::StopTransition()
 	}
 
 	bIsTransitionActive = false;
-	bHasCompleted = false;
+	// bHasCompleted preserved — reset by StartTransition() / ReverseTransition() / ForceClear()
 	bShouldHoldAtMax = false;
 	bIsHolding = false;
 	CurrentPreset = nullptr;
