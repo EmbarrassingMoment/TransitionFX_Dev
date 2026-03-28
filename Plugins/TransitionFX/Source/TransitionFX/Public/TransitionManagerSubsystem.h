@@ -91,6 +91,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void ReverseTransition(bool bAutoStop = true);
 
+	/** Sets whether the current transition's mask is inverted. */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
+	void InvertTransition(bool bInvert);
+
 	/** Stops the current transition. */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void StopTransition();
@@ -192,6 +196,9 @@ private:
 
 	/** Whether the completion event has been triggered for the current transition. */
 	bool bHasCompleted = false;
+
+	/** Whether the current transition's mask is inverted. */
+	bool bIsInverted = false;
 
 	/** Whether the transition should hold when it reaches max progress (1.0). */
 	bool bShouldHoldAtMax = false;
