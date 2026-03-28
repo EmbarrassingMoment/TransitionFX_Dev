@@ -54,10 +54,10 @@ StartTransition(Forward, bHoldAtMax=true)
 | `bIsPlayAll` | `Boolean` | Play All モードフラグ |
 | `TransitionManager` | `UTransitionManagerSubsystem*` | サブシステム参照キャッシュ |
 
-## 含まれるプリセット (25 種)
+## 含まれるプリセット (23 種)
 
-Fade, Iris, Diamond, LinearWipe, RadialWipe, CrossWipe, ZoomWipe, Box, Triangle,
-Hexagon, Heart, Spiral, Tiles, RandomTiles, Blinds, PolkaDots, CheckerBoard,
+Fade, Iris, Diamond, LinearWipe, RadialWipe, CrossWipe, Box, Triangle,
+Hexagon, Spiral, Tiles, RandomTiles, Blinds, PolkaDots, CheckerBoard,
 FlowerIris, TVSwitchOff, WavyCurtain, Wind, Pixelate, Split, TextureMask, FadeToBlack
 
 ## 注意事項

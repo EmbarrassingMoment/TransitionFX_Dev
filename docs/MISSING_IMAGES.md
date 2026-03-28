@@ -62,12 +62,11 @@ These images should be placed in `docs/images/` and the HTML comments should be 
 
 ## Captured Images (Complete)
 
-### Effect Preview GIFs — 24/24 done
+### Effect Preview GIFs — 22/22 done
 | Filename | Effect | Status |
 |---|---|---|
 | `effect_fade.gif` | Fade | Done |
 | `effect_iris.gif` | Iris | Done |
-| `effect_heart_iris.gif` | Heart Iris | Done |
 | `effect_flower_iris.gif` | Flower Iris | Done |
 | `effect_diamond.gif` | Diamond | Done |
 | `effect_box.gif` | Box | Done |
@@ -82,7 +81,6 @@ These images should be placed in `docs/images/` and the HTML comments should be 
 | `effect_random_tiles.gif` | Random Tiles | Done |
 | `effect_wind.gif` | Wind | Done |
 | `effect_cross_wipe.gif` | Cross Wipe | Done |
-| `effect_zoom_wipe.gif` | Zoom Wipe | Done |
 | `effect_texture_mask.gif` | Texture Mask | Done |
 | `effect_triangle.gif` | Triangle | Done |
 | `effect_tv_switch_off.gif` | TV Switch Off | Done |

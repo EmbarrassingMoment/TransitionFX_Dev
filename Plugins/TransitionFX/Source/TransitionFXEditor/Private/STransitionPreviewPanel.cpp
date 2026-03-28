@@ -969,7 +969,6 @@ FString STransitionPreviewPanel::GetGifFilenameForEffect(const FString& DisplayN
 	static const TMap<FString, FString> NameToFile = {
 		{ TEXT("Fade"),          TEXT("effect_fade.gif") },
 		{ TEXT("Iris"),          TEXT("effect_iris.gif") },
-		{ TEXT("Heart"),         TEXT("effect_heart_iris.gif") },
 		{ TEXT("FlowerIris"),    TEXT("effect_flower_iris.gif") },
 		{ TEXT("Diamond"),       TEXT("effect_diamond.gif") },
 		{ TEXT("Box"),           TEXT("effect_box.gif") },
@@ -984,7 +983,6 @@ FString STransitionPreviewPanel::GetGifFilenameForEffect(const FString& DisplayN
 		{ TEXT("RandomTiles"),   TEXT("effect_random_tiles.gif") },
 		{ TEXT("Wind"),          TEXT("effect_wind.gif") },
 		{ TEXT("CrossWipe"),     TEXT("effect_cross_wipe.gif") },
-		{ TEXT("ZoomWipe"),      TEXT("effect_zoom_wipe.gif") },
 		{ TEXT("TextureMask"),   TEXT("effect_texture_mask.gif") },
 		{ TEXT("TVSwitchOff"),   TEXT("effect_tv_switch_off.gif") },
 		{ TEXT("Hexagon"),       TEXT("effect_hexagon.gif") },

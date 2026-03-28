@@ -97,7 +97,6 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | :--- | :--- | :--- |
 | **Fade** | Standard opacity fade. Simple and lightweight. | ![Fade](docs/images/effect_fade.gif) |
 | **Iris** | Classic circular wipe closing toward the center. Aspect ratio corrected. | ![Iris](docs/images/effect_iris.gif) |
-| **Heart Iris** | An iris wipe in the shape of a heart using procedural SDF. | ![Heart Iris](docs/images/effect_heart_iris.gif) |
 | **Flower Iris** | An iris wipe in the shape of a flower with rounded petals. The number of petals and the flower's shape (sharpness) are adjustable. | ![Flower Iris](docs/images/effect_flower_iris.gif) |
 | **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | ![Diamond](docs/images/effect_diamond.gif) |
 | **Box** | A simple square expanding from the center. Basic geometric transition. | ![Box](docs/images/effect_box.gif) |
@@ -112,7 +111,6 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | ![Random Tiles](docs/images/effect_random_tiles.gif) |
 | **Wind** | A directional wipe with streak noise, simulating wind blowing the image away. | ![Wind](docs/images/effect_wind.gif) |
 | **Cross Wipe** | A cross shape expands from the center, pushing the image into the four corners until it vanishes. | ![Cross Wipe](docs/images/effect_cross_wipe.gif) |
-| **Zoom Wipe** | A directional wipe that distorts and zooms the scene inward as it fades out. | ![Zoom Wipe](docs/images/effect_zoom_wipe.gif) |
 | **Texture Mask** | Uses a grayscale texture to determine the transition order (Black=Start, White=End). Supports custom mask textures via Parameter Overrides. | ![Texture Mask](docs/images/effect_texture_mask.gif) |
 | **TV Switch Off** | A retro CRT TV turn-off effect. Collapses vertically into a line, then horizontally into a point. | ![TV Switch Off](docs/images/effect_tv_switch_off.gif) |
 | **Hexagon** | A sci-fi style honeycomb wipe. A wave of hexagonal cells smoothly shrinks into their centers. | ![Hexagon](docs/images/effect_hexagon.gif) |
