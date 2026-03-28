@@ -552,7 +552,7 @@ void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
 	bIsTransitionActive = true;
 }
 
-/** Inverts the current transition's mask and reverses playback. */
+/** Inverts the current transition's mask and replays forward (0 to 1). */
 void UTransitionManagerSubsystem::InvertTransition(bool bAutoStop)
 {
 	if (!CurrentPreset)
@@ -568,10 +568,10 @@ void UTransitionManagerSubsystem::InvertTransition(bool bAutoStop)
 		CurrentEffect->SetInvert(bIsInverted);
 	}
 
-	// Reactivate transition in reverse mode (same as ReverseTransition)
-	CurrentMode = ETransitionMode::Reverse;
-	bAutoStopOnReverseComplete = bAutoStop;
-	bShouldHoldAtMax = false;
+	// Reactivate transition in forward mode with inverted mask
+	CurrentMode = ETransitionMode::Forward;
+	CurrentProgress = 0.0f;
+	bShouldHoldAtMax = !bAutoStop;
 	bIsHolding = false;
 	bHasCompleted = false;
 	bIsTransitionActive = true;
