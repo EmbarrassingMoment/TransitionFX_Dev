@@ -200,8 +200,8 @@ void FGifEncoder::CompressLZW(TArray<uint8>& OutBytes, const TArray<uint8>& Indi
 	const int32 ClearCode = 1 << MinCodeSize;
 	const int32 EoiCode = ClearCode + 1;
 
-	// Bit packing state
-	int32 BitBuffer = 0;
+	// Bit packing state (int64 to prevent overflow when accumulating shifted codes)
+	int64 BitBuffer = 0;
 	int32 BitsInBuffer = 0;
 	TArray<uint8> RawBytes;
 

@@ -241,6 +241,13 @@ void UTransitionManagerSubsystem::OnPostLoadMapWithWorld(UWorld* LoadedWorld)
 	{
 		bAutoReverseOnLevelLoad = false;
 
+		// Verify the loaded world matches our current world context
+		if (LoadedWorld && LoadedWorld != GetWorld())
+		{
+			UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: OnPostLoadMapWithWorld called with mismatched world. Skipping auto-reverse."));
+			return;
+		}
+
 		if (PendingPreset)
 		{
 			float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(PendingPreset->DefaultDuration, PendingDuration);
@@ -462,6 +469,11 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 			Preset->SoundVolume,
 			Preset->SoundPitch
 		);
+
+		if (!CurrentAudioComponent)
+		{
+			UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: Failed to spawn transition sound for Preset '%s'."), *Preset->GetName());
+		}
 	}
 
 	// Create Effect
