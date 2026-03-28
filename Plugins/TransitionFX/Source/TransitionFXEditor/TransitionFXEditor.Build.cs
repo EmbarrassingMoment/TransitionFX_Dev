@@ -13,9 +13,7 @@ public class TransitionFXEditor : ModuleRules
             {
                 "Core",
                 "CoreUObject",
-                "Engine",
-                "Slate",
-                "SlateCore"
+                "Engine"
             }
         );
 
@@ -23,6 +21,8 @@ public class TransitionFXEditor : ModuleRules
             new string[]
             {
                 "TransitionFX",
+                "Slate",
+                "SlateCore",
                 "UnrealEd",
                 "InputCore",
                 "RenderCore",

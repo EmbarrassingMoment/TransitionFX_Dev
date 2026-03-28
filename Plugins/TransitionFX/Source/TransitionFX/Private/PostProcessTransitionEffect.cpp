@@ -47,12 +47,15 @@ void UPostProcessTransitionEffect::Initialize(UWorld* World, UTransitionPreset* 
 	static const FMaterialParameterInfo ProgressInfo(TransitionFXConfig::ProgressParamName);
 	if (!DynamicMaterial->GetScalarParameterValue(ProgressInfo, TempVal))
 	{
-		UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: Material '%s' is missing 'Progress' parameter. Transition will not animate."), *Preset->TransitionMaterial->GetName());
+		UE_LOG(LogTransitionFX, Error, TEXT("TransitionFX: Material '%s' is missing 'Progress' parameter. Transition will not animate."), *Preset->TransitionMaterial->GetName());
+		DynamicMaterial = nullptr;
+		return;
 	}
 
-	// Invalidate volume if it belongs to a different (stale) world
+	// Destroy and invalidate volume if it belongs to a different (stale) world
 	if (SpawnedVolume && SpawnedVolume->GetWorld() != World)
 	{
+		SpawnedVolume->Destroy();
 		SpawnedVolume = nullptr;
 	}
 
