@@ -93,7 +93,7 @@ public:
 
 	/** Inverts the current transition's mask and replays forward (0 to 1). */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
-	void InvertTransition(bool bAutoStop = true);
+	void InvertTransition(bool bAutoComplete = true);
 
 	/** Stops the current transition. */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")

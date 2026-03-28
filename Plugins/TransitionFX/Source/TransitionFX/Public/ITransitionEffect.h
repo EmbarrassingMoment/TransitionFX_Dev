@@ -50,10 +50,4 @@ public:
 	 * @param Params The parameters to apply.
 	 */
 	virtual void SetParameters(const FTransitionParameters& Params) = 0;
-
-	/**
-	 * Returns the progress point where the screen is considered fully covered.
-	 * Defaults to 0.5f. Reserved for future use; not currently called by the core system.
-	 */
-	virtual float GetHalfwayPoint() const { return 0.5f; }
 };

@@ -286,7 +286,7 @@ void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransit
 			}
 
 			// Create a temporary Dynamic Material Instance (MID)
-			UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Preset->TransitionMaterial, this);
+			UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Preset->TransitionMaterial, GetTransientPackage());
 
 			if (MID)
 			{
@@ -565,7 +565,7 @@ void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
 }
 
 /** Inverts the current transition's mask and replays forward (0 to 1). */
-void UTransitionManagerSubsystem::InvertTransition(bool bAutoStop)
+void UTransitionManagerSubsystem::InvertTransition(bool bAutoComplete)
 {
 	if (!CurrentPreset)
 	{
@@ -583,7 +583,7 @@ void UTransitionManagerSubsystem::InvertTransition(bool bAutoStop)
 	// Reactivate transition in forward mode with inverted mask
 	CurrentMode = ETransitionMode::Forward;
 	CurrentProgress = 0.0f;
-	bShouldHoldAtMax = !bAutoStop;
+	bShouldHoldAtMax = !bAutoComplete;
 	bIsHolding = false;
 	bHasCompleted = false;
 	bIsTransitionActive = true;
