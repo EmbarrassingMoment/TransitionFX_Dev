@@ -91,9 +91,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void ReverseTransition(bool bAutoStop = true);
 
-	/** Sets whether the current transition's mask is inverted. */
+	/** Inverts the current transition's mask and reverses playback. */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
-	void InvertTransition(bool bInvert);
+	void InvertTransition(bool bAutoStop = true);
 
 	/** Stops the current transition. */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")

@@ -552,8 +552,8 @@ void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
 	bIsTransitionActive = true;
 }
 
-/** Sets whether the current transition's mask is inverted. */
-void UTransitionManagerSubsystem::InvertTransition(bool bInvert)
+/** Inverts the current transition's mask and reverses playback. */
+void UTransitionManagerSubsystem::InvertTransition(bool bAutoStop)
 {
 	if (!CurrentPreset)
 	{
@@ -561,14 +561,20 @@ void UTransitionManagerSubsystem::InvertTransition(bool bInvert)
 		return;
 	}
 
-	if (!CurrentEffect)
+	// Toggle invert state
+	bIsInverted = !bIsInverted;
+	if (CurrentEffect)
 	{
-		UE_LOG(LogTransitionFX, Warning, TEXT("InvertTransition called with no active effect."));
-		return;
+		CurrentEffect->SetInvert(bIsInverted);
 	}
 
-	bIsInverted = bInvert;
-	CurrentEffect->SetInvert(bInvert);
+	// Reactivate transition in reverse mode (same as ReverseTransition)
+	CurrentMode = ETransitionMode::Reverse;
+	bAutoStopOnReverseComplete = bAutoStop;
+	bShouldHoldAtMax = false;
+	bIsHolding = false;
+	bHasCompleted = false;
+	bIsTransitionActive = true;
 }
 
 /** Stops the active transition: cleans up the effect, stops audio, restores input, and resets state. */
