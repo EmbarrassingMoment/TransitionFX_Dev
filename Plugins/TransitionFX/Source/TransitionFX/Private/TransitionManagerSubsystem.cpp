@@ -383,6 +383,7 @@ void UTransitionManagerSubsystem::ForceClear()
 	bAutoStopOnReverseComplete = false;
 	bShouldHoldAtMax = false;
 	bIsHolding = false;
+	bIsInverted = false;
 	CurrentPreset = nullptr;
 	CurrentProgress = 0.0f;
 }
@@ -438,6 +439,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	CurrentPlaySpeed = FMath::Max(0.01f, PlaySpeed);
 	bShouldHoldAtMax = bHoldAtMax;
 	bIsHolding = false;
+	bIsInverted = bInvert;
 	bIsTransitionActive = true;
 	bAutoStopOnReverseComplete = true;
 	bHasCompleted = false;
@@ -550,6 +552,31 @@ void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
 	bIsTransitionActive = true;
 }
 
+/** Inverts the current transition's mask and replays forward (0 to 1). */
+void UTransitionManagerSubsystem::InvertTransition(bool bAutoStop)
+{
+	if (!CurrentPreset)
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("InvertTransition called with null preset."));
+		return;
+	}
+
+	// Toggle invert state
+	bIsInverted = !bIsInverted;
+	if (CurrentEffect)
+	{
+		CurrentEffect->SetInvert(bIsInverted);
+	}
+
+	// Reactivate transition in forward mode with inverted mask
+	CurrentMode = ETransitionMode::Forward;
+	CurrentProgress = 0.0f;
+	bShouldHoldAtMax = !bAutoStop;
+	bIsHolding = false;
+	bHasCompleted = false;
+	bIsTransitionActive = true;
+}
+
 /** Stops the active transition: cleans up the effect, stops audio, restores input, and resets state. */
 void UTransitionManagerSubsystem::StopTransition()
 {
@@ -572,9 +599,10 @@ void UTransitionManagerSubsystem::StopTransition()
 	}
 
 	bIsTransitionActive = false;
-	bHasCompleted = false;
+	// bHasCompleted preserved — reset by StartTransition() / ReverseTransition() / ForceClear()
 	bShouldHoldAtMax = false;
 	bIsHolding = false;
+	bIsInverted = false;
 	CurrentPreset = nullptr;
 }
 
