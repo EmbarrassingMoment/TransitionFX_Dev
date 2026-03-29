@@ -62,6 +62,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Documentation**
 - README in English and Japanese
-- API Reference in English and Japanese (`API_Reference_EN.md`, `API_Reference_JP.md`)
-- Quick Start Guide in English and Japanese (`QUICKSTART_EN.md`, `QUICKSTART_JP.md`)
-- Performance rationale document (`PERFORMANCE_RATIONALE.md`)
+- API Reference in English and Japanese (`docs/API_Reference_EN.md`, `docs/API_Reference_JP.md`)
+- Quick Start Guide in English and Japanese (`docs/QUICKSTART_EN.md`, `docs/QUICKSTART_JP.md`)
+- Performance rationale document (`docs/PERFORMANCE_RATIONALE.md`)
