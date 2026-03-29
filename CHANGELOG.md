@@ -17,9 +17,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `UPostProcessTransitionEffect` — Concrete post-process volume based transition effect
 - `UTransitionBlueprintLibrary` — Blueprint function library with latent action support
 
-**Built-in Transition Effects (24 effects)**
-- Fade, Iris, Heart Iris, Flower Iris, Diamond, Box
-- Linear Wipe, Split, Wavy Curtain, Radial Wipe, Cross Wipe, Zoom Wipe
+**Built-in Transition Effects (22 effects)**
+- Fade, Iris, Flower Iris, Diamond, Box
+- Linear Wipe, Split, Wavy Curtain, Radial Wipe, Cross Wipe
 - Tiles, Polka Dots, Blinds, Spiral, Random Tiles, Wind
 - Texture Mask, TV Switch Off, Hexagon, Triangle, Checkerboard, Pixelate
 
