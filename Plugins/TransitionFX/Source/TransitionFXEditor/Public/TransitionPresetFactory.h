@@ -6,6 +6,7 @@
 #include "Factories/Factory.h"
 #include "TransitionPresetFactory.generated.h"
 
+/** Factory for creating UTransitionPreset assets via the content browser "New Asset" menu. */
 UCLASS()
 class UTransitionPresetFactory : public UFactory
 {
