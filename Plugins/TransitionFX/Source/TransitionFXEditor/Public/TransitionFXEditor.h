@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
+class IAssetTypeActions;
+
 /**
  * Editor module for the TransitionFX plugin.
  * Registers the transition preview tab and editor menus.
@@ -20,4 +22,6 @@ private:
 	void RegisterMenus();
 
 	static const FName PreviewTabId;
+
+	TSharedPtr<IAssetTypeActions> TransitionPresetActions;
 };

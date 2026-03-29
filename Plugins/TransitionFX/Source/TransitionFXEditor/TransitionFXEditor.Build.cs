@@ -30,7 +30,9 @@ public class TransitionFXEditor : ModuleRules
                 "ToolMenus",
                 "EditorFramework",
                 "Projects",
-                "DesktopPlatform"
+                "DesktopPlatform",
+                "AssetTools",
+                "AssetRegistry"
             }
         );
     }
