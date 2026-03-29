@@ -32,7 +32,8 @@ public class TransitionFXEditor : ModuleRules
                 "Projects",
                 "DesktopPlatform",
                 "AssetTools",
-                "AssetRegistry"
+                "AssetRegistry",
+                "ContentBrowser"
             }
         );
     }

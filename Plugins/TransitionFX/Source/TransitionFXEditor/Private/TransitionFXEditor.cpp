@@ -5,6 +5,7 @@
 #include "STransitionPreviewPanel.h"
 #include "AssetToolsModule.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Settings/ContentBrowserSettings.h"
 #include "ToolMenus.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Framework/Docking/TabManager.h"
@@ -23,7 +24,15 @@ void FTransitionFXEditorModule::StartupModule()
 	// Ensure plugin content is indexed by the AssetRegistry
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
-	AssetRegistry.ScanPathsSynchronous({TEXT("/TransitionFX/Data")}, /*bForceRescan=*/ true);
+	AssetRegistry.ScanPathsSynchronous({TEXT("/TransitionFX")}, /*bForceRescan=*/ true);
+
+	// Enable plugin content visibility in Content Browser and asset pickers
+	UContentBrowserSettings* CBSettings = GetMutableDefault<UContentBrowserSettings>();
+	if (CBSettings && !CBSettings->GetDisplayPluginFolders())
+	{
+		CBSettings->SetDisplayPluginFolders(true);
+		CBSettings->PostEditChange();
+	}
 
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(
 		PreviewTabId,
