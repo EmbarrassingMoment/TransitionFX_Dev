@@ -33,6 +33,13 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 *   **Event System:** Access `OnTransitionStarted`, `OnTransitionCompleted`, and `OnTransitionHoldStarted` delegates for precise gameplay logic timing.
 *   **Blueprint Support:** Includes a Latent Action node (`PlayTransitionAndWait`) for clean and easy scripting.
 
+## Requirements & Platform Support
+
+*   **Engine Version:** Unreal Engine **5.5** or later. Earlier versions (5.3, 5.4) are not officially supported.
+*   **Project Type:** Works with both **C++ and Blueprint-only** projects. No C++ coding is required for standard use.
+*   **Rendering:** Requires a PostProcess-capable rendering pipeline (Deferred or Forward with PostProcess enabled).
+*   **Platforms:** Windows (DX12 SM6), Linux (Vulkan SM6). Console and mobile platforms have not been officially tested — SDF-based effects are GPU-bound, so performance on low-end devices may vary.
+
 ## Installation
 1.  Download the plugin from the release page.
 2.  Place the `TransitionFX` folder into your project's `Plugins` directory.
@@ -196,6 +203,30 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 
 **API Reference:**
 *   **Function:** `AsyncLoadTransitionPresets(TArray<TSoftObjectPtr<UTransitionPreset>> Presets, FTransitionPreloadCompleteDelegate OnComplete)`
+
+## Limitations & Notes
+
+*   **Single transition at a time:** Only one transition can play at a time. Starting a new transition will replace the currently active one.
+*   **PostProcess-based rendering:** Transitions are rendered as a PostProcess effect. This means:
+    *   The effect is drawn on top of the entire viewport, including debug UI rendered to the viewport.
+    *   UMG/Slate widgets rendered above the viewport are **not** covered by the transition.
+    *   If you need to hide UI during transitions, use the `OnTransitionStarted` delegate to manually set widget visibility.
+*   **Multiplayer:** TransitionFX operates **locally on each client**. The subsystem runs per GameInstance, so it is inherently client-side. There is no built-in replication or server-side transition control.
+*   **Packaging:** The plugin is included in packaged builds automatically when enabled in the Plugins window. Ensure `TransitionFX` is listed in your `.uproject` file under `Plugins` if you manage plugin references manually.
+
+## Custom Effects
+
+TransitionFX supports creating your own custom transition effects by implementing the `ITransitionEffect` interface.
+
+1. Create a new C++ class that inherits from `UObject` and implements `ITransitionEffect`.
+2. Implement the required methods: `Initialize`, `UpdateProgress`, `Cleanup`, `SetInvert`, and `SetParameters`.
+3. In your `TransitionPreset`, set `Effect Class` to your custom class and assign your custom material.
+
+See [`ITransitionEffect.h`](Plugins/TransitionFX/Source/TransitionFX/Public/ITransitionEffect.h) and [`PostProcessTransitionEffect`](Plugins/TransitionFX/Source/TransitionFX/Public/PostProcessTransitionEffect.h) for a reference implementation.
+
+## FAQ
+
+For common questions and troubleshooting, see the [FAQ](FAQ_EN.md).
 
 ## License
 MIT License

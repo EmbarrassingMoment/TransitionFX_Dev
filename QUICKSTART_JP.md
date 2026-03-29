@@ -72,6 +72,28 @@ DA_FadeToBlack
 > マテリアルには `Progress` という名前のスカラーパラメータが必須です。
 > このパラメータが存在しない場合、遷移はアニメーションしません（警告ログが出力されます）。
 
+### カスタムイージングカーブの使用
+
+カスタムイージングカーブを作成する手順：
+
+1. コンテンツブラウザで右クリック → `Miscellaneous` → `Curve` → `CurveFloat` を選択
+2. アセットに名前を付ける（例: `C_CustomEase`）
+3. カーブエディタを開いてキーフレームを作成 — X 軸は時間（0.0〜1.0）、Y 軸はイージング後の進行度（0.0〜1.0）を表します
+4. `TransitionPreset` で `Easing Type` を `Custom` に設定
+5. `Progress Curve` プロパティが表示されるので、作成した `CurveFloat` アセットを割り当てます
+
+### トランジションの効果音設定
+
+トランジションに効果音を付ける方法：
+
+1. `TransitionPreset` の **Audio** セクションで、`Transition Sound` に Sound アセット（`USoundWave` や `USoundCue`）を割り当てます
+2. `Sound Volume` と `Sound Pitch` を必要に応じて調整します
+3. トランジション開始時にサウンドが自動再生され、トランジションがキャンセルされた場合は自動停止します
+
+> **💡 Tip**
+> 各プリセットはそれぞれ独自のオーディオ設定を持っています。異なるプリセットに異なるサウンドを割り当てることができます（例: Iris には「シュー」、Pixelate には「カチッ」）。
+> オーディオは Fire-and-Forget で動作し、サブシステムがオーディオコンポーネントのライフサイクルを自動管理します。
+
 ---
 
 ## Step 2: 初期化
@@ -257,6 +279,58 @@ Quick Fade From Black ── Duration: 1.0
 Play Transition And Wait
 └─ Override Params: ↑
 ```
+
+### トランジションの色を変更する
+
+デフォルトではトランジションは黒にフェードします。色を変更する場合（例: 白）は、`Override Params` で `Color` ベクターパラメータを使用します：
+
+```
+[Make TransitionParameters]
+└─ Vector Params : { "Color" → LinearColor(1.0, 1.0, 1.0, 1.0) }  ← 白
+    │
+    ▼
+Play Transition And Wait
+└─ Override Params: ↑
+```
+
+### カスタムテクスチャマスクを使用する
+
+`TextureMask` エフェクトを使うと、グレースケールテクスチャでトランジションの進行順序を制御できます：
+
+1. マスクテクスチャをインポートします（グレースケール。黒=遷移開始、白=遷移終了）
+2. **重要:** テクスチャのインポート設定で **sRGB のチェックを外し**、圧縮設定を **Masks (no sRGB)** または **Grayscale** に設定してください
+3. `M_Transition_TextureMask` マテリアルを使用するプリセットを作成します
+4. `Override Params` でテクスチャを渡します：
+
+```
+[Make TransitionParameters]
+└─ Texture Params : { "MaskTexture" → T_MyCustomMask }
+    │
+    ▼
+Play Transition And Wait
+├─ Preset         : DA_TextureMask
+└─ Override Params: ↑
+```
+
+### bInvert パラメータの意味
+
+`Play Transition And Wait` の `bInvert` ピンはトランジションマスクを反転させます：
+- **`bInvert = false`（デフォルト）:** トランジションは通常通り進行します（画面が徐々に覆われる）。
+- **`bInvert = true`:** マスクが反転し、先に覆われるはずだった領域が最後に覆われ、逆もまた然りになります。
+
+`Mode` を変更せずに「逆の見た目」を実現したい場合に便利です。例えば、Iris エフェクトで `bInvert = true` にすると、端から中央に閉じるのではなく、中央から端に向かって広がります。
+
+> **💡 Tip**
+> `bInvert` と `Mode: Reverse` は異なる概念です：
+> - `Mode` は **進行の方向**（0→1 vs 1→0）を制御します。
+> - `bInvert` はマスク自体の **空間的なパターン** を制御します。
+
+### エディタプレビューツール
+
+Play モードに入らずに、エディタ上で直接トランジションエフェクトをプレビューできます。
+**Tools > TransitionFX > TransitionFX Preview** からプレビューパネルにアクセスしてください。
+
+操作方法（再生コントロール、GIF キャプチャ、ビューポート設定）の詳細は [TransitionFX Preview Tool Manual](TransitionFX_PreviewTool_Manual.md) を参照してください。
 
 ---
 
