@@ -72,6 +72,28 @@ DA_FadeToBlack
 > The material requires a scalar parameter named `Progress`.
 > If this parameter does not exist, the transition will not animate (a warning log will be output).
 
+### Using a Custom Easing Curve
+
+To create a custom easing curve:
+
+1. Right-click in Content Browser → `Miscellaneous` → `Curve` → Select `CurveFloat`
+2. Name the asset (e.g., `C_CustomEase`)
+3. Open the curve editor and create keyframes — the X axis represents time (0.0 to 1.0), and the Y axis represents the eased progress (0.0 to 1.0)
+4. In your `TransitionPreset`, set `Easing Type` to `Custom`
+5. The `Progress Curve` property will appear — assign your `CurveFloat` asset
+
+### Setting Up Transition Audio
+
+To play a sound effect with your transition:
+
+1. In your `TransitionPreset`, under the **Audio** section, assign a `Sound` asset (e.g., a `USoundWave` or `USoundCue`) to `Transition Sound`
+2. Adjust `Sound Volume` and `Sound Pitch` as desired
+3. The sound will automatically play when the transition starts and stop if the transition is cancelled
+
+> **💡 Tip**
+> Each preset has its own audio settings. You can assign different sounds to different presets (e.g., a "whoosh" for Iris, a "click" for Pixelate).
+> Audio is fire-and-forget — the subsystem manages the lifecycle of the audio component automatically.
+
 ---
 
 ## Step 2: Initialization
@@ -257,6 +279,58 @@ By passing an `FTransitionParameters` struct to the `Override Params` pin, you c
 Play Transition And Wait
 └─ Override Params: ↑
 ```
+
+### Changing the Transition Color
+
+By default, transitions fade to black. To change the color (e.g., white), use `Override Params` with the `Color` vector parameter:
+
+```
+[Make TransitionParameters]
+└─ Vector Params : { "Color" → LinearColor(1.0, 1.0, 1.0, 1.0) }  ← White
+    │
+    ▼
+Play Transition And Wait
+└─ Override Params: ↑
+```
+
+### Using a Custom Texture Mask
+
+The `TextureMask` effect lets you drive the transition order from a grayscale texture:
+
+1. Import your mask texture (grayscale, where Black = transition starts, White = transition ends)
+2. **Important:** In the texture import settings, **uncheck sRGB** and set Compression to **Masks (no sRGB)** or **Grayscale**
+3. Create a preset using the `M_Transition_TextureMask` material
+4. Pass your texture via `Override Params`:
+
+```
+[Make TransitionParameters]
+└─ Texture Params : { "MaskTexture" → T_MyCustomMask }
+    │
+    ▼
+Play Transition And Wait
+├─ Preset         : DA_TextureMask
+└─ Override Params: ↑
+```
+
+### Understanding the bInvert Parameter
+
+The `bInvert` pin on `Play Transition And Wait` inverts the transition mask:
+- **`bInvert = false` (default):** The transition progresses normally (e.g., the screen is gradually covered).
+- **`bInvert = true`:** The mask is flipped — areas that would be covered first are now covered last, and vice versa.
+
+This is useful when you want to achieve a "reverse look" without changing the `Mode`. For example, an Iris effect with `bInvert = true` will expand from the edges inward instead of closing from the edges to the center.
+
+> **💡 Tip**
+> `bInvert` and `Mode: Reverse` are different concepts:
+> - `Mode` controls the **direction of progress** (0→1 vs 1→0).
+> - `bInvert` controls the **spatial pattern** of the mask itself.
+
+### Editor Preview Tool
+
+You can preview transition effects directly in the editor without entering Play mode.
+Open **Tools > TransitionFX > TransitionFX Preview** to access the preview panel.
+
+For detailed instructions (playback controls, GIF capture, viewport settings), see the [TransitionFX Preview Tool Manual](TransitionFX_PreviewTool_Manual.md).
 
 ---
 
