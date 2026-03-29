@@ -21,17 +21,17 @@ These must be created in the Unreal Editor.
 | bTickWhenPaused | `false` |
 | Priority | `1000.0` |
 
-## Progress: 24 / 25 data assets created (96%)
+## Progress: 23 / 23 data assets created (100%)
 
-- Transition Presets: **24/25** complete
+- Transition Presets: **23/23** complete (22 エフェクト + FadeToBlack)
+
+> **Note**: Heart Iris, Zoom Wipe はリリース対象外のため除外。
 
 ---
 
 ## Still Missing Presets
 
-| Data Asset Name | TransitionMaterial (Material Instance) | Status |
-|---|---|---|
-| `DA_WavyCurtain` | `MI_Transition_WavyCurtain` | Missing |
+なし — 全プリセット作成完了。
 
 ---
 
@@ -47,7 +47,6 @@ These must be created in the Unreal Editor.
 | `DA_Fade` | `MI_Transition_Fade` | Done |
 | `DA_FadeToBlack` | `MI_Transition_Fade` | Done |
 | `DA_FlowerIris` | `MI_Transition_FlowerIris` | Done |
-| `DA_Heart` | `MI_Transition_Heart` | Done |
 | `DA_Hexagon` | `MI_Transition_Hexagon` | Done |
 | `DA_Iris` | `MI_Transition_Iris` | Done |
 | `DA_LinearWipe` | `MI_Transition_LinearWipe` | Done |
@@ -61,8 +60,8 @@ These must be created in the Unreal Editor.
 | `DA_TextureMask` | `MI_Transition_TextureMask` | Done |
 | `DA_Tiles` | `MI_Transition_Tiles` | Done |
 | `DA_Triangle` | `MI_Transition_Triangle` | Done |
+| `DA_WavyCurtain` | `MI_Transition_WavyCurtain` | Done |
 | `DA_Wind` | `MI_Transition_Wind` | Done |
-| `DA_ZoomWipe` | `MI_Transition_ZoomWipe` | Done |
 
 ## Notes
 

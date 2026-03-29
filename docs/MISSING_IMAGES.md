@@ -3,12 +3,12 @@
 All documentation files contain `<!-- IMAGE: ... -->` placeholder comments for images that need to be captured.
 These images should be placed in `docs/images/` and the HTML comments should be replaced with markdown image syntax.
 
-## Progress: 47 / 51 images captured (92%)
+## Progress: 49 / 51 images captured (96%)
 
 - Effect Preview GIFs: **24/24** complete
 - README Hero & Overview: **2/3**
 - Easing Preview GIFs: **12/12** complete
-- Quick Start Guide: **5/8**
+- Quick Start Guide: **7/8**
 - API Reference: **4/4**
 
 ---
@@ -41,14 +41,14 @@ These images should be placed in `docs/images/` and the HTML comments should be 
 ### Quick Start Guide (EN/JP)
 | Filename | Description | Status |
 |---|---|---|
-| `quickstart_create_data_asset.png` | Content Browser — Data Asset creation flow | Missing |
+| `quickstart_create_data_asset.png` | Content Browser — Data Asset creation flow | Done |
 | `quickstart_preset_settings.png` | TransitionPreset detail panel showing all properties | Done |
 | `quickstart_bp_play_node.png` | Play Transition And Wait Blueprint node | Done |
 | `quickstart_preload_bp.png` | PreloadTransitionPresets node in GameInstance Init | Done |
 | `quickstart_fadeout_fadein_bp.png` | Fade Out → Processing → Fade In Blueprint graph | Done |
 | `quickstart_open_level_bp.png` | Open Level With Transition And Wait node | Done |
 | `quickstart_hold_workflow_bp.png` | bHoldAtMax + ReleaseHold loading screen Blueprint workflow | Missing |
-| `quickstart_forceclear_console.png` | Console with TransitionFX.ForceClear command | Missing |
+| `quickstart_forceclear_console.png` | Console with TransitionFX.ForceClear command | Done |
 
 ### API Reference (EN/JP)
 | Filename | Description | Status |
