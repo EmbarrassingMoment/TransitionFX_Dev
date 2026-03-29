@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AssetTypeActions_Base.h"
 
+/** Asset type actions for UTransitionPreset. Registers display name, color, and category in the content browser. */
 class FAssetTypeActions_TransitionPreset : public FAssetTypeActions_Base
 {
 public:
