@@ -25,8 +25,6 @@ These must be created in the Unreal Editor.
 
 - Transition Presets: **23/23** complete (22 エフェクト + FadeToBlack)
 
-> **Note**: Heart Iris, Zoom Wipe はリリース対象外のため除外。
-
 ---
 
 ## Still Missing Presets

@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-The TransitionFX Preview Tool is a tool for directly previewing the 24 types of SDF-based screen transitions included in the TransitionFX plugin within the editor.
+The TransitionFX Preview Tool is a tool for directly previewing the 22 types of SDF-based screen transitions included in the TransitionFX plugin within the editor.
 
 - **No PIE (Play In Editor) required** -- You can instantly check effects within the editor.
 - **Ideal for capturing GIFs** -- Designed to be used with external capture tools like ScreenToGif with a fixed-size viewport.
@@ -145,7 +145,7 @@ The material (or its parent material) must have the following **Scalar Parameter
 
 ### 5.4 Reference List of Existing Materials
 
-The plugin includes the following 24 transition types. Use them as a reference when creating new ones.
+The plugin includes the following 22 transition types. Use them as a reference when creating new ones.
 
 | Effect Name | Material Instance |
 |---|---|
@@ -156,7 +156,6 @@ The plugin includes the following 24 transition types. Use them as a reference w
 | Diamond | `MI_Transition_Diamond` |
 | Fade | `MI_Transition_Fade` |
 | FlowerIris | `MI_Transition_FlowerIris` |
-| Heart | `MI_Transition_Heart` |
 | Hexagon | `MI_Transition_Hexagon` |
 | Iris | `MI_Transition_Iris` |
 | LinearWipe | `MI_Transition_LinearWipe` |
@@ -172,7 +171,6 @@ The plugin includes the following 24 transition types. Use them as a reference w
 | Triangle | `MI_Transition_Triangle` |
 | WavyCurtain | `MI_Transition_WavyCurtain` |
 | Wind | `MI_Transition_Wind` |
-| ZoomWipe | `MI_Transition_ZoomWipe` |
 
 ---
 
