@@ -1,7 +1,11 @@
 // Copyright (c) 2026 Kurorekishi (EmbarrassingMoment).
 
 #include "TransitionFXEditor.h"
+#include "AssetTypeActions_TransitionPreset.h"
 #include "STransitionPreviewPanel.h"
+#include "AssetToolsModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "Settings/ContentBrowserSettings.h"
 #include "ToolMenus.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Framework/Docking/TabManager.h"
@@ -12,6 +16,24 @@ const FName FTransitionFXEditorModule::PreviewTabId(TEXT("TransitionFXPreview"))
 
 void FTransitionFXEditorModule::StartupModule()
 {
+	// Register AssetTypeActions for TransitionPreset
+	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	TransitionPresetActions = MakeShared<FAssetTypeActions_TransitionPreset>();
+	AssetTools.RegisterAssetTypeActions(TransitionPresetActions.ToSharedRef());
+
+	// Ensure plugin content is indexed by the AssetRegistry
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+	AssetRegistry.ScanPathsSynchronous({TEXT("/TransitionFX")}, /*bForceRescan=*/ true);
+
+	// Enable plugin content visibility in Content Browser and asset pickers
+	UContentBrowserSettings* CBSettings = GetMutableDefault<UContentBrowserSettings>();
+	if (CBSettings && !CBSettings->GetDisplayPluginFolders())
+	{
+		CBSettings->SetDisplayPluginFolders(true);
+		CBSettings->PostEditChange();
+	}
+
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(
 		PreviewTabId,
 		FOnSpawnTab::CreateStatic(&FTransitionFXEditorModule::SpawnPreviewTab))
@@ -23,6 +45,17 @@ void FTransitionFXEditorModule::StartupModule()
 
 void FTransitionFXEditorModule::ShutdownModule()
 {
+	// Unregister AssetTypeActions
+	if (TransitionPresetActions.IsValid())
+	{
+		if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
+		{
+			IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
+			AssetTools.UnregisterAssetTypeActions(TransitionPresetActions.ToSharedRef());
+		}
+		TransitionPresetActions.Reset();
+	}
+
 	UToolMenus::UnRegisterStartupCallback(this);
 	UToolMenus::UnregisterOwner(this);
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(PreviewTabId);
