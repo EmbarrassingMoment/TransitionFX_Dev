@@ -70,7 +70,7 @@ void FTransitionPreviewViewportClient::SetPreviewMaterial(UMaterialInterface* Ma
 		return;
 	}
 
-	DynamicMaterial = UMaterialInstanceDynamic::Create(Material, GetTransientPackage());
+	DynamicMaterial = UMaterialInstanceDynamic::Create(Material, nullptr);
 	if (DynamicMaterial)
 	{
 		DynamicMaterial->SetScalarParameterValue(TransitionFXConfig::ProgressParamName, 0.0f);
