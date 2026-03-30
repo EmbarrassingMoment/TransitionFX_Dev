@@ -224,7 +224,7 @@ See [`ITransitionEffect.h`](Plugins/TransitionFX/Source/TransitionFX/Public/ITra
 
 ## FAQ
 
-For common questions and troubleshooting, see the [FAQ](FAQ_EN.md).
+For common questions and troubleshooting, see the [FAQ](docs/FAQ_EN.md).
 
 ## License
 MIT License
