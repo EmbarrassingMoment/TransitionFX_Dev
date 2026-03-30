@@ -41,12 +41,14 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 	GifPlaySpeed = 0.5f;
 	ViewportWidth = 480.0f;
 	ViewportHeight = 270.0f;
+#if TRANSITIONFX_DEV_TOOLS
 	bIsBatchCapturing = false;
 	BatchCaptureIndex = 0;
 	bIsBatchCapturingEasing = false;
 	BatchEasingIndex = 0;
 	SavedEffectIndex = 0;
 	SavedEasing = ETransitionEasing::Linear;
+#endif
 
 	// Resolution options
 	ResolutionOptions.Add(MakeShared<FString>(TEXT("480 x 270")));
@@ -369,6 +371,7 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 				.MinDesiredWidth(60.0f)
 			]
 
+#if TRANSITIONFX_DEV_TOOLS
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
 			.Padding(8, 0, 0, 0)
@@ -388,6 +391,7 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 				.IsEnabled(this, &STransitionPreviewPanel::IsBatchCaptureEasingButtonEnabled)
 				.OnClicked_Lambda([this]() { StartBatchCaptureEasing(); return FReply::Handled(); })
 			]
+#endif
 
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
@@ -397,6 +401,7 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 				SNew(STextBlock)
 				.Text_Lambda([this]()
 				{
+#if TRANSITIONFX_DEV_TOOLS
 					if (bIsCapturing && bIsBatchCapturingEasing)
 					{
 						return FText::Format(
@@ -415,6 +420,7 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 							FText::AsNumber(CaptureFrameIndex),
 							FText::AsNumber(TotalCaptureFrames));
 					}
+#endif
 					if (bIsCapturing)
 					{
 						return FText::Format(
@@ -854,6 +860,7 @@ void STransitionPreviewPanel::FinalizeGifCapture()
 	// Determine save path
 	FString SavePath;
 
+#if TRANSITIONFX_DEV_TOOLS
 	if (bIsBatchCapturingEasing)
 	{
 		// Easing batch mode: auto-save with easing-mapped filename
@@ -867,6 +874,7 @@ void STransitionPreviewPanel::FinalizeGifCapture()
 		SavePath = BatchOutputDir / GifFilename;
 	}
 	else
+#endif
 	{
 		// Single mode: show save file dialog
 		IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
@@ -918,7 +926,9 @@ void STransitionPreviewPanel::FinalizeGifCapture()
 
 	if (Encoder.WriteToFile(SavePath))
 	{
+#if TRANSITIONFX_DEV_TOOLS
 		if (!bIsBatchCapturing && !bIsBatchCapturingEasing)
+#endif
 		{
 			FNotificationInfo Info(FText::Format(
 				LOCTEXT("CaptureSuccessNotification", "GIF saved: {0}"),
@@ -936,6 +946,7 @@ void STransitionPreviewPanel::FinalizeGifCapture()
 		FSlateNotificationManager::Get().AddNotification(Info);
 	}
 
+#if TRANSITIONFX_DEV_TOOLS
 	// Advance batch if in batch mode
 	if (bIsBatchCapturingEasing)
 	{
@@ -945,6 +956,7 @@ void STransitionPreviewPanel::FinalizeGifCapture()
 	{
 		AdvanceBatchCapture();
 	}
+#endif
 }
 
 FText STransitionPreviewPanel::GetCaptureButtonText() const
@@ -956,8 +968,14 @@ FText STransitionPreviewPanel::GetCaptureButtonText() const
 
 bool STransitionPreviewPanel::IsCaptureButtonEnabled() const
 {
-	return !bIsCapturing && !bIsBatchCapturing && !bIsBatchCapturingEasing && Effects.Num() > 0;
+	return !bIsCapturing
+#if TRANSITIONFX_DEV_TOOLS
+		&& !bIsBatchCapturing && !bIsBatchCapturingEasing
+#endif
+		&& Effects.Num() > 0;
 }
+
+#if TRANSITIONFX_DEV_TOOLS
 
 // ─────────────────────────────────────────────
 // Batch GIF Capture
@@ -1285,5 +1303,7 @@ bool STransitionPreviewPanel::IsBatchCaptureEasingButtonEnabled() const
 {
 	return !bIsCapturing && !bIsBatchCapturing && !bIsBatchCapturingEasing && Effects.Num() > 0;
 }
+
+#endif // TRANSITIONFX_DEV_TOOLS
 
 #undef LOCTEXT_NAMESPACE

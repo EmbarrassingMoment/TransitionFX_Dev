@@ -69,6 +69,7 @@ private:
 	FText GetCaptureButtonText() const;
 	bool IsCaptureButtonEnabled() const;
 
+#if TRANSITIONFX_DEV_TOOLS
 	// Batch GIF capture (captures all effects with filenames from MISSING_IMAGES.md)
 	static FString GetGifFilenameForEffect(const FString& DisplayName);
 	void StartBatchCapture();
@@ -82,6 +83,7 @@ private:
 	void AdvanceBatchCaptureEasing();
 	FText GetBatchCaptureEasingButtonText() const;
 	bool IsBatchCaptureEasingButtonEnabled() const;
+#endif
 
 	// UI helpers
 	FText GetProgressText() const;
@@ -125,6 +127,7 @@ private:
 	TArray<TArray<FColor>> CapturedFrames;
 	float GifPlaySpeed;
 
+#if TRANSITIONFX_DEV_TOOLS
 	// Batch capture state
 	bool bIsBatchCapturing;
 	int32 BatchCaptureIndex;
@@ -136,6 +139,7 @@ private:
 	TArray<ETransitionEasing> BatchEasingList;
 	int32 SavedEffectIndex;
 	ETransitionEasing SavedEasing;
+#endif
 
 	// Tick delegate
 	FTSTicker::FDelegateHandle TickDelegateHandle;
