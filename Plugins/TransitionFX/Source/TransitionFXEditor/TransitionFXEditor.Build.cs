@@ -8,6 +8,9 @@ public class TransitionFXEditor : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        // Set to 1 to enable batch capture buttons (documentation asset generation tooling).
+        PublicDefinitions.Add("TRANSITIONFX_DEV_TOOLS=0");
+
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
