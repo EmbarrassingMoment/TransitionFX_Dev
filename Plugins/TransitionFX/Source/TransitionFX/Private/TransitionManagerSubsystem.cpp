@@ -286,7 +286,7 @@ void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransit
 			}
 
 			// Create a temporary Dynamic Material Instance (MID)
-			UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Preset->TransitionMaterial, GetTransientPackage());
+			UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Preset->TransitionMaterial, this);
 
 			if (MID)
 			{
