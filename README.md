@@ -38,7 +38,7 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 *   **Engine Version:** Unreal Engine **5.5** or later. Earlier versions (5.3, 5.4) are not officially supported.
 *   **Project Type:** Works with both **C++ and Blueprint-only** projects. No C++ coding is required for standard use.
 *   **Rendering:** Requires a PostProcess-capable rendering pipeline (Deferred or Forward with PostProcess enabled).
-*   **Platforms:** Windows (DX12 SM6), Linux (Vulkan SM6). Console and mobile platforms have not been officially tested — SDF-based effects are GPU-bound, so performance on low-end devices may vary.
+*   **Platforms:** Windows (DX12 SM6). Console and mobile platforms have not been officially tested — SDF-based effects are GPU-bound, so performance on low-end devices may vary.
 
 ## Installation
 1.  Download the plugin from the release page.
