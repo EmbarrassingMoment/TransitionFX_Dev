@@ -212,6 +212,35 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 *   **Multiplayer:** TransitionFX operates **locally on each client**. The subsystem runs per GameInstance, so it is inherently client-side. There is no built-in replication or server-side transition control.
 *   **Packaging:** The plugin is included in packaged builds automatically when enabled in the Plugins window. Ensure `TransitionFX` is listed in your `.uproject` file under `Plugins` if you manage plugin references manually.
 
+## Roadmap
+
+> Planned features for future releases. Priorities may shift based on community feedback.
+
+### New Effects
+- [ ] New transition effects are planned — specific effects are to be determined based on user feedback and creative exploration
+
+### Feature Extensions
+- [ ] **Transition Color per Preset** `High` — Expose a default transition color property on presets (e.g., fade-to-white) without requiring parameter overrides at every call
+- [ ] **UMG Widget-Layer Transitions** `High` — An alternative rendering path using a full-screen UMG widget, allowing the transition to cover Slate/UMG UI layers
+- [ ] **Origin Point Override** `Medium` — Allow center-based transitions (Iris, Diamond, Tiles, etc.) to expand from a custom screen-space coordinate
+- [ ] **Transition Chaining / Sequencing** `Medium` — A node or data asset that plays a sequence of presets back-to-back
+- [ ] **OnTransitionProgress Delegate** `Medium` — A delegate that broadcasts progress each tick, removing the need to poll `GetCurrentProgress()`
+- [ ] **Simultaneous Transitions** `Low` — Support for layering multiple independent transitions with a multi-slot manager
+
+### Improvements & Optimization
+- [ ] **Preset Validation in Editor** `High` — Warn if a preset has no material or is missing the required `Progress` parameter
+- [ ] **Editor Preset Thumbnails** `Medium` — Auto-generate static thumbnails for TransitionPreset assets in the Content Browser
+- [ ] **Blueprint Preset Picker Widget** `Medium` — A visual dropdown showing available presets with mini-previews
+- [ ] **Configurable Pool Size** `Low` — Expose the effect pool cap (currently hardcoded at 3) via project settings
+- [ ] **Shader Complexity Tiers** `Low` — Simplified material variants for performance-sensitive platforms
+
+### Documentation & Tutorials
+- [ ] **Material Parameter Reference** `High` — Dedicated doc listing every built-in material's adjustable parameters
+- [ ] **Video Tutorial: Getting Started** `Medium` — Installation, preset creation, and first transition walkthrough
+- [ ] **Video Tutorial: Level Transition Workflow** `Medium` — Demonstrating `OpenLevelWithTransition` and the hold-at-max loading screen pattern
+- [ ] **Custom Effect Authoring Guide** `Medium` — Step-by-step guide for creating new SDF materials and wiring them via `ITransitionEffect`
+- [ ] **Example Project / Sample Maps** `Medium` — Downloadable sample with pre-configured presets and Blueprint examples for common patterns
+
 ## Custom Effects
 
 TransitionFX supports creating your own custom transition effects by implementing the `ITransitionEffect` interface.
