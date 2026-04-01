@@ -1,6 +1,8 @@
-# TransitionFX
+<p align="center">
+  <img src="docs/images/header.png" alt="TransitionFX – Transition Manager & Effects Library" width="100%">
+</p>
 
-<!-- IMAGE: hero_banner.gif - Hero banner showing multiple transition effects in action (montage/GIF) -->
+# TransitionFX
 
 ## Description
 TransitionFX is a lightweight and advanced procedural screen transition system for Unreal Engine 5.
