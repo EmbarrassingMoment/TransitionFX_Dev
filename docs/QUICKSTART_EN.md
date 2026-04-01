@@ -68,7 +68,7 @@ DA_FadeToBlack
 └─ bTickWhenPaused     : False
 ```
 
-> **💡 Tip**
+> **Tip**
 > The material requires a scalar parameter named `Progress`.
 > If this parameter does not exist, the transition will not animate (a warning log will be output).
 
@@ -86,11 +86,11 @@ To create a custom easing curve:
 
 To play a sound effect with your transition:
 
-1. In your `TransitionPreset`, under the **Audio** section, assign a `Sound` asset (e.g., a `USoundWave` or `USoundCue`) to `Transition Sound`
+1. In your `TransitionPreset`, under the **Audio**section, assign a `Sound` asset (e.g., a `USoundWave` or `USoundCue`) to `Transition Sound`
 2. Adjust `Sound Volume` and `Sound Pitch` as desired
 3. The sound will automatically play when the transition starts and stop if the transition is cancelled
 
-> **💡 Tip**
+> **Tip**
 > Each preset has its own audio settings. You can assign different sounds to different presets (e.g., a "whoosh" for Iris, a "click" for Pixelate).
 > Audio is fire-and-forget — the subsystem manages the lifecycle of the audio component automatically.
 
@@ -167,7 +167,7 @@ TransitionSystem->AsyncLoadTransitionPresets(SoftPresets,
 | Loading of the default fade preset `DA_FadeToBlack` (and its referenced material) | Subsystem initialization |
 | Preparation for automatic fade-in after a level transition | Automatically bound to `PostLoadMapWithWorld` |
 
-> **💡 Tip**
+> **Tip**
 > It is recommended to limit the presets passed to preloading to those that are "guaranteed to be used early in the game."
 > Passing all presets will increase the load at startup. If memory is a concern, use asynchronous preloading and design it so that they are loaded when needed.
 
@@ -175,7 +175,7 @@ TransitionSystem->AsyncLoadTransitionPresets(SoftPresets,
 
 ## Step 3: How to Call from BP
 
-The basic usage is simply calling the **`Play Transition And Wait`** node.
+The basic usage is simply calling the **`Play Transition And Wait`**node.
 Both fade-out and fade-in use the same preset, switched via the `Mode` pin.
 
 ### Basic Pattern: Fade Out → Processing → Fade In
@@ -246,25 +246,25 @@ Open Level With Transition And Wait
 [Write any post-processing in the caller, if necessary]
 ```
 
-> **⚠️ Warning**
+> **Warning**
 > The `Completed` pin fires **immediately after the fade-out completes and `OpenLevel` is called**.
 > It does not wait for the loading of the new level to finish. The fade-in on the new level side is automatically started via `PostLoadMapWithWorld`.
 
 ### When You Want to Fade Quickly Without a Preset
 
-If you want to easily fade without creating a DataAsset, you can use **`Quick Fade To Black`** / **`Quick Fade From Black`**.
+If you want to easily fade without creating a DataAsset, you can use **`Quick Fade To Black`**/ **`Quick Fade From Black`**.
 
 ```
 Quick Fade To Black   ── Duration: 1.0
 Quick Fade From Black ── Duration: 1.0
 ```
 
-> **💡 Tip**
+> **Tip**
 > `Quick Fade` internally uses the default `DA_FadeToBlack`.
 > If an effect other than a black fade is required, please create a dedicated DataAsset and use `Play Transition And Wait`.
 
-> **⚠️ Warning**
-> `Quick Fade To Black` and `Quick Fade From Black` are **fire-and-forget** functions. They start the transition but **do not wait for completion**. If you need to execute logic after the fade finishes, use `Play Transition And Wait` instead, or bind to the `OnTransitionCompleted` delegate.
+> **Warning**
+> `Quick Fade To Black` and `Quick Fade From Black` are **fire-and-forget**functions. They start the transition but **do not wait for completion**. If you need to execute logic after the fade finishes, use `Play Transition And Wait` instead, or bind to the `OnTransitionCompleted` delegate.
 
 ### When Dynamically Changing Material Parameters
 
@@ -298,7 +298,7 @@ Play Transition And Wait
 The `TextureMask` effect lets you drive the transition order from a grayscale texture:
 
 1. Import your mask texture (grayscale, where Black = transition starts, White = transition ends)
-2. **Important:** In the texture import settings, **uncheck sRGB** and set Compression to **Masks (no sRGB)** or **Grayscale**
+2. **Important:**In the texture import settings, **uncheck sRGB**and set Compression to **Masks (no sRGB)**or **Grayscale**
 3. Create a preset using the `M_Transition_TextureMask` material
 4. Pass your texture via `Override Params`:
 
@@ -315,20 +315,20 @@ Play Transition And Wait
 ### Understanding the bInvert Parameter
 
 The `bInvert` pin on `Play Transition And Wait` inverts the transition mask:
-- **`bInvert = false` (default):** The transition progresses normally (e.g., the screen is gradually covered).
-- **`bInvert = true`:** The mask is flipped — areas that would be covered first are now covered last, and vice versa.
+- **`bInvert = false` (default):**The transition progresses normally (e.g., the screen is gradually covered).
+- **`bInvert = true`:**The mask is flipped — areas that would be covered first are now covered last, and vice versa.
 
 This is useful when you want to achieve a "reverse look" without changing the `Mode`. For example, an Iris effect with `bInvert = true` will expand from the edges inward instead of closing from the edges to the center.
 
-> **💡 Tip**
+> **Tip**
 > `bInvert` and `Mode: Reverse` are different concepts:
-> - `Mode` controls the **direction of progress** (0→1 vs 1→0).
-> - `bInvert` controls the **spatial pattern** of the mask itself.
+> - `Mode` controls the **direction of progress**(0→1 vs 1→0).
+> - `bInvert` controls the **spatial pattern**of the mask itself.
 
 ### Editor Preview Tool
 
 You can preview transition effects directly in the editor without entering Play mode.
-Open **Tools > TransitionFX > TransitionFX Preview** to access the preview panel.
+Open **Tools > TransitionFX > TransitionFX Preview**to access the preview panel.
 
 For detailed instructions (playback controls, GIF capture, viewport settings), see the [TransitionFX Preview Tool Manual](TransitionFX_PreviewTool_Manual.md).
 
@@ -410,7 +410,7 @@ void UMyClass::OnHoldStarted()
 }
 ```
 
-> **⚠️ Warning**
+> **Warning**
 > If you forget to call `Release Hold`, the screen will remain dark forever.
 > If it gets stuck by any chance, you can forcefully recover it by executing `TransitionFX.ForceClear` in the console (`@` or `~` key).
 
@@ -443,7 +443,7 @@ This will reset all of the following:
 - Stopping of currently playing sounds
 - Resetting of all transition flags (`bIsTransitionActive`, `bIsHolding`, etc.)
 
-> **💡 Tip**
+> **Tip**
 > Be sure to make this command known to QA testers.
 > They can recover on their own if they get stuck with a dark screen, which improves the quality of bug reports.
 
@@ -475,7 +475,7 @@ Get Game Instance Subsystem (TransitionManagerSubsystem)
 Force Clear
 ```
 
-> **⚠️ Warning**
+> **Warning**
 > `Force Clear` immediately destroys the state without waiting for the transition to complete. `OnTransitionCompleted` will not fire.
 > If the game logic assumes `OnTransitionCompleted` will fire, you must manually call the subsequent processing after `Force Clear`.
 
@@ -580,8 +580,8 @@ Play Transition And Wait (Mode: Reverse)
 
 ### Notes
 
-> **⚠️ `OnTransitionCompleted` fires upon completion of both Forward and Reverse.**
+> **`OnTransitionCompleted` fires upon completion of both Forward and Reverse.**
 > If multiple transitions are executed in sequence, you need to use game states, etc. to distinguish which completion you are responding to.
 
-> **⚠️ Always `Remove` bound delegates when you are finished using them.**
+> **Always `Remove` bound delegates when you are finished using them.**
 > Especially when binding in a Level Blueprint, duplicate bindings can occur each time the level is reloaded. It is recommended to design it so that bindings are done on the `GameInstance` side, or to explicitly unbind them with `Remove Dynamic`.
