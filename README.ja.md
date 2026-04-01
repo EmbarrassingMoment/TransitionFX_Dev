@@ -1,6 +1,8 @@
-# TransitionFX
+<p align="center">
+  <img src="docs/images/header.png" alt="TransitionFX – Transition Manager & Effects Library" width="100%">
+</p>
 
-<!-- IMAGE: hero_banner.gif - プラグインのヒーロー画像（複数エフェクトのモンタージュ/GIF） -->
+# TransitionFX
 
 ## Description
 TransitionFXは、Unreal Engine 5向けの軽量かつ高度なプロシージャル画面遷移システムです。
