@@ -15,7 +15,7 @@
 
 ## Step 1: プリセットの作成
 
-TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition Preset）** として管理します。
+TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition Preset）**として管理します。
 まず最初にこのアセットを作成します。
 
 ### 作成手順
@@ -68,7 +68,7 @@ DA_FadeToBlack
 └─ bTickWhenPaused     : False
 ```
 
-> **💡 Tip**
+> **Tip**
 > マテリアルには `Progress` という名前のスカラーパラメータが必須です。
 > このパラメータが存在しない場合、遷移はアニメーションしません（警告ログが出力されます）。
 
@@ -86,11 +86,11 @@ DA_FadeToBlack
 
 トランジションに効果音を付ける方法：
 
-1. `TransitionPreset` の **Audio** セクションで、`Transition Sound` に Sound アセット（`USoundWave` や `USoundCue`）を割り当てます
+1. `TransitionPreset` の **Audio**セクションで、`Transition Sound` に Sound アセット（`USoundWave` や `USoundCue`）を割り当てます
 2. `Sound Volume` と `Sound Pitch` を必要に応じて調整します
 3. トランジション開始時にサウンドが自動再生され、トランジションがキャンセルされた場合は自動停止します
 
-> **💡 Tip**
+> **Tip**
 > 各プリセットはそれぞれ独自のオーディオ設定を持っています。異なるプリセットに異なるサウンドを割り当てることができます（例: Iris には「シュー」、Pixelate には「カチッ」）。
 > オーディオは Fire-and-Forget で動作し、サブシステムがオーディオコンポーネントのライフサイクルを自動管理します。
 
@@ -167,7 +167,7 @@ TransitionSystem->AsyncLoadTransitionPresets(SoftPresets,
 | デフォルトフェードプリセット `DA_FadeToBlack`（および参照先マテリアル）のロード | サブシステム初期化時 |
 | レベル遷移後の自動フェードイン準備 | `PostLoadMapWithWorld` に自動バインド |
 
-> **💡 Tip**
+> **Tip**
 > プリロードに渡すプリセットは「ゲーム序盤に必ず使う」ものに絞るのがおすすめです。
 > すべてのプリセットを渡すと起動時の負荷が増えます。メモリが気になる場合は非同期プリロードを使い、必要なタイミングでロードする設計にしましょう。
 
@@ -175,7 +175,7 @@ TransitionSystem->AsyncLoadTransitionPresets(SoftPresets,
 
 ## Step 3: BPからの呼び出し方
 
-基本的な使い方は **`Play Transition And Wait`** ノードを呼ぶだけです。
+基本的な使い方は **`Play Transition And Wait`**ノードを呼ぶだけです。
 フェードアウト・フェードインはどちらも同じプリセットを使い、`Mode` ピンで切り替えます。
 
 ### 基本パターン：フェードアウト → 処理 → フェードイン
@@ -210,7 +210,7 @@ Play Transition And Wait
 
 ### 秒数で再生時間を指定したい場合
 
-`Play Speed` ではなく具体的な秒数で指定したい場合は **`Play Transition And Wait With Duration`** を使います。
+`Play Speed` ではなく具体的な秒数で指定したい場合は **`Play Transition And Wait With Duration`**を使います。
 
 ```
 Play Transition And Wait With Duration
@@ -221,7 +221,7 @@ Play Transition And Wait With Duration
 
 ### ランダムなエフェクトを使いたい場合
 
-複数のプリセットからランダムに再生したい場合は **`Play Random Transition And Wait`** を使います。
+複数のプリセットからランダムに再生したい場合は **`Play Random Transition And Wait`**を使います。
 
 ```
 Play Random Transition And Wait
@@ -234,7 +234,7 @@ Play Random Transition And Wait
 
 ![Open Level With Transition And Wait ノード](docs/images/quickstart_open_level_bp.png)
 
-フェードアウト → レベルオープン → フェードインを 1 ノードで完結させたい場合は **`Open Level With Transition And Wait`** を使います。
+フェードアウト → レベルオープン → フェードインを 1 ノードで完結させたい場合は **`Open Level With Transition And Wait`**を使います。
 
 ```
 Open Level With Transition And Wait
@@ -246,25 +246,25 @@ Open Level With Transition And Wait
 【呼び出し元での後処理があれば記述】
 ```
 
-> **⚠️ 注意**
+> **注意**
 > `Completed` ピンは**フェードアウトが完了し `OpenLevel` が呼ばれた直後**に発火します。
 > 新レベルのロード完了を待つものではありません。新レベル側でのフェードインは `PostLoadMapWithWorld` を通じて自動的に開始されます。
 
 ### プリセット不要で素早くフェードしたい場合
 
-DataAsset を作らずに手軽にフェードしたい場合は **`Quick Fade To Black`** / **`Quick Fade From Black`** が使えます。
+DataAsset を作らずに手軽にフェードしたい場合は **`Quick Fade To Black`**/ **`Quick Fade From Black`**が使えます。
 
 ```
 Quick Fade To Black   ── Duration: 1.0
 Quick Fade From Black ── Duration: 1.0
 ```
 
-> **💡 Tip**
+> **Tip**
 > `Quick Fade` は内部的にデフォルトの `DA_FadeToBlack` を使用します。
 > 黒フェード以外のエフェクトが必要な場合は、専用の DataAsset を作成して `Play Transition And Wait` を使ってください。
 
-> **⚠️ 注意**
-> `Quick Fade To Black` と `Quick Fade From Black` は**完了を待たない（Fire-and-Forget）** 関数です。遷移を開始しますが、**完了まで待機しません**。フェード完了後にロジックを実行する必要がある場合は、代わりに `Play Transition And Wait` を使用するか、`OnTransitionCompleted` デリゲートにバインドしてください。
+> **注意**
+> `Quick Fade To Black` と `Quick Fade From Black` は**完了を待たない（Fire-and-Forget）**関数です。遷移を開始しますが、**完了まで待機しません**。フェード完了後にロジックを実行する必要がある場合は、代わりに `Play Transition And Wait` を使用するか、`OnTransitionCompleted` デリゲートにバインドしてください。
 
 ### マテリアルパラメータを動的に変えたい場合
 
@@ -298,7 +298,7 @@ Play Transition And Wait
 `TextureMask` エフェクトを使うと、グレースケールテクスチャでトランジションの進行順序を制御できます：
 
 1. マスクテクスチャをインポートします（グレースケール。黒=遷移開始、白=遷移終了）
-2. **重要:** テクスチャのインポート設定で **sRGB のチェックを外し**、圧縮設定を **Masks (no sRGB)** または **Grayscale** に設定してください
+2. **重要:**テクスチャのインポート設定で **sRGB のチェックを外し**、圧縮設定を **Masks (no sRGB)**または **Grayscale**に設定してください
 3. `M_Transition_TextureMask` マテリアルを使用するプリセットを作成します
 4. `Override Params` でテクスチャを渡します：
 
@@ -315,20 +315,20 @@ Play Transition And Wait
 ### bInvert パラメータの意味
 
 `Play Transition And Wait` の `bInvert` ピンはトランジションマスクを反転させます：
-- **`bInvert = false`（デフォルト）:** トランジションは通常通り進行します（画面が徐々に覆われる）。
-- **`bInvert = true`:** マスクが反転し、先に覆われるはずだった領域が最後に覆われ、逆もまた然りになります。
+- **`bInvert = false`（デフォルト）:**トランジションは通常通り進行します（画面が徐々に覆われる）。
+- **`bInvert = true`:**マスクが反転し、先に覆われるはずだった領域が最後に覆われ、逆もまた然りになります。
 
 `Mode` を変更せずに「逆の見た目」を実現したい場合に便利です。例えば、Iris エフェクトで `bInvert = true` にすると、端から中央に閉じるのではなく、中央から端に向かって広がります。
 
-> **💡 Tip**
+> **Tip**
 > `bInvert` と `Mode: Reverse` は異なる概念です：
 > - `Mode` は **進行の方向**（0→1 vs 1→0）を制御します。
-> - `bInvert` はマスク自体の **空間的なパターン** を制御します。
+> - `bInvert` はマスク自体の **空間的なパターン**を制御します。
 
 ### エディタプレビューツール
 
 Play モードに入らずに、エディタ上で直接トランジションエフェクトをプレビューできます。
-**Tools > TransitionFX > TransitionFX Preview** からプレビューパネルにアクセスしてください。
+**Tools > TransitionFX > TransitionFX Preview**からプレビューパネルにアクセスしてください。
 
 操作方法（再生コントロール、GIF キャプチャ、ビューポート設定）の詳細は [TransitionFX Preview Tool Manual](TransitionFX_PreviewTool_Manual.md) を参照してください。
 
@@ -410,7 +410,7 @@ void UMyClass::OnHoldStarted()
 }
 ```
 
-> **⚠️ 注意**
+> **注意**
 > `Release Hold` を呼び忘れると画面が永遠に暗転したままになります。
 > 万が一スタックした場合は、コンソール（`@` または `~` キー）で `TransitionFX.ForceClear` を実行することで強制復旧できます。
 
@@ -443,7 +443,7 @@ TransitionFX.ForceClear
 - 再生中のサウンドの停止
 - すべての遷移フラグのリセット（`bIsTransitionActive`、`bIsHolding` など）
 
-> **💡 Tip**
+> **Tip**
 > QA テスターには必ずこのコマンドを周知しておきましょう。
 > 画面が暗転してスタックした際に自力で復旧できるため、バグレポートの質が上がります。
 
@@ -475,7 +475,7 @@ Get Game Instance Subsystem (TransitionManagerSubsystem)
 Force Clear
 ```
 
-> **⚠️ 注意**
+> **注意**
 > `Force Clear` は遷移の完了を待たず即座に状態を破棄します。`OnTransitionCompleted` は発火しません。
 > ゲームロジックが `OnTransitionCompleted` の発火を前提としている場合、`Force Clear` 後に手動で後続処理を呼ぶ必要があります。
 
@@ -580,8 +580,8 @@ Play Transition And Wait (Mode: Reverse)
 
 ### 注意点
 
-> **⚠️ `OnTransitionCompleted` は Forward・Reverse どちらの完了でも発火します。**
+> **`OnTransitionCompleted` は Forward・Reverse どちらの完了でも発火します。**
 > 複数の遷移が前後して実行される場合、どちらの完了に反応しているかをゲームステートなどで区別する必要があります。
 
-> **⚠️ バインドしたデリゲートは使い終わったら必ず `Remove` してください。**
+> **バインドしたデリゲートは使い終わったら必ず `Remove` してください。**
 > 特にレベル Blueprint でバインドした場合、レベルが再ロードされるたびに重複バインドが発生する可能性があります。`GameInstance` 側でバインドする設計にするか、`Remove Dynamic` で明示的に解除することを推奨します。
