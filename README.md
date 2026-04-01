@@ -40,6 +40,21 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 *   **Rendering:** Requires a PostProcess-capable rendering pipeline (Deferred or Forward with PostProcess enabled).
 *   **Platforms:** Windows (DX12 SM6). Console and mobile platforms have not been officially tested — SDF-based effects are GPU-bound, so performance on low-end devices may vary.
 
+## Sample Project
+
+A ready-to-use sample project is available on the [Releases page](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases).
+It includes the full plugin source and a showcase level demonstrating all 22+ transition effects.
+
+**Requirements:** Unreal Engine 5.5, Windows, DirectX 12 / SM6, Visual Studio 2022 (Game Development with C++ workload)
+
+1. Download `TransitionFX_SampleProject_vX.X.X.zip` from the Releases page.
+2. Extract the zip to a folder (avoid paths with spaces or non-ASCII characters).
+3. Right-click `TransitionFX_Dev.uproject` and select **"Generate Visual Studio project files"**.
+4. Open `TransitionFX_Dev.uproject`. When prompted to rebuild missing modules, click **Yes**.
+5. Once the editor opens, press **Play** in the `L_ShowCase` level to explore all effects.
+
+> **Note:** The first launch will compile shaders, which may take several minutes.
+
 ## Installation
 1.  Download the plugin from the release page.
 2.  Place the `TransitionFX` folder into your project's `Plugins` directory.
