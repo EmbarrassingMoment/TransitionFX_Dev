@@ -112,6 +112,19 @@ You can bind to the following events in the `TransitionManagerSubsystem`:
 *   **OnTransitionCompleted:** Fired when the transition finishes.
 *   **OnTransitionHoldStarted:** Fired when the transition holds at max progress (1.0) (if `bHoldAtMax` is true).
 
+## Transition Modes: Forward / Reverse / Invert
+
+The `Invert` flag flips which area of the screen is covered — it is **not** the same as `Reverse` (which reverses playback direction).
+
+> All previews below use the **Iris** effect with `Mode: Forward` to isolate the effect of the Invert flag.
+
+| Invert | Behavior | Preview |
+| :--- | :--- | :--- |
+| **Off** (default) | The effect shape **covers** the screen (closes inward). Standard Fade Out. | ![Forward Invert Off](docs/images/forward_invert_off.gif) |
+| **On** | The effect shape **reveals** the screen (opens outward). Inverts the mask. | ![Forward Invert On](docs/images/forward_invert_on.gif) |
+
+> **Tip:** To achieve a Fade In without using `Reverse` mode, set `Mode: Forward` + `Invert: True`.
+
 ## API Reference
 The `TransitionManagerSubsystem` provides several callable functions for advanced control:
 
