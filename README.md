@@ -55,6 +55,8 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 A ready-to-use sample project is available on the [Releases page](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases).
 It includes the full plugin source and a showcase level demonstrating all 22+ transition effects.
 
+▶ [Watch the sample video on YouTube](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
+
 **Requirements:** Unreal Engine 5.5, Windows, DirectX 12 / SM6, Visual Studio 2022 (Game Development with C++ workload)
 
 1. Download `TransitionFX_SampleProject_vX.X.X.zip` from the Releases page.
