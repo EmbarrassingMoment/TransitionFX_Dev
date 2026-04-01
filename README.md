@@ -12,6 +12,8 @@
 [![Blueprint](https://img.shields.io/badge/Blueprint-Ready-9B59B6?style=flat&logo=unrealengine&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Sponsor](https://img.shields.io/badge/Sponsor-EmbarrassingMoment-ff69b4?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/EmbarrassingMoment)
 
+> 日本語版はこちら → [README.ja.md](README.ja.md)
+
 ## Description
 TransitionFX is a lightweight and advanced procedural screen transition system for Unreal Engine 5.
 It renders high-quality transitions based on SDF (Signed Distance Field) math without using textures, and can be implemented from Blueprints with just a single node.
@@ -112,6 +114,8 @@ You can bind to the following events in the `TransitionManagerSubsystem`:
 *   **OnTransitionStarted:** Fired when the transition begins.
 *   **OnTransitionCompleted:** Fired when the transition finishes.
 *   **OnTransitionHoldStarted:** Fired when the transition holds at max progress (1.0) (if `bHoldAtMax` is true).
+
+> For a detailed guide including loading screen patterns, debug tips, and event usage, see the [Quick Start Guide](docs/QUICKSTART_EN.md).
 
 ## Transition Modes: Forward / Reverse / Invert
 
