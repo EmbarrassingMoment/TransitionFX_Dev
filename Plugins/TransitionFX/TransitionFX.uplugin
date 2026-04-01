@@ -15,7 +15,7 @@
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
-	"Installed": true,
+	"Installed": false,
 	"Modules": [
 		{
 			"Name": "TransitionFX",

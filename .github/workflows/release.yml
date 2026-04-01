@@ -1,0 +1,58 @@
+name: Release Sample Project
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout with LFS
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Create distribution zip
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          ZIP_NAME="TransitionFX_SampleProject_${TAG_NAME}.zip"
+
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='Binaries/' \
+            --exclude='Intermediate/' \
+            --exclude='Saved/' \
+            --exclude='DerivedDataCache/' \
+            --exclude='Build/' \
+            --exclude='Plugins/*/Binaries/' \
+            --exclude='Plugins/*/Intermediate/' \
+            --exclude='.vs/' \
+            --exclude='*.sln' \
+            --exclude='CONTRIBUTING.md' \
+            . /tmp/TransitionFX_SampleProject/
+
+          cd /tmp
+          zip -r "${ZIP_NAME}" TransitionFX_SampleProject/
+          mv "${ZIP_NAME}" "${GITHUB_WORKSPACE}/"
+          echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
+
+      - name: Extract changelog notes
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk "/^## \[${VERSION}\]/{found=1; next} found && /^## /{exit} found{print}" CHANGELOG.md > release_notes.txt
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            "${ZIP_NAME}" \
+            --title "TransitionFX ${GITHUB_REF_NAME}" \
+            --notes-file release_notes.txt
