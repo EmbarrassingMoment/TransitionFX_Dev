@@ -140,7 +140,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Hexagon** | A sci-fi style honeycomb wipe. A wave of hexagonal cells smoothly shrinks into their centers. | ![Hexagon](docs/images/effect_hexagon.gif) |
 | **Triangle** | A stylish polygon-style wipe where sharp triangles shrink and disappear in a ripple effect from the center. | ![Triangle](docs/images/effect_triangle.gif) |
 | **Checkerboard** | A checkerboard pattern that tiles the screen and expands to cover it. Classic retro feel. | ![Checkerboard](docs/images/effect_checkerboard.gif) |
-| **Pixelate** | A pixelation effect that progressively reduces the screen resolution until it fades out. | ![Pixelate](docs/images/effect_pixelate.gif) |
+| **Pixelate** | A pixelation effect that progressively reduces the screen resolution until it fades out. | |
 
 > **Tip for Texture Masks:**
 > When importing your mask textures, ensure you uncheck **sRGB** and set Compression Settings to **Masks (no sRGB)** or **Grayscale** for accurate value reading.
