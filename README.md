@@ -297,6 +297,10 @@ See [`ITransitionEffect.h`](Plugins/TransitionFX/Source/TransitionFX/Public/ITra
 
 ## FAQ
 
+### Q: Does TransitionFX work with UEFN (Unreal Editor for Fortnite)?
+
+No. TransitionFX relies on runtime features that UEFN restricts, including dynamic PostProcessVolume spawning via `SpawnActor`, `UMaterialInstanceDynamic` creation and parameter manipulation, GameInstance Subsystems, and C++ plugin loading. These are fundamental architectural dependencies, not minor incompatibilities, so a simple build flag or conditional compilation cannot resolve them. If Epic Games expands UEFN's runtime capabilities in the future, we will re-evaluate support.
+
 For common questions and troubleshooting, see the [FAQ](docs/FAQ_EN.md).
 
 ## License
