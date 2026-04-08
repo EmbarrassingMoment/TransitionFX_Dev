@@ -152,6 +152,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | ![Diamond](docs/images/effect_diamond.gif) |
 | **Box** | A simple square expanding from the center. Basic geometric transition. | ![Box](docs/images/effect_box.gif) |
 | **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | ![Linear Wipe](docs/images/effect_linear_wipe.gif) |
+| **Sliding Doors** | A horizontal wipe where two panels slide from opposite sides and meet in the center, like elevator or airlock doors. | ![Sliding Doors](docs/images/effect_slidingdoor.gif) |
 | **Split** | A stylish wipe that splits the screen in half from the center and opens outward. Supports adjustable split angles (horizontal, vertical, diagonal). | ![Split](docs/images/effect_split.gif) |
 | **Wavy Curtain** | A directional wipe similar to Linear Wipe, but with an animated wavy boundary like a curtain. | ![Wavy Curtain](docs/images/effect_wavy_curtain.gif) |
 | **Radial Wipe** | Clock-like radial wipe. Supports smooth edges and adjustable start angle. | ![Radial Wipe](docs/images/effect_radial_wipe.gif) |
