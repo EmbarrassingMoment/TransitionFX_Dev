@@ -1018,7 +1018,9 @@ FString STransitionPreviewPanel::GetGifFilenameForEffect(const FString& DisplayN
 	}
 
 	// Fallback: convert PascalCase to snake_case
-	FString Result = TEXT("effect_");
+	FString Result;
+	Result.Reserve(7 + DisplayName.Len() * 2 + 4); // "effect_" + worst-case snake_case + ".gif"
+	Result += TEXT("effect_");
 	for (int32 i = 0; i < DisplayName.Len(); ++i)
 	{
 		TCHAR Ch = DisplayName[i];
@@ -1151,7 +1153,9 @@ FString STransitionPreviewPanel::GetGifFilenameForEasing(ETransitionEasing Easin
 	// Fallback: convert enum display name to snake_case
 	const UEnum* EnumPtr = StaticEnum<ETransitionEasing>();
 	FString DisplayName = EnumPtr ? EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(Easing)).ToString() : TEXT("unknown");
-	FString Result = TEXT("easing_");
+	FString Result;
+	Result.Reserve(7 + DisplayName.Len() * 2 + 4); // "easing_" + worst-case snake_case + ".gif"
+	Result += TEXT("easing_");
 	for (int32 i = 0; i < DisplayName.Len(); ++i)
 	{
 		TCHAR Ch = DisplayName[i];
