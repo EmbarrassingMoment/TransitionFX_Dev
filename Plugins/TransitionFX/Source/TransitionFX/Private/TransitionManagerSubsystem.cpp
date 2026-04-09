@@ -93,6 +93,8 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 		CurrentEffect->UpdateProgress(EasedProgress);
 	}
 
+	OnTransitionProgressChanged.Broadcast(EasedProgress);
+
 	// Check Completion
 	if (CurrentMode == ETransitionMode::Reverse)
 	{

@@ -18,6 +18,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionCompleted);
 /** Delegate broadcast when a transition enters the hold state at max progress. */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionHoldStarted);
 
+/** Delegate broadcast each tick with the current eased progress value (0.0 to 1.0). */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransitionProgressChanged, float, Progress);
+
 /** Delegate called when asynchronous preset preloading completes. */
 DECLARE_DYNAMIC_DELEGATE(FTransitionPreloadCompleteDelegate);
 
@@ -152,6 +155,10 @@ public:
 	/** Triggered when a transition holds at max progress (1.0). */
 	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
 	FOnTransitionHoldStarted OnTransitionHoldStarted;
+
+	/** Triggered each tick with the current eased progress (0.0 to 1.0). */
+	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
+	FOnTransitionProgressChanged OnTransitionProgressChanged;
 
 private:
 	/** Stops and releases the current audio component. */
