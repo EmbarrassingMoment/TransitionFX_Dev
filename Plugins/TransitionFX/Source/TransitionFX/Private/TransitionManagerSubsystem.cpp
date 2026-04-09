@@ -93,6 +93,25 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 		CurrentEffect->UpdateProgress(EasedProgress);
 	}
 
+	OnTransitionProgressChanged.Broadcast(EasedProgress);
+
+	// Check Progress Thresholds
+	for (int32 i = 0; i < ProgressThresholds.Num(); ++i)
+	{
+		if (!ThresholdFired[i])
+		{
+			const float T = ProgressThresholds[i];
+			const bool bCrossedForward = PreviousEasedProgress < T && EasedProgress >= T;
+			const bool bCrossedReverse = PreviousEasedProgress > T && EasedProgress <= T;
+			if (bCrossedForward || bCrossedReverse)
+			{
+				ThresholdFired[i] = true;
+				OnProgressThresholdReached.Broadcast(T);
+			}
+		}
+	}
+	PreviousEasedProgress = EasedProgress;
+
 	// Check Completion
 	if (CurrentMode == ETransitionMode::Reverse)
 	{
@@ -454,10 +473,18 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	if (CurrentMode == ETransitionMode::Forward)
 	{
 		CurrentProgress = 0.0f;
+		PreviousEasedProgress = 0.0f;
 	}
 	else
 	{
 		CurrentProgress = 1.0f;
+		PreviousEasedProgress = 1.0f;
+	}
+
+	// Reset threshold fired flags
+	for (int32 i = 0; i < ThresholdFired.Num(); ++i)
+	{
+		ThresholdFired[i] = false;
 	}
 
 	// Play Sound
@@ -616,6 +643,20 @@ void UTransitionManagerSubsystem::StopTransition()
 	bIsHolding = false;
 	bIsInverted = false;
 	CurrentPreset = nullptr;
+}
+
+/** Registers a progress threshold value, clamped to [0.0, 1.0]. */
+void UTransitionManagerSubsystem::AddProgressThreshold(float Threshold)
+{
+	ProgressThresholds.Add(FMath::Clamp(Threshold, 0.0f, 1.0f));
+	ThresholdFired.Add(false);
+}
+
+/** Removes all registered progress thresholds. */
+void UTransitionManagerSubsystem::ClearProgressThresholds()
+{
+	ProgressThresholds.Empty();
+	ThresholdFired.Empty();
 }
 
 /** Returns true if any transition is currently active. */
