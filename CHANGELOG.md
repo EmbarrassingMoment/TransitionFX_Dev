@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+**Event System**
+- `OnTransitionProgressChanged` — Broadcasts the eased progress value (0.0 to 1.0) each tick while a transition is active
+- `OnProgressThresholdReached` — Fires once when the eased progress crosses a registered threshold value
+
+**C++ / Blueprint API**
+- `AddProgressThreshold(float Threshold)` — Registers a progress threshold (0.0 to 1.0) for one-shot callback notification
+- `ClearProgressThresholds()` — Removes all registered progress thresholds
+
+---
+
 ## [1.0.0] - 2026-02-18
 
 ### Added

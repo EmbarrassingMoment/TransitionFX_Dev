@@ -493,13 +493,15 @@ Force Clear
 
 ## Step 6: Utilizing Events (Delegates)
 
-The `TransitionManagerSubsystem` provides 3 delegates, allowing you to execute game logic corresponding to the timing of transitions.
+The `TransitionManagerSubsystem` provides 5 delegates, allowing you to execute game logic corresponding to the timing of transitions.
 
 | Delegate | Firing Timing |
 | :--- | :--- |
 | `OnTransitionStarted` | Immediately after `StartTransition` is called and the transition has begun |
 | `OnTransitionCompleted` | When the transition progress reaches the completion value (Forward: `1.0` / Reverse: `0.0`) |
 | `OnTransitionHoldStarted` | When `bHoldAtMax = true` and the progress reaches `1.0`, entering a hold |
+| `OnTransitionProgressChanged` | Every tick while a transition is active, with the eased progress value (0.0 to 1.0) |
+| `OnProgressThresholdReached` | Once when the eased progress crosses a value registered via `AddProgressThreshold` |
 
 ### Binding Method
 
@@ -512,9 +514,11 @@ Event BeginPlay (or GameInstance Init)
     │
     ▼
 Get Game Instance Subsystem (TransitionManagerSubsystem)
-    ├─ Bind Event to OnTransitionStarted     → [Custom Event: On Started]
-    ├─ Bind Event to OnTransitionCompleted   → [Custom Event: On Completed]
-    └─ Bind Event to OnTransitionHoldStarted → [Custom Event: On Hold]
+    ├─ Bind Event to OnTransitionStarted          → [Custom Event: On Started]
+    ├─ Bind Event to OnTransitionCompleted        → [Custom Event: On Completed]
+    ├─ Bind Event to OnTransitionHoldStarted      → [Custom Event: On Hold]
+    ├─ Bind Event to OnTransitionProgressChanged  → [Custom Event: On Progress (float)]
+    └─ Bind Event to OnProgressThresholdReached   → [Custom Event: On Threshold (float)]
 ```
 
 **C++**
@@ -523,6 +527,8 @@ Get Game Instance Subsystem (TransitionManagerSubsystem)
 TransitionSystem->OnTransitionStarted.AddDynamic(this, &UMyClass::OnTransitionStarted);
 TransitionSystem->OnTransitionCompleted.AddDynamic(this, &UMyClass::OnTransitionCompleted);
 TransitionSystem->OnTransitionHoldStarted.AddDynamic(this, &UMyClass::OnTransitionHoldStarted);
+TransitionSystem->OnTransitionProgressChanged.AddDynamic(this, &UMyClass::OnProgressChanged);
+TransitionSystem->OnProgressThresholdReached.AddDynamic(this, &UMyClass::OnThresholdReached);
 ```
 
 ### Use Case Examples

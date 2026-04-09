@@ -92,6 +92,16 @@ Changes the playback speed multiplier dynamically. The value is clamped to a min
 #### Release Hold
 Releases the hold at max progress, allowing a held transition to complete. Used with the `bHoldAtMax` workflow.
 
+#### Add Progress Threshold
+Registers a progress threshold value (0.0 to 1.0). When the eased progress crosses this value during a transition, `OnProgressThresholdReached` is broadcast once. Thresholds are automatically reset each time a new transition starts.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **Threshold** | Input | A value between 0.0 and 1.0. |
+
+#### Clear Progress Thresholds
+Removes all registered progress thresholds.
+
 ### Query Nodes
 
 #### Get Current Progress
@@ -298,6 +308,20 @@ Prepares the subsystem for an auto-reverse transition on the next level load. Do
 void PrepareAutoReverseTransition(UTransitionPreset* Preset, float Duration = 1.0f);
 ```
 
+#### AddProgressThreshold
+Registers a progress threshold (0.0 to 1.0). When the eased progress crosses this value, `OnProgressThresholdReached` is broadcast once. Thresholds are reset each time a new transition starts.
+
+```cpp
+void AddProgressThreshold(float Threshold);
+```
+
+#### ClearProgressThresholds
+Removes all registered progress thresholds.
+
+```cpp
+void ClearProgressThresholds();
+```
+
 #### GetDefaultFadePreset
 Returns the default `DA_FadeToBlack` preset, loading it lazily if necessary.
 
@@ -319,6 +343,8 @@ The subsystem provides the following event dispatchers:
 *   **OnTransitionStarted**: Called when a transition starts.
 *   **OnTransitionCompleted**: Called when a transition completes.
 *   **OnTransitionHoldStarted**: Called when a transition holds at max progress (1.0) (if `bHoldAtMax` is true).
+*   **OnTransitionProgressChanged** `(float Progress)`: Broadcasts the eased progress value (0.0 to 1.0) every tick while a transition is active. Removes the need to poll `GetCurrentProgress()`.
+*   **OnProgressThresholdReached** `(float Threshold)`: Fires once when the eased progress crosses a value registered via `AddProgressThreshold`. Thresholds are reset automatically when a new transition starts.
 
 *Note: There is no delegate named `OnTransitionStop`, but calling `StopTransition` will interrupt the transition.*
 

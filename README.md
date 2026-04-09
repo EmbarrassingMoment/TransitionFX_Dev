@@ -116,6 +116,8 @@ You can bind to the following events in the `TransitionManagerSubsystem`:
 *   **OnTransitionStarted:** Fired when the transition begins.
 *   **OnTransitionCompleted:** Fired when the transition finishes.
 *   **OnTransitionHoldStarted:** Fired when the transition holds at max progress (1.0) (if `bHoldAtMax` is true).
+*   **OnTransitionProgressChanged:** Broadcasts the eased progress (0.0 to 1.0) each tick while a transition is active.
+*   **OnProgressThresholdReached:** Fires once when progress crosses a value registered via `AddProgressThreshold`.
 
 > For a detailed guide including loading screen patterns, debug tips, and event usage, see the [Quick Start Guide](docs/QUICKSTART_EN.md).
 
@@ -269,7 +271,7 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 - [ ] **UMG Widget-Layer Transitions** `High` — An alternative rendering path using a full-screen UMG widget, allowing the transition to cover Slate/UMG UI layers
 - [ ] **Origin Point Override** `Medium` — Allow center-based transitions (Iris, Diamond, Tiles, etc.) to expand from a custom screen-space coordinate
 - [ ] **Transition Chaining / Sequencing** `Medium` — A node or data asset that plays a sequence of presets back-to-back
-- [ ] **OnTransitionProgress Delegate** `Medium` — A delegate that broadcasts progress each tick, removing the need to poll `GetCurrentProgress()`
+- [x] **OnTransitionProgress Delegate** `Medium` — A delegate that broadcasts progress each tick, removing the need to poll `GetCurrentProgress()`. Also includes threshold-based callbacks via `AddProgressThreshold`.
 - [ ] **Simultaneous Transitions** `Low` — Support for layering multiple independent transitions with a multi-slot manager
 
 ### Improvements & Optimization

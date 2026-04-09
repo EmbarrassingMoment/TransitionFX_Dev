@@ -493,13 +493,15 @@ Force Clear
 
 ## Step 6: イベント（デリゲート）の活用
 
-`TransitionManagerSubsystem` には 3 つのデリゲートが用意されており、遷移のタイミングに合わせてゲームロジックを実行できます。
+`TransitionManagerSubsystem` には 5 つのデリゲートが用意されており、遷移のタイミングに合わせてゲームロジックを実行できます。
 
 | デリゲート | 発火タイミング |
 | :--- | :--- |
 | `OnTransitionStarted` | `StartTransition` が呼ばれ、遷移が開始した直後 |
 | `OnTransitionCompleted` | 遷移の進行度が完了値（Forward: `1.0` / Reverse: `0.0`）に達したとき |
 | `OnTransitionHoldStarted` | `bHoldAtMax = true` の状態で進行度が `1.0` に達し、ホールドに入ったとき |
+| `OnTransitionProgressChanged` | 遷移がアクティブな間、毎ティックでイージング適用済みの進捗値（0.0〜1.0）を通知 |
+| `OnProgressThresholdReached` | `AddProgressThreshold` で登録した閾値を進捗が超えた際に1回だけ発火 |
 
 ### バインド方法
 
@@ -512,9 +514,11 @@ Event BeginPlay（または GameInstance Init）
     │
     ▼
 Get Game Instance Subsystem (TransitionManagerSubsystem)
-    ├─ Bind Event to OnTransitionStarted     → [カスタムイベント: On Started]
-    ├─ Bind Event to OnTransitionCompleted   → [カスタムイベント: On Completed]
-    └─ Bind Event to OnTransitionHoldStarted → [カスタムイベント: On Hold]
+    ├─ Bind Event to OnTransitionStarted          → [カスタムイベント: On Started]
+    ├─ Bind Event to OnTransitionCompleted        → [カスタムイベント: On Completed]
+    ├─ Bind Event to OnTransitionHoldStarted      → [カスタムイベント: On Hold]
+    ├─ Bind Event to OnTransitionProgressChanged  → [カスタムイベント: On Progress (float)]
+    └─ Bind Event to OnProgressThresholdReached   → [カスタムイベント: On Threshold (float)]
 ```
 
 **C++**
@@ -523,6 +527,8 @@ Get Game Instance Subsystem (TransitionManagerSubsystem)
 TransitionSystem->OnTransitionStarted.AddDynamic(this, &UMyClass::OnTransitionStarted);
 TransitionSystem->OnTransitionCompleted.AddDynamic(this, &UMyClass::OnTransitionCompleted);
 TransitionSystem->OnTransitionHoldStarted.AddDynamic(this, &UMyClass::OnTransitionHoldStarted);
+TransitionSystem->OnTransitionProgressChanged.AddDynamic(this, &UMyClass::OnProgressChanged);
+TransitionSystem->OnProgressThresholdReached.AddDynamic(this, &UMyClass::OnThresholdReached);
 ```
 
 ### ユースケース例
