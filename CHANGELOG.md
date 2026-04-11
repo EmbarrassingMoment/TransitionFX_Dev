@@ -10,9 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-**Built-in Effects (+2, total 24)**
+**Built-in Effects (+3, total 25)**
 - **Sliding Doors** — Two panels slide from opposite sides and meet at the center, like elevator or airlock doors
 - **Dissolve** — Classic transition where the screen dissolves like mist or sand using procedural noise
+- **Corner Wipe** — A directional wipe that starts from a specified corner and expands diagonally across the entire screen; origin corner (0–3) is dynamically selectable
 
 **Material Functions**
 - `MF_StarSDF` — Star signed-distance-field material function for star-shaped effects
@@ -34,7 +35,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added UEFN (Unreal Editor for Fortnite) compatibility FAQ to README (EN/JP)
 - Updated API Reference (EN/JP) with `OnTransitionProgressChanged`, `OnProgressThresholdReached`, `AddProgressThreshold`, and `ClearProgressThresholds`
 - Updated Quick Start guides (EN/JP) with new event system documentation (5 delegates)
-- Added effect preview GIFs for Dissolve and Sliding Doors
+- Added effect preview GIFs for Dissolve, Sliding Doors, and Corner Wipe
+- Added Corner Wipe to the Built-in Effects table in README (EN/JP)
 - Marked "OnTransitionProgress Delegate" as completed in the Roadmap
 
 ---
