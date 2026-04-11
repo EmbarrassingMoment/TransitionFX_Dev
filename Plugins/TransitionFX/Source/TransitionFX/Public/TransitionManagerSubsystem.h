@@ -18,6 +18,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionCompleted);
 /** Delegate broadcast when a transition enters the hold state at max progress. */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTransitionHoldStarted);
 
+/** Delegate broadcast each tick with the current eased progress value (0.0 to 1.0). */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransitionProgressChanged, float, Progress);
+
+/** Delegate broadcast once when the eased progress crosses a registered threshold. */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnProgressThresholdReached, float, Threshold);
+
 /** Delegate called when asynchronous preset preloading completes. */
 DECLARE_DYNAMIC_DELEGATE(FTransitionPreloadCompleteDelegate);
 
@@ -140,6 +146,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void PrepareAutoReverseTransition(UTransitionPreset* Preset, float Duration = 1.0f);
 
+	/**
+	 * Registers a progress threshold. When the eased progress crosses this value,
+	 * OnProgressThresholdReached is broadcast once. Thresholds are reset each time
+	 * a new transition starts.
+	 *
+	 * @param Threshold A value between 0.0 and 1.0.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
+	void AddProgressThreshold(float Threshold);
+
+	/** Removes all registered progress thresholds. */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
+	void ClearProgressThresholds();
+
 public:
 	/** Triggered when a transition starts. */
 	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
@@ -152,6 +172,14 @@ public:
 	/** Triggered when a transition holds at max progress (1.0). */
 	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
 	FOnTransitionHoldStarted OnTransitionHoldStarted;
+
+	/** Triggered each tick with the current eased progress (0.0 to 1.0). */
+	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
+	FOnTransitionProgressChanged OnTransitionProgressChanged;
+
+	/** Triggered once when the eased progress crosses a registered threshold value. */
+	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
+	FOnProgressThresholdReached OnProgressThresholdReached;
 
 private:
 	/** Stops and releases the current audio component. */
@@ -208,6 +236,15 @@ private:
 
 	/** Current playback speed multiplier. */
 	float CurrentPlaySpeed = 1.0f;
+
+	/** Registered progress threshold values (0.0 to 1.0). */
+	TArray<float> ProgressThresholds;
+
+	/** Tracks whether each threshold has already been fired for the current transition. */
+	TArray<bool> ThresholdFired;
+
+	/** The eased progress from the previous tick, used for threshold crossing detection. */
+	float PreviousEasedProgress = 0.0f;
 
 	/** Cached player controller to avoid redundant lookups. */
 	UPROPERTY(Transient)

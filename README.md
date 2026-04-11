@@ -116,6 +116,8 @@ You can bind to the following events in the `TransitionManagerSubsystem`:
 *   **OnTransitionStarted:** Fired when the transition begins.
 *   **OnTransitionCompleted:** Fired when the transition finishes.
 *   **OnTransitionHoldStarted:** Fired when the transition holds at max progress (1.0) (if `bHoldAtMax` is true).
+*   **OnTransitionProgressChanged:** Broadcasts the eased progress (0.0 to 1.0) each tick while a transition is active.
+*   **OnProgressThresholdReached:** Fires once when progress crosses a value registered via `AddProgressThreshold`.
 
 > For a detailed guide including loading screen patterns, debug tips, and event usage, see the [Quick Start Guide](docs/QUICKSTART_EN.md).
 
@@ -153,6 +155,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Box** | A simple square expanding from the center. Basic geometric transition. | ![Box](docs/images/effect_box.gif) |
 | **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | ![Linear Wipe](docs/images/effect_linear_wipe.gif) |
 | **Sliding Doors** | A horizontal wipe where two panels slide from opposite sides and meet in the center, like elevator or airlock doors. | ![Sliding Doors](docs/images/effect_slidingdoor.gif) |
+| **Corner Wipe** | A directional wipe that starts from a specified corner and expands diagonally until it covers the entire screen. The origin corner (0-3) can be dynamically selected. | ![Corner Wipe](docs/images/effect_cornerwipe.gif) |
 | **Split** | A stylish wipe that splits the screen in half from the center and opens outward. Supports adjustable split angles (horizontal, vertical, diagonal). | ![Split](docs/images/effect_split.gif) |
 | **Wavy Curtain** | A directional wipe similar to Linear Wipe, but with an animated wavy boundary like a curtain. | ![Wavy Curtain](docs/images/effect_wavy_curtain.gif) |
 | **Radial Wipe** | Clock-like radial wipe. Supports smooth edges and adjustable start angle. | ![Radial Wipe](docs/images/effect_radial_wipe.gif) |
@@ -161,6 +164,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | ![Blinds](docs/images/effect_blinds.gif) |
 | **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | ![Spiral](docs/images/effect_spiral.gif) |
 | **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | ![Random Tiles](docs/images/effect_random_tiles.gif) |
+| **Dissolve** | A classic transition where the screen dissolves like mist or sand using procedural noise. Optimized with a precise threshold margin. | ![Dissolve](effect_dissolve.gif) |
 | **Wind** | A directional wipe with streak noise, simulating wind blowing the image away. | ![Wind](docs/images/effect_wind.gif) |
 | **Cross Wipe** | A cross shape expands from the center, pushing the image into the four corners until it vanishes. | ![Cross Wipe](docs/images/effect_cross_wipe.gif) |
 | **Texture Mask** | Uses a grayscale texture to determine the transition order (Black=Start, White=End). Supports custom mask textures via Parameter Overrides. | ![Texture Mask](docs/images/effect_texture_mask.gif) |
@@ -269,7 +273,7 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 - [ ] **UMG Widget-Layer Transitions** `High` — An alternative rendering path using a full-screen UMG widget, allowing the transition to cover Slate/UMG UI layers
 - [ ] **Origin Point Override** `Medium` — Allow center-based transitions (Iris, Diamond, Tiles, etc.) to expand from a custom screen-space coordinate
 - [ ] **Transition Chaining / Sequencing** `Medium` — A node or data asset that plays a sequence of presets back-to-back
-- [ ] **OnTransitionProgress Delegate** `Medium` — A delegate that broadcasts progress each tick, removing the need to poll `GetCurrentProgress()`
+- [x] **OnTransitionProgress Delegate** `Medium` — A delegate that broadcasts progress each tick, removing the need to poll `GetCurrentProgress()`. Also includes threshold-based callbacks via `AddProgressThreshold`.
 - [ ] **Simultaneous Transitions** `Low` — Support for layering multiple independent transitions with a multi-slot manager
 
 ### Improvements & Optimization

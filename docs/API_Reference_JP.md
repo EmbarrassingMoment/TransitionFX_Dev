@@ -92,6 +92,16 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 #### Release Hold
 最大進行度でのホールドを解除し、ホールド中の遷移を完了させます。`bHoldAtMax` ワークフローで使用します。
 
+#### Add Progress Threshold
+進捗の閾値（0.0〜1.0）を登録します。遷移中にイージング適用済みの進捗がこの値を超えると、`OnProgressThresholdReached` が1回だけブロードキャストされます。閾値は新しい遷移が開始されるたびに自動的にリセットされます。
+
+| ピン名 | タイプ | 説明 |
+| :--- | :--- | :--- |
+| **Threshold** | Input | 0.0〜1.0 の閾値。 |
+
+#### Clear Progress Thresholds
+登録されているすべての進捗閾値を削除します。
+
 ### クエリノード (Query Nodes)
 
 #### Get Current Progress
@@ -298,6 +308,20 @@ void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName,
 void PrepareAutoReverseTransition(UTransitionPreset* Preset, float Duration = 1.0f);
 ```
 
+#### AddProgressThreshold
+進捗の閾値（0.0〜1.0）を登録します。イージング適用済みの進捗がこの値を超えると、`OnProgressThresholdReached` が1回だけブロードキャストされます。閾値は新しい遷移開始時に自動リセットされます。
+
+```cpp
+void AddProgressThreshold(float Threshold);
+```
+
+#### ClearProgressThresholds
+登録されているすべての進捗閾値を削除します。
+
+```cpp
+void ClearProgressThresholds();
+```
+
 #### GetDefaultFadePreset
 デフォルトの `DA_FadeToBlack` プリセットを返します。必要に応じて遅延ロードされます。
 
@@ -319,6 +343,8 @@ static UTransitionManagerSubsystem* GetTransitionManager(const UObject* WorldCon
 *   **OnTransitionStarted**: 遷移が開始されたときに呼び出されます。
 *   **OnTransitionCompleted**: 遷移が完了したときに呼び出されます。
 *   **OnTransitionHoldStarted**: 遷移が最大進行度（1.0）でホールド（一時停止）されたときに呼び出されます（`bHoldAtMax` が true の場合）。
+*   **OnTransitionProgressChanged** `(float Progress)`: 遷移がアクティブな間、毎ティックでイージング適用済みの進捗値（0.0〜1.0）をブロードキャストします。`GetCurrentProgress()` のポーリングが不要になります。
+*   **OnProgressThresholdReached** `(float Threshold)`: `AddProgressThreshold` で登録した閾値をイージング適用済みの進捗が超えた際に1回だけ発火します。閾値は新しい遷移開始時に自動リセットされます。
 
 ※ `OnTransitionStop` という名前のデリゲートは存在しませんが、`StopTransition` を呼び出すと遷移は中断されます。
 
