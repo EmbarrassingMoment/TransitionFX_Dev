@@ -460,6 +460,12 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	// Ensure previous audio is stopped
 	StopAndClearAudio();
 
+	FTransitionParameters EffectiveParams = MoveTemp(OverrideParams);
+	if (Preset->bUseDefaultTransitionColor && !EffectiveParams.VectorParams.Contains(TransitionFXConfig::ColorParamName))
+	{
+		EffectiveParams.VectorParams.Add(TransitionFXConfig::ColorParamName, Preset->DefaultTransitionColor);
+	}
+
 	CurrentPreset = Preset;
 	CurrentMode = Mode;
 	CurrentPlaySpeed = FMath::Max(0.01f, PlaySpeed);
@@ -529,7 +535,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 				CurrentEffect = EffectObj;
 				CurrentEffect->Initialize(World, Preset);
 				CurrentEffect->SetInvert(bInvert);
-				CurrentEffect->SetParameters(OverrideParams);
+				CurrentEffect->SetParameters(EffectiveParams);
 
 				if (CurrentMode == ETransitionMode::Reverse)
 				{

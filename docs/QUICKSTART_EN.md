@@ -282,7 +282,9 @@ Play Transition And Wait
 
 ### Changing the Transition Color
 
-By default, transitions fade to black. To change the color (e.g., white), use `Override Params` with the `Color` vector parameter:
+Enable `Use Default Transition Color` on each `TransitionPreset`, then set `Default Transition Color` to control the default fade color (black, white, etc.) without wiring `Override Params` every time.
+
+If you need to change color dynamically at runtime for a specific call, use `Override Params` with the `Color` vector parameter (this takes precedence over the preset default):
 
 ```
 [Make TransitionParameters]

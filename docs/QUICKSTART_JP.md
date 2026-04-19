@@ -282,7 +282,9 @@ Play Transition And Wait
 
 ### トランジションの色を変更する
 
-デフォルトではトランジションは黒にフェードします。色を変更する場合（例: 白）は、`Override Params` で `Color` ベクターパラメータを使用します：
+各 `TransitionPreset` で `Use Default Transition Color` を有効にし、`Default Transition Color` を設定すると、毎回 `Override Params` を接続しなくても、デフォルトのフェード色（黒・白など）を指定できます。
+
+呼び出しごとに動的に色を切り替えたい場合は、従来どおり `Override Params` の `Color` ベクターパラメータを使って上書きできます（こちらが優先されます）：
 
 ```
 [Make TransitionParameters]

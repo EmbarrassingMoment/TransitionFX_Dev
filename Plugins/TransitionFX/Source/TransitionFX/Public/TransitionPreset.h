@@ -46,6 +46,8 @@ public:
 	UTransitionPreset()
 		: DefaultDuration(1.0f)
 		, EasingType(ETransitionEasing::Linear)
+		, bUseDefaultTransitionColor(false)
+		, DefaultTransitionColor(FLinearColor::Black)
 		, bAutoBlockInput(true)
 		, bTickWhenPaused(false)
 		, Priority(1000.0f)
@@ -73,6 +75,14 @@ public:
 	/** Optional curve to ease the progress. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX", meta = (EditCondition = "EasingType == ETransitionEasing::Custom", EditConditionHides))
 	TObjectPtr<UCurveFloat> ProgressCurve;
+
+	/** Applies DefaultTransitionColor to the material's "Color" parameter when no override color is passed at call time. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX|Parameters")
+	bool bUseDefaultTransitionColor;
+
+	/** Default color applied to the material's "Color" parameter when no override is provided. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX|Parameters", meta = (EditCondition = "bUseDefaultTransitionColor"))
+	FLinearColor DefaultTransitionColor;
 
 	/** Blocks player input during transition. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX")
