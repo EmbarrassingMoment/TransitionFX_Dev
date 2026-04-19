@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `PlaySequenceAndWait` latent Blueprint node.
 - `OnSequenceCompleted` and `OnSequenceStepChanged` delegates.
 
+### Fixed
+
+- Fixed a one-frame background flash between sequence steps caused by the previous step's PostProcessVolume being destroyed before the next step's effect was initialized. During a sequence, the effect now hot-swaps across steps and is only torn down when the full sequence completes.
+
 ---
 
 ## [1.1.0] - 2026-04-09
