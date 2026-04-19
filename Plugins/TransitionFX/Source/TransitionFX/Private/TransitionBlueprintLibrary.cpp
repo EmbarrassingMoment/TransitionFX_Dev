@@ -6,6 +6,7 @@
 #include "LatentActions.h"
 #include "TransitionFXConfig.h"
 #include "TransitionManagerSubsystem.h"
+#include "TransitionSequence.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -123,6 +124,46 @@ public:
 	virtual FString GetDescription() const override
 	{
 		return FString::Printf(TEXT("Opening Level %s after transition..."), *LevelName.ToString());
+	}
+#endif
+};
+
+/**
+ * Latent action that polls the transition manager and completes when the
+ * currently playing sequence finishes or the manager becomes invalid.
+ */
+class FTransitionSequenceLatentAction : public FPendingLatentAction
+{
+public:
+	FLatentActionInfo ExecutionFunction;
+	int32 OutputLink;
+	FWeakObjectPtr CallbackTarget;
+	TWeakObjectPtr<UTransitionManagerSubsystem> Manager;
+
+	FTransitionSequenceLatentAction(const FLatentActionInfo& InLatentInfo, UTransitionManagerSubsystem* InManager)
+		: ExecutionFunction(InLatentInfo)
+		, OutputLink(InLatentInfo.Linkage)
+		, CallbackTarget(InLatentInfo.CallbackTarget)
+		, Manager(InManager)
+	{
+	}
+
+	virtual void UpdateOperation(FLatentResponse& Response) override
+	{
+		bool bFinished = true;
+
+		if (Manager.IsValid())
+		{
+			bFinished = !Manager->IsSequencePlaying();
+		}
+
+		Response.FinishAndTriggerIf(bFinished, ExecutionFunction.ExecutionFunction, OutputLink, CallbackTarget);
+	}
+
+#if WITH_EDITOR
+	virtual FString GetDescription() const override
+	{
+		return TEXT("Waiting for transition sequence...");
 	}
 #endif
 };
@@ -385,6 +426,45 @@ void UTransitionBlueprintLibrary::OpenLevelWithTransitionAndWait(const UObject* 
 			}
 		}
 	}
+}
+
+/**
+ * Starts a transition sequence and registers a latent action that completes
+ * when the sequence finishes. If Sequence is null or has no entries, the
+ * latent action finishes on the next poll to avoid hanging Blueprints.
+ */
+void UTransitionBlueprintLibrary::PlaySequenceAndWait(const UObject* WorldContextObject, UTransitionSequence* Sequence, struct FLatentActionInfo LatentInfo)
+{
+	UWorld* World = GEngine ? GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull) : nullptr;
+	if (!World)
+	{
+		return;
+	}
+
+	FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
+	if (LatentActionManager.FindExistingAction<FTransitionSequenceLatentAction>(LatentInfo.CallbackTarget, LatentInfo.UUID) != nullptr)
+	{
+		return;
+	}
+
+	UTransitionManagerSubsystem* Manager = World->GetGameInstance() ? World->GetGameInstance()->GetSubsystem<UTransitionManagerSubsystem>() : nullptr;
+
+	if (!Sequence || Sequence->Entries.Num() == 0)
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequenceAndWait: Sequence is null or empty. Finishing immediately."));
+		// Passing nullptr causes FTransitionSequenceLatentAction::UpdateOperation to return true on first poll.
+		LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionSequenceLatentAction(LatentInfo, nullptr));
+		return;
+	}
+
+	if (!Manager)
+	{
+		LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionSequenceLatentAction(LatentInfo, nullptr));
+		return;
+	}
+
+	Manager->PlaySequence(Sequence);
+	LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionSequenceLatentAction(LatentInfo, Manager));
 }
 
 /** Converts duration to play speed, starts the transition, and registers a latent action for completion. */
