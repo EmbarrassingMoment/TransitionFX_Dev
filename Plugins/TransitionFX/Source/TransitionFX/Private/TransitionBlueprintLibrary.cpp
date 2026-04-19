@@ -56,6 +56,85 @@ public:
 };
 
 /**
+ * Latent action that plays a list of transition steps in sequence.
+ * Each step starts only after the previous transition has completed.
+ */
+class FTransitionSequenceLatentAction : public FPendingLatentAction
+{
+public:
+	FLatentActionInfo ExecutionFunction;
+	int32 OutputLink;
+	FWeakObjectPtr CallbackTarget;
+	TWeakObjectPtr<UTransitionManagerSubsystem> Manager;
+	TArray<FTransitionSequenceStep> Steps;
+	int32 CurrentStepIndex = INDEX_NONE;
+
+	FTransitionSequenceLatentAction(const FLatentActionInfo& InLatentInfo, UTransitionManagerSubsystem* InManager, const TArray<FTransitionSequenceStep>& InSteps)
+		: ExecutionFunction(InLatentInfo)
+		, OutputLink(InLatentInfo.Linkage)
+		, CallbackTarget(InLatentInfo.CallbackTarget)
+		, Manager(InManager)
+		, Steps(InSteps)
+	{
+		PlayNextStep();
+	}
+
+	virtual void UpdateOperation(FLatentResponse& Response) override
+	{
+		bool bFinished = !Manager.IsValid();
+
+		if (Manager.IsValid())
+		{
+			if (CurrentStepIndex == INDEX_NONE)
+			{
+				bFinished = true;
+			}
+			else if (Manager->IsCurrentTransitionFinished())
+			{
+				if (!PlayNextStep())
+				{
+					bFinished = true;
+				}
+			}
+		}
+
+		Response.FinishAndTriggerIf(bFinished, ExecutionFunction.ExecutionFunction, OutputLink, CallbackTarget);
+	}
+
+private:
+	bool PlayNextStep()
+	{
+		if (!Manager.IsValid())
+		{
+			CurrentStepIndex = INDEX_NONE;
+			return false;
+		}
+
+		while (++CurrentStepIndex < Steps.Num())
+		{
+			const FTransitionSequenceStep& Step = Steps[CurrentStepIndex];
+			if (!Step.Preset)
+			{
+				UE_LOG(LogTransitionFX, Warning, TEXT("PlayTransitionSequenceAndWait: Skipping null preset at step %d."), CurrentStepIndex);
+				continue;
+			}
+
+			float StepPlaySpeed = FMath::Max(0.01f, Step.PlaySpeed);
+			if (Step.bUseDurationOverride)
+			{
+				StepPlaySpeed = TransitionFXConfig::CalculatePlaySpeed(Step.Preset->DefaultDuration, Step.DurationOverride);
+			}
+
+			Manager->StartTransition(Step.Preset, Step.Mode, StepPlaySpeed, Step.bInvert, false, Step.OverrideParams);
+			return true;
+		}
+
+		CurrentStepIndex = INDEX_NONE;
+		return false;
+	}
+};
+
+/**
  * Latent action that starts a fade-out transition, waits for it to finish,
  * then opens the specified level. Prepares auto-reverse for the new level.
  */
@@ -185,6 +264,32 @@ void UTransitionBlueprintLibrary::PlayRandomTransitionAndWait(const UObject* Wor
 	}
 
 	PlayTransitionAndWait(WorldContextObject, SelectedPreset, Mode, PlaySpeed, bInvert, OverrideParams, LatentInfo);
+}
+
+void UTransitionBlueprintLibrary::PlayTransitionSequenceAndWait(const UObject* WorldContextObject, UTransitionSequencePreset* SequencePreset, struct FLatentActionInfo LatentInfo)
+{
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	{
+		FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
+		if (LatentActionManager.FindExistingAction<FTransitionSequenceLatentAction>(LatentInfo.CallbackTarget, LatentInfo.UUID) == nullptr)
+		{
+			if (!SequencePreset || SequencePreset->Steps.IsEmpty())
+			{
+				UE_LOG(LogTransitionFX, Warning, TEXT("PlayTransitionSequenceAndWait: Sequence preset is null or has no steps."));
+				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionLatentAction(LatentInfo, nullptr));
+				return;
+			}
+
+			UTransitionManagerSubsystem* Manager = World->GetGameInstance()->GetSubsystem<UTransitionManagerSubsystem>();
+			if (Manager)
+			{
+				LatentActionManager.AddNewAction(
+					LatentInfo.CallbackTarget,
+					LatentInfo.UUID,
+					new FTransitionSequenceLatentAction(LatentInfo, Manager, SequencePreset->Steps));
+			}
+		}
+	}
 }
 
 /**

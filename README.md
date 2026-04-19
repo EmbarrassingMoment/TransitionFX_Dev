@@ -111,6 +111,9 @@ Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.
 *   **Random Play:**
     Use the `Play Random Transition And Wait` node to play a random transition from an array of presets.
 
+*   **Sequence Play (Preset Chain):**
+    Create a `TransitionSequencePreset` Data Asset and use `Play Transition Sequence And Wait` to play multiple steps in order.
+
 ### 3. Events
 You can bind to the following events in the `TransitionManagerSubsystem`:
 *   **OnTransitionStarted:** Fired when the transition begins.
@@ -272,7 +275,7 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 - [ ] **Transition Color per Preset** `High` — Expose a default transition color property on presets (e.g., fade-to-white) without requiring parameter overrides at every call
 - [ ] **UMG Widget-Layer Transitions** `High` — An alternative rendering path using a full-screen UMG widget, allowing the transition to cover Slate/UMG UI layers
 - [ ] **Origin Point Override** `Medium` — Allow center-based transitions (Iris, Diamond, Tiles, etc.) to expand from a custom screen-space coordinate
-- [ ] **Transition Chaining / Sequencing** `Medium` — A node or data asset that plays a sequence of presets back-to-back
+- [x] **Transition Chaining / Sequencing** `Medium` — Added `TransitionSequencePreset` and `PlayTransitionSequenceAndWait` for back-to-back preset playback
 - [x] **OnTransitionProgress Delegate** `Medium` — A delegate that broadcasts progress each tick, removing the need to poll `GetCurrentProgress()`. Also includes threshold-based callbacks via `AddProgressThreshold`.
 - [ ] **Simultaneous Transitions** `Low` — Support for layering multiple independent transitions with a multi-slot manager
 

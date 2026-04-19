@@ -7,6 +7,7 @@
 #include "TransitionManagerSubsystem.h"
 #include "Engine/LatentActionManager.h"
 #include "TransitionFXTypes.h"
+#include "TransitionSequencePreset.h"
 #include "TransitionBlueprintLibrary.generated.h"
 
 class UCurveFloat;
@@ -47,6 +48,16 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", ExpandEnumAsExecs = "Mode", PlaySpeed = "1.0"))
 	static void PlayRandomTransitionAndWait(const UObject* WorldContextObject, const TArray<UTransitionPreset*>& Presets, ETransitionMode Mode, float PlaySpeed, bool bInvert, FTransitionParameters OverrideParams, struct FLatentActionInfo LatentInfo);
+
+	/**
+	 * Plays a sequence preset and waits until every step completes.
+	 *
+	 * @param WorldContextObject The world context object.
+	 * @param SequencePreset Data asset containing ordered transition steps.
+	 * @param LatentInfo The latent action info.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject"))
+	static void PlayTransitionSequenceAndWait(const UObject* WorldContextObject, UTransitionSequencePreset* SequencePreset, struct FLatentActionInfo LatentInfo);
 
 	/**
 	 * Plays a transition with a specific duration and waits for it to complete.
