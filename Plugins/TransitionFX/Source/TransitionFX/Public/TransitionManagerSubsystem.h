@@ -324,6 +324,13 @@ private:
 	/** True while a sequence is in progress. */
 	bool bIsSequencePlaying = false;
 
+	/**
+	 * Scope-limited flag set by StartSequenceStep while dispatching the per-entry
+	 * StartTransition call. Lets StartTransition distinguish internal sequence-driven
+	 * calls from external callers that should interrupt the sequence.
+	 */
+	bool bIsDispatchingSequenceStep = false;
+
 	/** Timer handle for DelayAfter between entries. */
 	FTimerHandle SequenceDelayTimerHandle;
 

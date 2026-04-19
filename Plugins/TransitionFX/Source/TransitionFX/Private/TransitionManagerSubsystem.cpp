@@ -228,6 +228,12 @@ void UTransitionManagerSubsystem::AsyncLoadTransitionPresets(const TArray<TSoftO
  */
 void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration)
 {
+	if (bIsSequencePlaying)
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransition called while a sequence is playing. Cancelling sequence."));
+		StopSequence();
+	}
+
 	if (!Preset)
 	{
 		UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransition: Null Preset provided. Falling back to default fade."));
@@ -476,6 +482,15 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		return;
 	}
 
+	// An external StartTransition call interrupts any running sequence.
+	// Internal per-step dispatches from StartSequenceStep set bIsDispatchingSequenceStep
+	// to bypass this guard.
+	if (bIsSequencePlaying && !bIsDispatchingSequenceStep)
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("StartTransition called while a sequence is playing. Cancelling sequence."));
+		StopSequence();
+	}
+
 	// Stop any existing transition
 	if (bIsTransitionActive)
 	{
@@ -711,8 +726,10 @@ void UTransitionManagerSubsystem::PlaySequence(UTransitionSequence* Sequence)
 		return;
 	}
 
-	// Sequences and level transitions are mutually exclusive.
-	if (!PendingLevelName.IsNone() || bAutoReverseOnLevelLoad)
+	// Sequences and level transitions are mutually exclusive: refuse if a level
+	// transition (or auto-reverse plan) is pending. bAutoReverseOnLevelLoad is
+	// the authoritative in-flight flag — it is cleared in OnPostLoadMapWithWorld.
+	if (bAutoReverseOnLevelLoad)
 	{
 		UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: A level transition is pending. Sequences cannot run during level transitions. Ignoring."));
 		return;
@@ -790,6 +807,9 @@ void UTransitionManagerSubsystem::StartSequenceStep(int32 StepIndex)
 	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnSequenceStepFinished);
 	OnTransitionCompleted.AddDynamic(this, &UTransitionManagerSubsystem::OnSequenceStepFinished);
 
+	// Scope-limit the internal-dispatch flag so StartTransition's sequence guard
+	// lets our own per-step call through without aborting the sequence.
+	TGuardValue<bool> DispatchGuard(bIsDispatchingSequenceStep, true);
 	StartTransition(Entry.Preset, Entry.Mode, PlaySpeed, Entry.bInvert, /*bHoldAtMax=*/false, Entry.OverrideParams);
 }
 
