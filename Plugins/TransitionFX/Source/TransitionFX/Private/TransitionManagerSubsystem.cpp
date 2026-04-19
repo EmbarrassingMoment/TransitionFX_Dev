@@ -135,7 +135,9 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 				bHasCompleted = true;
 				OnTransitionCompleted.Broadcast();
 
-				if (bAutoStopOnReverseComplete)
+				// Defer cleanup to FinishSequence / hot-swap when a sequence is playing,
+				// so the effect stays rendering between steps and no background frame is exposed.
+				if (bAutoStopOnReverseComplete && !bIsSequencePlaying)
 				{
 					StopTransition();
 				}
@@ -167,7 +169,13 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 				// Auto-stop forward transitions that are not holding.
 				// Without this, the PostProcessVolume, AudioComponent, and tick remain active
 				// even though the transition is visually complete.
-				StopTransition();
+				// During a sequence, StartTransition for the next step hot-swaps the effect,
+				// and FinishSequence cleans up the final step, so skip the auto-stop here
+				// to keep the rendered frame covered (no background flash between steps).
+				if (!bIsSequencePlaying)
+				{
+					StopTransition();
+				}
 			}
 		}
 	}
@@ -491,14 +499,30 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		StopSequence();
 	}
 
-	// Stop any existing transition
-	if (bIsTransitionActive)
-	{
-		StopTransition();
-	}
+	// Hot-swap path: during a sequence step dispatch, keep the previous effect
+	// rendering until the new one is initialized so no frame exposes the
+	// background between steps.
+	const bool bHotSwap = bIsDispatchingSequenceStep && bIsTransitionActive && CurrentEffect;
 
-	// Ensure previous audio is stopped
-	StopAndClearAudio();
+	// Effect object pending cleanup once the new effect is in place (hot-swap only).
+	TScriptInterface<ITransitionEffect> PendingOldEffect;
+
+	if (bHotSwap)
+	{
+		// Audio switches immediately; visual continuity is what matters.
+		StopAndClearAudio();
+	}
+	else
+	{
+		// Stop any existing transition (tears down the effect volume).
+		if (bIsTransitionActive)
+		{
+			StopTransition();
+		}
+
+		// Ensure previous audio is stopped.
+		StopAndClearAudio();
+	}
 
 	CurrentPreset = Preset;
 	CurrentMode = Mode;
@@ -549,24 +573,16 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			UObject* EffectObj = nullptr;
+			// In the hot-swap path, prefer reusing the existing instance when its class
+			// matches. Re-running Initialize swaps the DynamicMaterial on the already-spawned
+			// PostProcessVolume, producing a seamless frame-to-frame handoff.
+			const bool bCanReuseExistingEffect = bHotSwap
+				&& CurrentEffect
+				&& CurrentEffect.GetObject()
+				&& CurrentEffect.GetObject()->GetClass() == Preset->EffectClass;
 
-			// Check Pool (Reuse existing instance to avoid allocation and reduce GC pressure)
-			FTransitionEffectPool& Pool = EffectPool.FindOrAdd(Preset->EffectClass);
-			if (Pool.Effects.Num() > 0)
+			if (bCanReuseExistingEffect)
 			{
-				EffectObj = Pool.Effects.Pop();
-			}
-
-			// Create New if not found
-			if (!EffectObj)
-			{
-				EffectObj = NewObject<UObject>(this, Preset->EffectClass);
-			}
-
-			if (EffectObj && EffectObj->Implements<UTransitionEffect>())
-			{
-				CurrentEffect = EffectObj;
 				CurrentEffect->Initialize(World, Preset);
 				CurrentEffect->SetInvert(bInvert);
 				CurrentEffect->SetParameters(OverrideParams);
@@ -578,7 +594,56 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 			}
 			else
 			{
-				UE_LOG(LogTransitionFX, Error, TEXT("Failed to create or retrieve transition effect instance."));
+				// Hot-swap with differing classes: hold on to the old effect until the new
+				// one is fully initialized, then tear down the old one so both rendered
+				// simultaneously for a single frame rather than leaving a gap.
+				if (bHotSwap)
+				{
+					PendingOldEffect = CurrentEffect;
+					CurrentEffect = nullptr;
+				}
+
+				UObject* EffectObj = nullptr;
+
+				// Check Pool (Reuse existing instance to avoid allocation and reduce GC pressure)
+				FTransitionEffectPool& Pool = EffectPool.FindOrAdd(Preset->EffectClass);
+				if (Pool.Effects.Num() > 0)
+				{
+					EffectObj = Pool.Effects.Pop();
+				}
+
+				// Create New if not found
+				if (!EffectObj)
+				{
+					EffectObj = NewObject<UObject>(this, Preset->EffectClass);
+				}
+
+				if (EffectObj && EffectObj->Implements<UTransitionEffect>())
+				{
+					CurrentEffect = EffectObj;
+					CurrentEffect->Initialize(World, Preset);
+					CurrentEffect->SetInvert(bInvert);
+					CurrentEffect->SetParameters(OverrideParams);
+
+					if (CurrentMode == ETransitionMode::Reverse)
+					{
+						CurrentEffect->UpdateProgress(1.0f);
+					}
+				}
+				else
+				{
+					UE_LOG(LogTransitionFX, Error, TEXT("Failed to create or retrieve transition effect instance."));
+				}
+
+				// New effect is in place; safe to dispose of the previous one.
+				if (PendingOldEffect)
+				{
+					PendingOldEffect->Cleanup();
+					if (UObject* OldEffectObj = PendingOldEffect.GetObject())
+					{
+						ReturnEffectToPool(OldEffectObj);
+					}
+				}
 			}
 		}
 	}
@@ -842,9 +907,8 @@ void UTransitionManagerSubsystem::OnSequenceStepFinished()
 		StartSequenceStep(NextIndex);
 	});
 
-	// Always defer via the timer manager. Even with DelayAfter==0, we must not start the next
-	// transition synchronously from inside OnTransitionCompleted because the caller (Tick)
-	// still calls StopTransition() after the broadcast, which would tear down the new one.
+	// Defer advancement via the timer manager so each step starts on a fresh tick
+	// (avoids unbounded recursion for null-preset skips and keeps frame timing predictable).
 	if (!World)
 	{
 		StartSequenceStep(NextIndex);
@@ -862,8 +926,10 @@ void UTransitionManagerSubsystem::OnSequenceStepFinished()
 }
 
 /**
- * Resets sequence state and broadcasts OnSequenceCompleted. Does NOT stop the
- * final transition — it is assumed to have naturally completed.
+ * Resets sequence state, tears down the final step's effect, and broadcasts
+ * OnSequenceCompleted. Tick skips its usual auto-stop while a sequence is
+ * playing to prevent background frames between steps, so the final effect
+ * is still active here and must be cleaned up explicitly.
  * Moves to UTransitionSequencePlayer in future refactor.
  */
 void UTransitionManagerSubsystem::FinishSequence()
@@ -879,6 +945,12 @@ void UTransitionManagerSubsystem::FinishSequence()
 	CurrentSequenceStep = -1;
 	CurrentLoopIteration = 0;
 	bIsSequencePlaying = false;
+
+	// Clean up the final step's effect now that the sequence is complete.
+	if (bIsTransitionActive)
+	{
+		StopTransition();
+	}
 
 	OnSequenceCompleted.Broadcast();
 }
