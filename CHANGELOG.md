@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- `UTransitionSequence` data asset for chaining multiple transitions back-to-back.
+- `PlaySequence` / `StopSequence` / `IsSequencePlaying` / `GetCurrentSequenceStep` API on `UTransitionManagerSubsystem`.
+- `PlaySequenceAndWait` latent Blueprint node.
+- `OnSequenceCompleted` and `OnSequenceStepChanged` delegates.
+
+---
+
 ## [1.1.0] - 2026-04-09
 
 ### Added
