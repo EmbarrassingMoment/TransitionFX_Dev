@@ -70,9 +70,17 @@ It includes the full plugin source and a showcase level demonstrating all 22+ tr
 > **Note:** The first launch will compile shaders, which may take several minutes.
 
 ## Installation
-1.  Download the plugin from the release page.
-2.  Place the `TransitionFX` folder into your project's `Plugins` directory.
-3.  Enable `TransitionFX` in the editor plugins window.
+
+### Option A: Install from Fab (Recommended)
+1. Get the plugin from [Fab](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a).
+2. In the Unreal Editor, open **Window > Fab** to open the Fab browser.
+3. Find `TransitionFX` in your library and click **Add to Project**.
+4. Enable `TransitionFX` in the editor plugins window.
+
+### Option B: Manual Installation
+1. Download the plugin from the release page.
+2. Place the `TransitionFX` folder into your project's `Plugins` directory.
+3. Enable `TransitionFX` in the editor plugins window.
 
 ![Plugins window with TransitionFX enabled](docs/images/install_enable_plugin.png)
 
