@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+**Built-in Effects (+1, total 26)**
+- **Diamond Band Wipe** — A dynamic transition where a diamond-shaped band expands from the center, splitting apart to reveal the underlying scene.
+
+**Sequence System**
 - `UTransitionSequence` data asset for chaining multiple transitions back-to-back.
 - `PlaySequence` / `StopSequence` / `IsSequencePlaying` / `GetCurrentSequenceStep` API on `UTransitionManagerSubsystem`.
 - `PlaySequenceAndWait` latent Blueprint node.
