@@ -10,6 +10,7 @@
 #include "TransitionBlueprintLibrary.generated.h"
 
 class UCurveFloat;
+class UTransitionSequence;
 
 /**
  * Blueprint function library for transition effects.
@@ -112,6 +113,17 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", Duration = "1.0"))
 	static void OpenLevelWithTransitionAndWait(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration, struct FLatentActionInfo LatentInfo);
+
+	/**
+	 * Plays a transition sequence and waits for it to complete.
+	 *
+	 * @param WorldContextObject The world context object.
+	 * @param Sequence The transition sequence to play.
+	 * @param LatentInfo The latent action info.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX|Sequence",
+		meta = (WorldContext = "WorldContextObject", Latent, LatentInfo = "LatentInfo", DisplayName = "Play Sequence And Wait"))
+	static void PlaySequenceAndWait(const UObject* WorldContextObject, UTransitionSequence* Sequence, struct FLatentActionInfo LatentInfo);
 
 	/**
 	 * Applies an easing function to the given alpha value.

@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+## [1.2.0] - 2026-05-03
+
+### Added
+
+**Built-in Effects (+1, total 26)**
+- **Diamond Band Wipe** — A dynamic transition where a diamond-shaped band expands from the center, splitting apart to reveal the underlying scene.
+
+**Sequence System**
+- `UTransitionSequence` data asset for chaining multiple transitions back-to-back.
+- `PlaySequence` / `StopSequence` / `IsSequencePlaying` / `GetCurrentSequenceStep` API on `UTransitionManagerSubsystem`.
+- `PlaySequenceAndWait` latent Blueprint node.
+- `OnSequenceCompleted` and `OnSequenceStepChanged` delegates.
+
+### Fixed
+
+- Fixed a one-frame background flash between sequence steps caused by the previous step's PostProcessVolume being destroyed before the next step's effect was initialized. During a sequence, the effect now hot-swaps across steps and is only torn down when the full sequence completes.
+- Fixed an issue where an incorrect material instance was set for DA_FadeToBlack.
+- Refactoring to a more efficient node configuration for M_Transition_Diamond.
+
+---
+
 ## [1.1.0] - 2026-04-09
 
 ### Added

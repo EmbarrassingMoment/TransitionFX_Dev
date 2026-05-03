@@ -5,6 +5,7 @@
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "TransitionPreset.h"
+#include "TransitionSequence.h"
 #include "Sound/SoundBase.h"
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -12,6 +13,7 @@
 #include "Engine/World.h"
 #include "Curves/CurveFloat.h"
 #include "HAL/IConsoleManager.h"
+#include "TimerManager.h"
 #include "TransitionBlueprintLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "TransitionFX.h"
@@ -50,6 +52,17 @@ void UTransitionManagerSubsystem::Deinitialize()
 	IConsoleManager::Get().UnregisterConsoleObject(TEXT("TransitionFX.ForceClear"));
 
 	FCoreUObjectDelegates::PostLoadMapWithWorld.RemoveAll(this);
+
+	// Clear any pending sequence timer and state before releasing the pool
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(SequenceDelayTimerHandle);
+	}
+	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnSequenceStepFinished);
+	CurrentSequence = nullptr;
+	CurrentSequenceStep = -1;
+	CurrentLoopIteration = 0;
+	bIsSequencePlaying = false;
 
 	// Clean up any active transition before releasing the pool
 	ForceClear();
@@ -122,7 +135,9 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 				bHasCompleted = true;
 				OnTransitionCompleted.Broadcast();
 
-				if (bAutoStopOnReverseComplete)
+				// Defer cleanup to FinishSequence / hot-swap when a sequence is playing,
+				// so the effect stays rendering between steps and no background frame is exposed.
+				if (bAutoStopOnReverseComplete && !bIsSequencePlaying)
 				{
 					StopTransition();
 				}
@@ -154,7 +169,13 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 				// Auto-stop forward transitions that are not holding.
 				// Without this, the PostProcessVolume, AudioComponent, and tick remain active
 				// even though the transition is visually complete.
-				StopTransition();
+				// During a sequence, StartTransition for the next step hot-swaps the effect,
+				// and FinishSequence cleans up the final step, so skip the auto-stop here
+				// to keep the rendered frame covered (no background flash between steps).
+				if (!bIsSequencePlaying)
+				{
+					StopTransition();
+				}
 			}
 		}
 	}
@@ -215,6 +236,12 @@ void UTransitionManagerSubsystem::AsyncLoadTransitionPresets(const TArray<TSoftO
  */
 void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration)
 {
+	if (bIsSequencePlaying)
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransition called while a sequence is playing. Cancelling sequence."));
+		StopSequence();
+	}
+
 	if (!Preset)
 	{
 		UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransition: Null Preset provided. Falling back to default fade."));
@@ -392,6 +419,18 @@ void UTransitionManagerSubsystem::ForceClear()
 {
 	UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: Force Clear Executed."));
 
+	// Tear down any active sequence first so its transient delegate binding is released
+	// before we clean up the current effect.
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(SequenceDelayTimerHandle);
+	}
+	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnSequenceStepFinished);
+	CurrentSequence = nullptr;
+	CurrentSequenceStep = -1;
+	CurrentLoopIteration = 0;
+	bIsSequencePlaying = false;
+
 	CleanupAndPoolCurrentEffect();
 
 	// Reset Input
@@ -451,14 +490,39 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		return;
 	}
 
-	// Stop any existing transition
-	if (bIsTransitionActive)
+	// An external StartTransition call interrupts any running sequence.
+	// Internal per-step dispatches from StartSequenceStep set bIsDispatchingSequenceStep
+	// to bypass this guard.
+	if (bIsSequencePlaying && !bIsDispatchingSequenceStep)
 	{
-		StopTransition();
+		UE_LOG(LogTransitionFX, Warning, TEXT("StartTransition called while a sequence is playing. Cancelling sequence."));
+		StopSequence();
 	}
 
-	// Ensure previous audio is stopped
-	StopAndClearAudio();
+	// Hot-swap path: during a sequence step dispatch, keep the previous effect
+	// rendering until the new one is initialized so no frame exposes the
+	// background between steps.
+	const bool bHotSwap = bIsDispatchingSequenceStep && bIsTransitionActive && CurrentEffect;
+
+	// Effect object pending cleanup once the new effect is in place (hot-swap only).
+	TScriptInterface<ITransitionEffect> PendingOldEffect;
+
+	if (bHotSwap)
+	{
+		// Audio switches immediately; visual continuity is what matters.
+		StopAndClearAudio();
+	}
+	else
+	{
+		// Stop any existing transition (tears down the effect volume).
+		if (bIsTransitionActive)
+		{
+			StopTransition();
+		}
+
+		// Ensure previous audio is stopped.
+		StopAndClearAudio();
+	}
 
 	CurrentPreset = Preset;
 	CurrentMode = Mode;
@@ -509,24 +573,16 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			UObject* EffectObj = nullptr;
+			// In the hot-swap path, prefer reusing the existing instance when its class
+			// matches. Re-running Initialize swaps the DynamicMaterial on the already-spawned
+			// PostProcessVolume, producing a seamless frame-to-frame handoff.
+			const bool bCanReuseExistingEffect = bHotSwap
+				&& CurrentEffect
+				&& CurrentEffect.GetObject()
+				&& CurrentEffect.GetObject()->GetClass() == Preset->EffectClass;
 
-			// Check Pool (Reuse existing instance to avoid allocation and reduce GC pressure)
-			FTransitionEffectPool& Pool = EffectPool.FindOrAdd(Preset->EffectClass);
-			if (Pool.Effects.Num() > 0)
+			if (bCanReuseExistingEffect)
 			{
-				EffectObj = Pool.Effects.Pop();
-			}
-
-			// Create New if not found
-			if (!EffectObj)
-			{
-				EffectObj = NewObject<UObject>(this, Preset->EffectClass);
-			}
-
-			if (EffectObj && EffectObj->Implements<UTransitionEffect>())
-			{
-				CurrentEffect = EffectObj;
 				CurrentEffect->Initialize(World, Preset);
 				CurrentEffect->SetInvert(bInvert);
 				CurrentEffect->SetParameters(OverrideParams);
@@ -538,7 +594,56 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 			}
 			else
 			{
-				UE_LOG(LogTransitionFX, Error, TEXT("Failed to create or retrieve transition effect instance."));
+				// Hot-swap with differing classes: hold on to the old effect until the new
+				// one is fully initialized, then tear down the old one so both rendered
+				// simultaneously for a single frame rather than leaving a gap.
+				if (bHotSwap)
+				{
+					PendingOldEffect = CurrentEffect;
+					CurrentEffect = nullptr;
+				}
+
+				UObject* EffectObj = nullptr;
+
+				// Check Pool (Reuse existing instance to avoid allocation and reduce GC pressure)
+				FTransitionEffectPool& Pool = EffectPool.FindOrAdd(Preset->EffectClass);
+				if (Pool.Effects.Num() > 0)
+				{
+					EffectObj = Pool.Effects.Pop();
+				}
+
+				// Create New if not found
+				if (!EffectObj)
+				{
+					EffectObj = NewObject<UObject>(this, Preset->EffectClass);
+				}
+
+				if (EffectObj && EffectObj->Implements<UTransitionEffect>())
+				{
+					CurrentEffect = EffectObj;
+					CurrentEffect->Initialize(World, Preset);
+					CurrentEffect->SetInvert(bInvert);
+					CurrentEffect->SetParameters(OverrideParams);
+
+					if (CurrentMode == ETransitionMode::Reverse)
+					{
+						CurrentEffect->UpdateProgress(1.0f);
+					}
+				}
+				else
+				{
+					UE_LOG(LogTransitionFX, Error, TEXT("Failed to create or retrieve transition effect instance."));
+				}
+
+				// New effect is in place; safe to dispose of the previous one.
+				if (PendingOldEffect)
+				{
+					PendingOldEffect->Cleanup();
+					if (UObject* OldEffectObj = PendingOldEffect.GetObject())
+					{
+						ReturnEffectToPool(OldEffectObj);
+					}
+				}
 			}
 		}
 	}
@@ -663,4 +768,232 @@ void UTransitionManagerSubsystem::ClearProgressThresholds()
 bool UTransitionManagerSubsystem::IsTransitionPlaying() const
 {
 	return bIsTransitionActive;
+}
+
+// --- Sequence Implementation (Phase 1 — TODO: extract into UTransitionSequencePlayer in Phase 2) ---
+
+/**
+ * Starts playing a transition sequence. Stops any currently playing transition
+ * or sequence first. A null or empty sequence is a no-op (with a warning log).
+ * Moves to UTransitionSequencePlayer in future refactor.
+ */
+void UTransitionManagerSubsystem::PlaySequence(UTransitionSequence* Sequence)
+{
+	if (!Sequence)
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: Null sequence provided."));
+		return;
+	}
+
+	if (Sequence->Entries.Num() == 0)
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: Sequence '%s' has no entries."), *Sequence->GetName());
+		return;
+	}
+
+	// Sequences and level transitions are mutually exclusive: refuse if a level
+	// transition (or auto-reverse plan) is pending. bAutoReverseOnLevelLoad is
+	// the authoritative in-flight flag — it is cleared in OnPostLoadMapWithWorld.
+	if (bAutoReverseOnLevelLoad)
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: A level transition is pending. Sequences cannot run during level transitions. Ignoring."));
+		return;
+	}
+
+	// Stop any existing transition/sequence cleanly.
+	if (bIsSequencePlaying)
+	{
+		StopSequence();
+	}
+	else if (bIsTransitionActive)
+	{
+		StopTransition();
+	}
+
+	CurrentSequence = Sequence;
+	CurrentSequenceStep = -1;
+	CurrentLoopIteration = 0;
+	bIsSequencePlaying = true;
+
+	StartSequenceStep(0);
+}
+
+/**
+ * Begins the entry at StepIndex, handles loop wrap-around / completion, and skips
+ * null-preset entries with a warning. Moves to UTransitionSequencePlayer in future refactor.
+ */
+void UTransitionManagerSubsystem::StartSequenceStep(int32 StepIndex)
+{
+	if (!CurrentSequence || !bIsSequencePlaying)
+	{
+		return;
+	}
+
+	const int32 NumEntries = CurrentSequence->Entries.Num();
+
+	// Loop / completion handling when we run off the end.
+	if (StepIndex >= NumEntries)
+	{
+		if (!CurrentSequence->bLoop)
+		{
+			FinishSequence();
+			return;
+		}
+
+		CurrentLoopIteration++;
+
+		const int32 LoopCount = CurrentSequence->LoopCount;
+		if (LoopCount > 0 && CurrentLoopIteration > LoopCount)
+		{
+			FinishSequence();
+			return;
+		}
+
+		StepIndex = 0;
+	}
+
+	const FTransitionSequenceEntry& Entry = CurrentSequence->Entries[StepIndex];
+
+	if (!Entry.Preset)
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: Entry %d has a null preset. Skipping."), StepIndex);
+		StartSequenceStep(StepIndex + 1);
+		return;
+	}
+
+	CurrentSequenceStep = StepIndex;
+	OnSequenceStepChanged.Broadcast(StepIndex);
+
+	const float SafeOverride = FMath::Max(0.0f, Entry.DurationOverride);
+	const float TargetDuration = (SafeOverride > 0.0f) ? SafeOverride : Entry.Preset->DefaultDuration;
+	const float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(Entry.Preset->DefaultDuration, TargetDuration);
+
+	// One-shot bind: remove any stale binding before adding to prevent duplicates.
+	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnSequenceStepFinished);
+	OnTransitionCompleted.AddDynamic(this, &UTransitionManagerSubsystem::OnSequenceStepFinished);
+
+	// Scope-limit the internal-dispatch flag so StartTransition's sequence guard
+	// lets our own per-step call through without aborting the sequence.
+	TGuardValue<bool> DispatchGuard(bIsDispatchingSequenceStep, true);
+	StartTransition(Entry.Preset, Entry.Mode, PlaySpeed, Entry.bInvert, /*bHoldAtMax=*/false, Entry.OverrideParams);
+}
+
+/**
+ * Fired when the current entry's transition completes. Advances to the next entry
+ * after DelayAfter (if any). Moves to UTransitionSequencePlayer in future refactor.
+ */
+void UTransitionManagerSubsystem::OnSequenceStepFinished()
+{
+	// One-shot: always remove immediately to keep sequence step transitions deterministic.
+	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnSequenceStepFinished);
+
+	if (!bIsSequencePlaying || !CurrentSequence)
+	{
+		return;
+	}
+
+	if (!CurrentSequence->Entries.IsValidIndex(CurrentSequenceStep))
+	{
+		FinishSequence();
+		return;
+	}
+
+	const float DelayAfter = FMath::Max(0.0f, CurrentSequence->Entries[CurrentSequenceStep].DelayAfter);
+	const int32 NextIndex = CurrentSequenceStep + 1;
+
+	UWorld* World = GetWorld();
+	FTimerDelegate Delegate = FTimerDelegate::CreateWeakLambda(this, [this, NextIndex]()
+	{
+		StartSequenceStep(NextIndex);
+	});
+
+	// Defer advancement via the timer manager so each step starts on a fresh tick
+	// (avoids unbounded recursion for null-preset skips and keeps frame timing predictable).
+	if (!World)
+	{
+		StartSequenceStep(NextIndex);
+		return;
+	}
+
+	if (DelayAfter <= 0.0f)
+	{
+		World->GetTimerManager().SetTimerForNextTick(Delegate);
+	}
+	else
+	{
+		World->GetTimerManager().SetTimer(SequenceDelayTimerHandle, Delegate, DelayAfter, false);
+	}
+}
+
+/**
+ * Resets sequence state, tears down the final step's effect, and broadcasts
+ * OnSequenceCompleted. Tick skips its usual auto-stop while a sequence is
+ * playing to prevent background frames between steps, so the final effect
+ * is still active here and must be cleaned up explicitly.
+ * Moves to UTransitionSequencePlayer in future refactor.
+ */
+void UTransitionManagerSubsystem::FinishSequence()
+{
+	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnSequenceStepFinished);
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(SequenceDelayTimerHandle);
+	}
+
+	CurrentSequence = nullptr;
+	CurrentSequenceStep = -1;
+	CurrentLoopIteration = 0;
+	bIsSequencePlaying = false;
+
+	// Clean up the final step's effect now that the sequence is complete.
+	if (bIsTransitionActive)
+	{
+		StopTransition();
+	}
+
+	OnSequenceCompleted.Broadcast();
+}
+
+/**
+ * Stops the active sequence mid-flight. Does NOT broadcast OnSequenceCompleted
+ * (cancellation is not a successful completion). Moves to UTransitionSequencePlayer in future refactor.
+ */
+void UTransitionManagerSubsystem::StopSequence()
+{
+	if (!bIsSequencePlaying)
+	{
+		return;
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(SequenceDelayTimerHandle);
+	}
+
+	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnSequenceStepFinished);
+
+	// Reset sequence state BEFORE stopping the underlying transition so that any
+	// re-entrant callbacks see a clean state.
+	CurrentSequence = nullptr;
+	CurrentSequenceStep = -1;
+	CurrentLoopIteration = 0;
+	bIsSequencePlaying = false;
+
+	if (bIsTransitionActive)
+	{
+		StopTransition();
+	}
+}
+
+/** Returns true while a sequence is in progress. Moves to UTransitionSequencePlayer in future refactor. */
+bool UTransitionManagerSubsystem::IsSequencePlaying() const
+{
+	return bIsSequencePlaying;
+}
+
+/** Returns the index of the currently playing entry, or -1. Moves to UTransitionSequencePlayer in future refactor. */
+int32 UTransitionManagerSubsystem::GetCurrentSequenceStep() const
+{
+	return bIsSequencePlaying ? CurrentSequenceStep : -1;
 }

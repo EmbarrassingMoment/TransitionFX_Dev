@@ -44,6 +44,7 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 *   **Audio Integration:** Synchronize Sound Effects (SFX) with your transitions. The system manages the audio lifecycle, ensuring sounds play on start and stop automatically if the transition is cancelled.
 *   **Event System:** Access `OnTransitionStarted`, `OnTransitionCompleted`, and `OnTransitionHoldStarted` delegates for precise gameplay logic timing.
 *   **Blueprint Support:** Includes a Latent Action node (`PlayTransitionAndWait`) for clean and easy scripting.
+*   **Sequence Playback:** Chain multiple transitions together using a `TransitionSequence` data asset, with per-entry duration overrides, inter-step delays, and optional looping.
 
 ## Requirements & Platform Support
 
@@ -142,6 +143,33 @@ The `Invert` flag flips which area of the screen is covered — it is **not** th
 
 > **Tip:** To achieve a Fade In without using `Reverse` mode, set `Mode: Forward` + `Invert: True`.
 
+## Transition Sequences
+
+For complex effects like "Fade to Black → Iris Open → Dissolve In", create a `TransitionSequence` data asset.
+
+### Creating a Sequence
+1. Right-click in Content Browser > `Miscellaneous` > `Data Asset` > `TransitionSequence`.
+2. Add entries to the `Entries` array. Each entry specifies:
+    - **Preset** — which transition to play
+    - **Mode** — Forward / Reverse
+    - **Duration Override** — 0 = use preset default
+    - **Invert** — flip the mask
+    - **Delay After** — seconds to wait before the next entry
+    - **Override Params** — per-entry material parameter overrides
+3. (Optional) Enable `bLoop` and set `LoopCount` for repeating sequences. `LoopCount = 0` with `bLoop = true` loops forever.
+
+### Playing a Sequence
+Use the `Play Sequence And Wait` latent node, or call `PlaySequence` on the subsystem.
+
+### Events
+- **OnSequenceCompleted** — fires when the entire sequence finishes (after all loops).
+- **OnSequenceStepChanged(int32 StepIndex)** — fires each time the sequence advances.
+
+### Limitations
+- Sequences cannot contain level transitions. Use `OpenLevelWithTransition` separately.
+- Only one sequence can play at a time; starting a new one stops the previous.
+- Calling `StartTransition` or `OpenLevelWithTransition` while a sequence is playing cancels the sequence.
+
 ## API Reference
 The `TransitionManagerSubsystem` provides several callable functions for advanced control:
 
@@ -160,6 +188,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Iris** | Classic circular wipe closing toward the center. Aspect ratio corrected. | ![Iris](docs/images/effect_iris.gif) |
 | **Flower Iris** | An iris wipe in the shape of a flower with rounded petals. The number of petals and the flower's shape (sharpness) are adjustable. | ![Flower Iris](docs/images/effect_flower_iris.gif) |
 | **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | ![Diamond](docs/images/effect_diamond.gif) |
+| **Diamond Band Wipe** | A dynamic transition where a diamond-shaped band expands from the center, splitting apart to reveal the underlying scene. | ![Diamond Band](effect_diamondband.gif) |
 | **Box** | A simple square expanding from the center. Basic geometric transition. | ![Box](docs/images/effect_box.gif) |
 | **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | ![Linear Wipe](docs/images/effect_linear_wipe.gif) |
 | **Sliding Doors** | A horizontal wipe where two panels slide from opposite sides and meet in the center, like elevator or airlock doors. | ![Sliding Doors](docs/images/effect_slidingdoor.gif) |
@@ -280,7 +309,7 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 - [ ] **Transition Color per Preset** `High` — Expose a default transition color property on presets (e.g., fade-to-white) without requiring parameter overrides at every call
 - [ ] **UMG Widget-Layer Transitions** `High` — An alternative rendering path using a full-screen UMG widget, allowing the transition to cover Slate/UMG UI layers
 - [ ] **Origin Point Override** `Medium` — Allow center-based transitions (Iris, Diamond, Tiles, etc.) to expand from a custom screen-space coordinate
-- [ ] **Transition Chaining / Sequencing** `Medium` — A node or data asset that plays a sequence of presets back-to-back
+- [x] **Transition Chaining / Sequencing** `Medium` — A DataAsset-based sequence of presets played back-to-back with optional looping
 - [x] **OnTransitionProgress Delegate** `Medium` — A delegate that broadcasts progress each tick, removing the need to poll `GetCurrentProgress()`. Also includes threshold-based callbacks via `AddProgressThreshold`.
 - [ ] **Simultaneous Transitions** `Low` — Support for layering multiple independent transitions with a multi-slot manager
 

@@ -27,8 +27,15 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnProgressThresholdReached, float, 
 /** Delegate called when asynchronous preset preloading completes. */
 DECLARE_DYNAMIC_DELEGATE(FTransitionPreloadCompleteDelegate);
 
+/** Delegate broadcast when a sequence completes all of its entries (and loops, if any). */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSequenceCompleted);
+
+/** Delegate broadcast each time a sequence advances to a new entry (including the first). */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSequenceStepChanged, int32, StepIndex);
+
 class APlayerController;
 class UAudioComponent;
+class UTransitionSequence;
 
 /** Pool for transition effects. */
 USTRUCT()
@@ -160,6 +167,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void ClearProgressThresholds();
 
+	// --- Sequence API (Phase 1 implementation — moves to UTransitionSequencePlayer in future refactor) ---
+
+	/** Starts playing a transition sequence. Stops any currently playing sequence or transition. */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX|Sequence")
+	void PlaySequence(UTransitionSequence* Sequence);
+
+	/** Stops the currently playing sequence (if any) and the underlying transition. */
+	UFUNCTION(BlueprintCallable, Category = "TransitionFX|Sequence")
+	void StopSequence();
+
+	/** Returns true if a sequence is currently playing. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "TransitionFX|Sequence")
+	bool IsSequencePlaying() const;
+
+	/** Returns the index of the currently playing entry, or -1 if no sequence is playing. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "TransitionFX|Sequence")
+	int32 GetCurrentSequenceStep() const;
+
 public:
 	/** Triggered when a transition starts. */
 	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
@@ -180,6 +205,14 @@ public:
 	/** Triggered once when the eased progress crosses a registered threshold value. */
 	UPROPERTY(BlueprintAssignable, Category = "TransitionFX")
 	FOnProgressThresholdReached OnProgressThresholdReached;
+
+	/** Broadcast when the entire sequence finishes (after all loops if bLoop is set). */
+	UPROPERTY(BlueprintAssignable, Category = "TransitionFX|Sequence")
+	FOnSequenceCompleted OnSequenceCompleted;
+
+	/** Broadcast each time the sequence advances to a new entry (including the first). */
+	UPROPERTY(BlueprintAssignable, Category = "TransitionFX|Sequence")
+	FOnSequenceStepChanged OnSequenceStepChanged;
 
 private:
 	/** Stops and releases the current audio component. */
@@ -275,4 +308,39 @@ private:
 
 	/** Callback fired after a new level is loaded. Triggers the auto-reverse fade-in if configured. */
 	void OnPostLoadMapWithWorld(UWorld* LoadedWorld);
+
+	// --- Sequence State (Phase 1 implementation — TODO: extract into UTransitionSequencePlayer in Phase 2) ---
+
+	/** The currently playing sequence, or null when no sequence is active. */
+	UPROPERTY(Transient)
+	TObjectPtr<UTransitionSequence> CurrentSequence = nullptr;
+
+	/** Index of the entry currently playing, or -1 when no sequence is active. */
+	int32 CurrentSequenceStep = -1;
+
+	/** Number of completed loop iterations (0 == on the first pass). */
+	int32 CurrentLoopIteration = 0;
+
+	/** True while a sequence is in progress. */
+	bool bIsSequencePlaying = false;
+
+	/**
+	 * Scope-limited flag set by StartSequenceStep while dispatching the per-entry
+	 * StartTransition call. Lets StartTransition distinguish internal sequence-driven
+	 * calls from external callers that should interrupt the sequence.
+	 */
+	bool bIsDispatchingSequenceStep = false;
+
+	/** Timer handle for DelayAfter between entries. */
+	FTimerHandle SequenceDelayTimerHandle;
+
+	/** Begins the entry at StepIndex, or finishes/loops the sequence if out of range. Moves to UTransitionSequencePlayer in future refactor. */
+	void StartSequenceStep(int32 StepIndex);
+
+	/** Bound one-shot to OnTransitionCompleted for each entry. Advances to the next step (with optional DelayAfter). Moves to UTransitionSequencePlayer in future refactor. */
+	UFUNCTION()
+	void OnSequenceStepFinished();
+
+	/** Resets sequence state and broadcasts OnSequenceCompleted. Does not stop the final transition (assumed already finished). Moves to UTransitionSequencePlayer in future refactor. */
+	void FinishSequence();
 };
