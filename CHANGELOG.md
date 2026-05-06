@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed a one-frame background flash between sequence steps caused by the previous step's PostProcessVolume being destroyed before the next step's effect was initialized. During a sequence, the effect now hot-swaps across steps and is only torn down when the full sequence completes.
 - Fixed an issue where an incorrect material instance was set for DA_FadeToBlack.
+- Added a dedicated factory and asset type actions for `UTransitionSequence`. The asset now appears as a top-level "Transition Sequence" entry in the Content Browser right-click menu, matching the existing `Transition Preset` workflow. Previously, sequences could only be created via the generic `Miscellaneous → Data Asset` class picker.
 - Refactoring to a more efficient node configuration for M_Transition_Diamond.
 
 ---

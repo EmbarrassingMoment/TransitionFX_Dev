@@ -24,4 +24,5 @@ private:
 	static const FName PreviewTabId;
 
 	TSharedPtr<IAssetTypeActions> TransitionPresetActions;
+	TSharedPtr<IAssetTypeActions> TransitionSequenceActions;
 };
