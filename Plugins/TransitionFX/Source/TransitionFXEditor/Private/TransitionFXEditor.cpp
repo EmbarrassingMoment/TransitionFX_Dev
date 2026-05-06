@@ -2,6 +2,7 @@
 
 #include "TransitionFXEditor.h"
 #include "AssetTypeActions_TransitionPreset.h"
+#include "AssetTypeActions_TransitionSequence.h"
 #include "STransitionPreviewPanel.h"
 #include "AssetToolsModule.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -16,10 +17,12 @@ const FName FTransitionFXEditorModule::PreviewTabId(TEXT("TransitionFXPreview"))
 
 void FTransitionFXEditorModule::StartupModule()
 {
-	// Register AssetTypeActions for TransitionPreset
+	// Register AssetTypeActions for TransitionPreset and TransitionSequence
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	TransitionPresetActions = MakeShared<FAssetTypeActions_TransitionPreset>();
 	AssetTools.RegisterAssetTypeActions(TransitionPresetActions.ToSharedRef());
+	TransitionSequenceActions = MakeShared<FAssetTypeActions_TransitionSequence>();
+	AssetTools.RegisterAssetTypeActions(TransitionSequenceActions.ToSharedRef());
 
 	// Ensure plugin content is indexed by the AssetRegistry
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
@@ -46,15 +49,20 @@ void FTransitionFXEditorModule::StartupModule()
 void FTransitionFXEditorModule::ShutdownModule()
 {
 	// Unregister AssetTypeActions
-	if (TransitionPresetActions.IsValid())
+	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
 	{
-		if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
+		IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
+		if (TransitionPresetActions.IsValid())
 		{
-			IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
 			AssetTools.UnregisterAssetTypeActions(TransitionPresetActions.ToSharedRef());
 		}
-		TransitionPresetActions.Reset();
+		if (TransitionSequenceActions.IsValid())
+		{
+			AssetTools.UnregisterAssetTypeActions(TransitionSequenceActions.ToSharedRef());
+		}
 	}
+	TransitionPresetActions.Reset();
+	TransitionSequenceActions.Reset();
 
 	UToolMenus::UnRegisterStartupCallback(this);
 	UToolMenus::UnregisterOwner(this);
