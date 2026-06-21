@@ -374,7 +374,7 @@ void PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets);
 ```cpp
 FTransitionParameters Params;
 Params.ScalarParams.Add(FName("Intensity"), 2.0f);
-Params.VectorParams.Add(FName("Color"), FLinearColor::Red);
+Params.VectorParams.Add(FName("FadeColor"), FLinearColor::Red);
 // TextureParams も同様に設定可能
 ```
 

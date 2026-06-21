@@ -374,7 +374,7 @@ By using the `FTransitionParameters` struct, you can dynamically change preset m
 ```cpp
 FTransitionParameters Params;
 Params.ScalarParams.Add(FName("Intensity"), 2.0f);
-Params.VectorParams.Add(FName("Color"), FLinearColor::Red);
+Params.VectorParams.Add(FName("FadeColor"), FLinearColor::Red);
 // TextureParams can also be set similarly
 ```
 
