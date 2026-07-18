@@ -273,7 +273,7 @@ By passing an `FTransitionParameters` struct to the `Override Params` pin, you c
 ```
 [Make TransitionParameters]
 ├─ Scalar Params : { "Intensity" → 2.0 }
-└─ Vector Params : { "Color" → LinearColor(Red) }
+└─ Vector Params : { "FadeColor" → LinearColor(Red) }
     │
     ▼
 Play Transition And Wait
@@ -282,11 +282,11 @@ Play Transition And Wait
 
 ### Changing the Transition Color
 
-By default, transitions fade to black. To change the color (e.g., white), use `Override Params` with the `Color` vector parameter:
+By default, transitions fade to black. To change the color (e.g., white), use `Override Params` with the `FadeColor` vector parameter:
 
 ```
 [Make TransitionParameters]
-└─ Vector Params : { "Color" → LinearColor(1.0, 1.0, 1.0, 1.0) }  ← White
+└─ Vector Params : { "FadeColor" → LinearColor(1.0, 1.0, 1.0, 1.0) }  ← White
     │
     ▼
 Play Transition And Wait

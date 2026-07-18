@@ -203,9 +203,11 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | **Split** | 画面中央から真っ二つに割れて開くスタイリッシュなワイプ。分割する角度（水平、垂直、斜めなど）を自由に調整可能です。 | ![Split](docs/images/effect_split.gif) |
 | **Wavy Curtain** | Linear Wipeに似ていますが、カーテンのような波打つ境界線を持つ方向性ワイプです。 | ![Wavy Curtain](docs/images/effect_wavy_curtain.gif) |
 | **Radial Wipe** | 時計のような放射状ワイプ。滑らかなエッジと開始角度の調整をサポート。 | ![Radial Wipe](docs/images/effect_radial_wipe.gif) |
+| **Fan** | 中央から扇状のブレードが放射状に広がり、回転しながら画面を覆っていく風車（扇）のようなワイプ。 | ![Fan](docs/images/effect_fan.gif) |
 | **Tiles** | 画面がグリッド状に分割され、ブロックが中央から波のように拡大します。 | ![Tiles](docs/images/effect_tiles.gif) |
 | **Polka Dots** | 拡大する円（ハーフトーンパターン）の波が画面を覆います。ポップでモダンな外観。 | ![Polka Dots](docs/images/effect_polka_dots.gif) |
 | **Blinds** | スタイリッシュなストライプ/ベネチアンブラインド効果。ストライプが拡大・結合して画面を覆います。 | ![Blinds](docs/images/effect_blinds.gif) |
+| **Slice** | 画面が短冊（ストリップ）状に分割され、交互に反対方向へスライドしながら画面外へ抜けていくトランジション。分割数、方向、エッジの柔らかさ、タイミングのずれを調整可能。 | ![Slice](docs/images/effect_slice.gif) |
 | **Spiral** | 中央に渦巻く催眠的なスパイラル効果。回転スピンと開始角度を調整可能。 | ![Spiral](docs/images/effect_spiral.gif) |
 | **Random Tiles** | プロシージャルノイズを使用して、グリッドタイルがランダムな順序で現れる確率的なトランジション。 | ![Random Tiles](docs/images/effect_random_tiles.gif) |
 | **Dissolve** | プロシージャルノイズを使用し、画面が霧や砂のように溶けていく王道のトランジション。最小限のマージン設定によりリニアなアニメーションを実現。 | ![Dissolve](effect_dissolve.gif) |
@@ -313,7 +315,7 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 - [ ] 新しいトランジションエフェクトを追加予定 — 具体的なエフェクトはユーザーフィードバックやクリエイティブな検討を踏まえて決定
 
 ### 機能拡張
-- [ ] **プリセットごとのトランジションカラー** `High` — プリセットにデフォルトカラーを設定可能にし、毎回パラメータオーバーライドを渡さずにフェード先の色（白など）を指定できるようにする
+- [x] **プリセットごとのトランジションカラー** `High` — プリセットにデフォルトカラーを設定可能にし、毎回パラメータオーバーライドを渡さずにフェード先の色（白など）を指定できるようにする
 - [ ] **UMG ウィジェットレイヤートランジション** `High` — フルスクリーン UMG ウィジェットを使用した代替レンダリングパスにより、Slate/UMG UI レイヤーもトランジションで覆えるようにする
 - [ ] **原点オーバーライド** `Medium` — Iris、Diamond、Tiles などの中心ベースのトランジションを、任意のスクリーン座標から展開できるようにする
 - [x] **トランジションチェイン / シーケンス** `Medium` — DataAsset ベースでプリセットを連続再生し、任意でループも可能

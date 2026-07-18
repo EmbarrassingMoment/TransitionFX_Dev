@@ -62,6 +62,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX")
 	TObjectPtr<UMaterialInterface> TransitionMaterial;
 
+	/**
+	 * When true, applies TransitionColor to the material's color parameter at the
+	 * start of the transition (e.g., fade-to-white) without requiring a call-site
+	 * parameter override. An explicit color supplied via FTransitionParameters at
+	 * the call site always takes precedence.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX")
+	bool bOverrideTransitionColor = false;
+
+	/** Default transition color applied when bOverrideTransitionColor is true. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX", meta = (EditCondition = "bOverrideTransitionColor"))
+	FLinearColor TransitionColor = FLinearColor::Black;
+
 	/** Default duration of the transition in seconds. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX", meta = (ClampMin = "0.01"))
 	float DefaultDuration;
