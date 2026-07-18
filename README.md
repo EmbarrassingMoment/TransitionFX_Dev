@@ -200,6 +200,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Tiles** | The screen is divided into a grid, and blocks expand outward from the center like a wave. | ![Tiles](docs/images/effect_tiles.gif) |
 | **Polka Dots** | A wave of expanding circles (halftone pattern) covers the screen. Pop and modern look. | ![Polka Dots](docs/images/effect_polka_dots.gif) |
 | **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | ![Blinds](docs/images/effect_blinds.gif) |
+| **Slice** | The screen is cut into strips that slide off-screen in alternating directions with staggered timing. Slice count, direction, softness, and stagger are adjustable. | ![Slice](docs/images/effect_slice.gif) |
 | **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | ![Spiral](docs/images/effect_spiral.gif) |
 | **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | ![Random Tiles](docs/images/effect_random_tiles.gif) |
 | **Dissolve** | A classic transition where the screen dissolves like mist or sand using procedural noise. Optimized with a precise threshold margin. | ![Dissolve](effect_dissolve.gif) |
