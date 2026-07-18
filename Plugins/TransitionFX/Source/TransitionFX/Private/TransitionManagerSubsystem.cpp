@@ -490,6 +490,13 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		return;
 	}
 
+	// Apply the preset's default transition color unless the caller already
+	// supplied an explicit color override (call-site overrides always win).
+	if (Preset->bOverrideTransitionColor && !OverrideParams.VectorParams.Contains(TransitionFXConfig::ColorParamName))
+	{
+		OverrideParams.VectorParams.Add(TransitionFXConfig::ColorParamName, Preset->TransitionColor);
+	}
+
 	// An external StartTransition call interrupts any running sequence.
 	// Internal per-step dispatches from StartSequenceStep set bIsDispatchingSequenceStep
 	// to bypass this guard.

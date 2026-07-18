@@ -273,7 +273,7 @@ Quick Fade From Black ── Duration: 1.0
 ```
 [Make TransitionParameters]
 ├─ Scalar Params : { "Intensity" → 2.0 }
-└─ Vector Params : { "Color" → LinearColor(Red) }
+└─ Vector Params : { "FadeColor" → LinearColor(Red) }
     │
     ▼
 Play Transition And Wait
@@ -282,11 +282,11 @@ Play Transition And Wait
 
 ### トランジションの色を変更する
 
-デフォルトではトランジションは黒にフェードします。色を変更する場合（例: 白）は、`Override Params` で `Color` ベクターパラメータを使用します：
+デフォルトではトランジションは黒にフェードします。色を変更する場合（例: 白）は、`Override Params` で `FadeColor` ベクターパラメータを使用します：
 
 ```
 [Make TransitionParameters]
-└─ Vector Params : { "Color" → LinearColor(1.0, 1.0, 1.0, 1.0) }  ← 白
+└─ Vector Params : { "FadeColor" → LinearColor(1.0, 1.0, 1.0, 1.0) }  ← 白
     │
     ▼
 Play Transition And Wait

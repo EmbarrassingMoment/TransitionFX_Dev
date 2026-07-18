@@ -98,7 +98,7 @@ Latent Action は UE の Blueprint 機能で、非同期操作が完了するま
 
 | エフェクト | パラメータ名 | 型 | 説明 |
 | :--- | :--- | :--- | :--- |
-| 全エフェクト共通 | `Color` | Vector (LinearColor) | トランジションカラー（デフォルト: 黒） |
+| 全エフェクト共通 | `FadeColor` | Vector (LinearColor) | トランジションカラー（デフォルト: 黒） |
 | Linear Wipe | `Angle` | Scalar (float) | ワイプの角度 |
 | Split | `Angle` | Scalar (float) | 分割方向の角度 |
 | Tiles / Polka Dots / Blinds / Checkerboard | `TileCount` | Scalar (float) | タイル数 / ドット数 / ストライプ数 |

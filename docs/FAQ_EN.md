@@ -98,7 +98,7 @@ Use the `Override Params` pin on `Play Transition And Wait` (or `StartTransition
 
 | Effect | Parameter Name | Type | Description |
 | :--- | :--- | :--- | :--- |
-| All | `Color` | Vector (LinearColor) | Transition color (default: black) |
+| All | `FadeColor` | Vector (LinearColor) | Transition color (default: black) |
 | Linear Wipe | `Angle` | Scalar (float) | Wipe angle in degrees |
 | Split | `Angle` | Scalar (float) | Split direction angle |
 | Tiles / Polka Dots / Blinds / Checkerboard | `TileCount` | Scalar (float) | Number of tiles / dots / stripes |

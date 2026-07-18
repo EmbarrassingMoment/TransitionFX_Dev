@@ -8,6 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+**Built-in Effects (+1, total 27)**
+- **Fan** — A pinwheel-style wipe where angular blades sweep out from the center and rotate to cover the screen, like an opening folding fan. Adds the `DA_Fan` preset, `M_Transition_Fan` master material, `MI_Transition_Fan` instance, preview GIF, and README (EN/JA) Built-in Effects table entry.
+
+- **Transition Color per Preset** — `UTransitionPreset` now exposes a `bOverrideTransitionColor` toggle and a `TransitionColor` property. When enabled, the color is applied to the material's color parameter at the start of the transition (e.g., fade-to-white) without requiring a parameter override at the call site. An explicit color supplied via `FTransitionParameters` at the call site still takes precedence.
+
+### Changed
+
+- Changed the project's default map to an empty map to speed up editor and packaged startup.
+- `SetParameters` now logs a warning (`LogTransitionFX`) when an override targets a scalar, vector, or texture parameter that the material does not expose, instead of silently ignoring it. This surfaces cases such as a color override having no visible effect because the material lacks that parameter.
+
+### Fixed
+
+- Fixed the transition color override having no effect. The material color parameter is named `FadeColor`, but `ColorParamName` was set to `Color`, so `SetVectorParameterValue` was silently ignored. This also affected `QuickFadeToBlack`/`QuickFadeFromBlack` and the new per-preset `TransitionColor`. Updated the constant and the documentation (FAQ, Quick Start, API Reference) to use `FadeColor`.
+
 ## [1.2.0] - 2026-05-03
 
 ### Added
