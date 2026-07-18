@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-07-19
+
 ### Added
 
 **Built-in Effects (+2, total 28)**
@@ -15,15 +17,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Slice** — The screen is cut into strips that slide off-screen in alternating directions with staggered timing. Slice count, direction, softness, and stagger are adjustable. Adds the `DA_Slice` preset, `M_Transition_Slice` master material, `MI_Transition_Slice` instance, preview GIF, and README (EN/JA) Built-in Effects table entry.
 
 - **Transition Color per Preset** — `UTransitionPreset` now exposes a `bOverrideTransitionColor` toggle and a `TransitionColor` property. When enabled, the color is applied to the material's color parameter at the start of the transition (e.g., fade-to-white) without requiring a parameter override at the call site. An explicit color supplied via `FTransitionParameters` at the call site still takes precedence.
+- `DA_SequenceSamples` — Sample `UTransitionSequence` data asset demonstrating the sequence system out of the box (`Content/Data/Sequence/`).
 
 ### Changed
 
 - Changed the project's default map to an empty map to speed up editor and packaged startup.
 - `SetParameters` now logs a warning (`LogTransitionFX`) when an override targets a scalar, vector, or texture parameter that the material does not expose, instead of silently ignoring it. This surfaces cases such as a color override having no visible effect because the material lacks that parameter.
+- Bumped plugin `VersionName` in `TransitionFX.uplugin` to match the release version.
+- Release ZIP no longer includes local development tooling configuration (`.claude/`).
 
 ### Fixed
 
 - Fixed the transition color override having no effect. The material color parameter is named `FadeColor`, but `ColorParamName` was set to `Color`, so `SetVectorParameterValue` was silently ignored. This also affected `QuickFadeToBlack`/`QuickFadeFromBlack` and the new per-preset `TransitionColor`. Updated the constant and the documentation (FAQ, Quick Start, API Reference) to use `FadeColor`.
+- Added a dedicated factory and asset type actions for `UTransitionSequence`. The asset now appears as a top-level "Transition Sequence" entry in the Content Browser right-click menu, matching the existing `Transition Preset` workflow. Previously, sequences could only be created via the generic `Miscellaneous → Data Asset` class picker.
+
+---
 
 ## [1.2.0] - 2026-05-03
 
@@ -42,7 +50,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed a one-frame background flash between sequence steps caused by the previous step's PostProcessVolume being destroyed before the next step's effect was initialized. During a sequence, the effect now hot-swaps across steps and is only torn down when the full sequence completes.
 - Fixed an issue where an incorrect material instance was set for DA_FadeToBlack.
-- Added a dedicated factory and asset type actions for `UTransitionSequence`. The asset now appears as a top-level "Transition Sequence" entry in the Content Browser right-click menu, matching the existing `Transition Preset` workflow. Previously, sequences could only be created via the generic `Miscellaneous → Data Asset` class picker.
 - Refactoring to a more efficient node configuration for M_Transition_Diamond.
 
 ---
