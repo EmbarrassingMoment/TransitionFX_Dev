@@ -26,6 +26,7 @@ jobs:
           rsync -a \
             --exclude='.git' \
             --exclude='.github' \
+            --exclude='.claude/' \
             --exclude='Binaries/' \
             --exclude='Intermediate/' \
             --exclude='Saved/' \
