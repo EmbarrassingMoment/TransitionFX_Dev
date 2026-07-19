@@ -297,6 +297,19 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 **API リファレンス:**
 *   **関数:** `AsyncLoadTransitionPresets(TArray<TSoftObjectPtr<UTransitionPreset>> Presets, FTransitionPreloadCompleteDelegate OnComplete)`
 
+## プロジェクト設定 (Project Settings)
+
+プラグイン全体のオプションは **編集 > プロジェクト設定 > プラグイン > TransitionFX**（`UTransitionFXSettings`）から変更できます。設定値は `Config/DefaultGame.ini` に保存されるため、ini ファイルを直接編集することも可能です:
+
+```ini
+[/Script/TransitionFX.TransitionFXSettings]
+MaxPoolSizePerEffectClass=3
+```
+
+| 設定 | デフォルト | 説明 |
+| :--- | :--- | :--- |
+| **Max Pool Size Per Effect Class** | `3` | エフェクトクラスごとにプールへ保持するインスタンスの最大数。値を大きくすると異なるエフェクトを頻繁に切り替える際のアロケーションが減り、小さくするとアイドル状態のインスタンスが保持するメモリを削減できます。`0` に設定するとプーリングが完全に無効になります（使用済みインスタンスは GC に委ねられます）。 |
+
 ## 制約事項・注意点
 
 *   **同時再生は 1 つのみ:** トランジションは一度に 1 つだけ再生できます。新しいトランジションを開始すると、現在アクティブなトランジションが置き換えられます。
