@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Project Settings page (`UTransitionFXSettings`)** — New developer settings class exposing plugin configuration under **Project Settings > Plugins > TransitionFX** (saved to `DefaultGame.ini`). This page is the future home for additional plugin-wide options.
+- **Configurable effect pool size** — The per-effect-class pool cap (previously hardcoded at 3) is now exposed as `MaxPoolSizePerEffectClass` in the settings page. Set to 0 to disable pooling entirely.
+
 ## [1.3.0] - 2026-07-19
 
 ### Added

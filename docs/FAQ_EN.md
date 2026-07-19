@@ -54,9 +54,9 @@ TransitionFX runs as a **GameInstance Subsystem**, so the subsystem itself survi
 
 The subsystem maintains an internal pool of transition effect instances (`TMap<UClass*, FTransitionEffectPool>`). When a transition ends, the effect object is returned to the pool instead of being destroyed. The next time the same effect class is requested, a pooled instance is reused.
 
-- **Pool cap:** Maximum **3 instances per effect class**.
+- **Pool cap:** Maximum **3 instances per effect class** by default. Configurable via **Project Settings > Plugins > TransitionFX > `MaxPoolSizePerEffectClass`** (set to 0 to disable pooling).
 - **Excess handling:** Instances beyond the cap are dereferenced and handled by Unreal's Garbage Collector.
-- **No user configuration required** — pooling is fully automatic.
+- **No user configuration required** — pooling is fully automatic with sensible defaults.
 
 ### Q: Can I change volume and pitch dynamically during playback?
 

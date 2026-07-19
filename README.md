@@ -319,7 +319,7 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 - [ ] **Preset Validation in Editor** `High` — Warn if a preset has no material or is missing the required `Progress` parameter
 - [ ] **Editor Preset Thumbnails** `Medium` — Auto-generate static thumbnails for TransitionPreset assets in the Content Browser
 - [ ] **Blueprint Preset Picker Widget** `Medium` — A visual dropdown showing available presets with mini-previews
-- [ ] **Configurable Pool Size** `Low` — Expose the effect pool cap (currently hardcoded at 3) via project settings
+- [x] **Configurable Pool Size** `Low` — Expose the effect pool cap (previously hardcoded at 3) via **Project Settings > Plugins > TransitionFX** (`MaxPoolSizePerEffectClass`)
 - [ ] **Shader Complexity Tiers** `Low` — Simplified material variants for performance-sensitive platforms
 
 ### Documentation & Tutorials

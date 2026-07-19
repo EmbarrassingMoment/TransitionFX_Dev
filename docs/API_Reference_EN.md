@@ -358,7 +358,7 @@ void AsyncLoadTransitionPresets(const TArray<TSoftObjectPtr<UTransitionPreset>>&
 ```
 
 ### Object Pooling
-The subsystem pools transition effect instances for reuse, capped at **3 instances per effect class** to prevent memory bloat. Excess instances are released for garbage collection.
+The subsystem pools transition effect instances for reuse, capped per effect class to prevent memory bloat (default: **3 instances**). The cap is configurable via **Project Settings > Plugins > TransitionFX > `MaxPoolSizePerEffectClass`**; set it to 0 to disable pooling. Excess instances are released for garbage collection.
 
 ### Preloading
 `PreloadTransitionPresets` uses loaded presets to warm up shaders in advance, preventing hitches (stuttering) during transition execution.
