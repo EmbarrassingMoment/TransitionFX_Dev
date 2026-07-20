@@ -53,10 +53,11 @@ Material parameter "Progress" [0.0→1.0] drives SDF shader on screen
 | `UTransitionBlueprintLibrary` | `Public/TransitionBlueprintLibrary.h` | Blueprint-callable latent actions and helper nodes |
 | `UTransitionSequence` | `Public/TransitionSequence.h` | Data Asset for chaining multiple transitions; each `FTransitionSequenceEntry` holds preset, mode, duration override, delay |
 | `UTransitionFXConfig` | `Public/TransitionFXConfig.h` | Compile-time constants: material parameter names (`Progress`, `Invert`, `TransitionColor`), default asset path |
+| `UTransitionFXSettings` | `Public/TransitionFXSettings.h` | `UDeveloperSettings`-based project settings (Project Settings > Plugins > TransitionFX): effect pool cap |
 
 ### Effect Pool
 
-`UTransitionManagerSubsystem` maintains a `TMap<UClass*, FTransitionEffectPool>` capped at **3 instances per class**. Always return effects to the pool via `CleanupAndPoolCurrentEffect()` — never destroy them directly.
+`UTransitionManagerSubsystem` maintains a `TMap<UClass*, FTransitionEffectPool>` capped per class by `UTransitionFXSettings::MaxPoolSizePerEffectClass` (default 3, Project Settings > Plugins > TransitionFX). Always return effects to the pool via `CleanupAndPoolCurrentEffect()` — never destroy them directly.
 
 ### Easing
 
@@ -85,7 +86,8 @@ Plugins/TransitionFX/
 │   │   ├── ITransitionEffect.h            ← effect interface
 │   │   ├── TransitionBlueprintLibrary.h   ← Blueprint nodes
 │   │   ├── TransitionSequence.h           ← sequence data asset
-│   │   └── TransitionFXConfig.h           ← material param name constants
+│   │   ├── TransitionFXConfig.h           ← material param name constants
+│   │   └── TransitionFXSettings.h         ← project settings (effect pool cap)
 │   └── Private/
 │       ├── TransitionManagerSubsystem.cpp ← ~1,000 LOC, core tick loop
 │       └── TransitionBlueprintLibrary.cpp ← latent action implementations

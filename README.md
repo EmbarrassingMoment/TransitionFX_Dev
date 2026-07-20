@@ -290,6 +290,19 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 **API Reference:**
 *   **Function:** `AsyncLoadTransitionPresets(TArray<TSoftObjectPtr<UTransitionPreset>> Presets, FTransitionPreloadCompleteDelegate OnComplete)`
 
+## Project Settings
+
+Plugin-wide options are available under **Edit > Project Settings > Plugins > TransitionFX** (`UTransitionFXSettings`). Values are saved to `Config/DefaultGame.ini`, so they can also be edited directly:
+
+```ini
+[/Script/TransitionFX.TransitionFXSettings]
+MaxPoolSizePerEffectClass=3
+```
+
+| Setting | Default | Description |
+| :--- | :--- | :--- |
+| **Max Pool Size Per Effect Class** | `3` | Maximum number of pooled effect instances kept per effect class. Higher values reduce allocations when frequently switching between different effects; lower values reduce memory held by idle instances. Set to `0` to disable pooling entirely (used instances are released for garbage collection). |
+
 ## Limitations & Notes
 
 *   **Single transition at a time:** Only one transition can play at a time. Starting a new transition will replace the currently active one.
@@ -319,7 +332,7 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 - [ ] **Preset Validation in Editor** `High` — Warn if a preset has no material or is missing the required `Progress` parameter
 - [ ] **Editor Preset Thumbnails** `Medium` — Auto-generate static thumbnails for TransitionPreset assets in the Content Browser
 - [ ] **Blueprint Preset Picker Widget** `Medium` — A visual dropdown showing available presets with mini-previews
-- [ ] **Configurable Pool Size** `Low` — Expose the effect pool cap (currently hardcoded at 3) via project settings
+- [x] **Configurable Pool Size** `Low` — Expose the effect pool cap (previously hardcoded at 3) via **Project Settings > Plugins > TransitionFX** (`MaxPoolSizePerEffectClass`)
 - [ ] **Shader Complexity Tiers** `Low` — Simplified material variants for performance-sensitive platforms
 
 ### Documentation & Tutorials

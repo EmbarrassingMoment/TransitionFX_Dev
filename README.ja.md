@@ -297,6 +297,19 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 **API リファレンス:**
 *   **関数:** `AsyncLoadTransitionPresets(TArray<TSoftObjectPtr<UTransitionPreset>> Presets, FTransitionPreloadCompleteDelegate OnComplete)`
 
+## プロジェクト設定 (Project Settings)
+
+プラグイン全体のオプションは **編集 > プロジェクト設定 > プラグイン > TransitionFX**（`UTransitionFXSettings`）から変更できます。設定値は `Config/DefaultGame.ini` に保存されるため、ini ファイルを直接編集することも可能です:
+
+```ini
+[/Script/TransitionFX.TransitionFXSettings]
+MaxPoolSizePerEffectClass=3
+```
+
+| 設定 | デフォルト | 説明 |
+| :--- | :--- | :--- |
+| **Max Pool Size Per Effect Class** | `3` | エフェクトクラスごとにプールへ保持するインスタンスの最大数。値を大きくすると異なるエフェクトを頻繁に切り替える際のアロケーションが減り、小さくするとアイドル状態のインスタンスが保持するメモリを削減できます。`0` に設定するとプーリングが完全に無効になります（使用済みインスタンスは GC に委ねられます）。 |
+
 ## 制約事項・注意点
 
 *   **同時再生は 1 つのみ:** トランジションは一度に 1 つだけ再生できます。新しいトランジションを開始すると、現在アクティブなトランジションが置き換えられます。
@@ -326,7 +339,7 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 - [ ] **エディタでのプリセットバリデーション** `High` — マテリアル未設定や必須パラメータ `Progress` の欠落を警告する
 - [ ] **エディタプリセットサムネイル** `Medium` — コンテンツブラウザで TransitionPreset アセットの静的サムネイルを自動生成し、一目で識別しやすくする
 - [ ] **ブループリントプリセットピッカーウィジェット** `Medium` — ミニプレビュー付きのビジュアルドロップダウンで利用可能なプリセットを表示
-- [ ] **プールサイズの設定** `Low` — エフェクトプールの上限（現在は 3 にハードコード）をプロジェクト設定で公開する
+- [x] **プールサイズの設定** `Low` — エフェクトプールの上限（従来は 3 にハードコード）を **プロジェクト設定 > プラグイン > TransitionFX** の `MaxPoolSizePerEffectClass` で公開
 - [ ] **シェーダー複雑度ティア** `Low` — パフォーマンスに敏感なプラットフォーム向けの簡略化されたマテリアルバリアント
 
 ### ドキュメント・チュートリアル

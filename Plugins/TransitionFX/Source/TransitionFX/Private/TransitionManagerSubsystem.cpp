@@ -2,6 +2,7 @@
 
 #include "TransitionManagerSubsystem.h"
 #include "TransitionFXConfig.h"
+#include "TransitionFXSettings.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "TransitionPreset.h"
@@ -346,7 +347,7 @@ void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransit
 	}
 }
 
-/** Returns a used effect object to the pool, capping at MaxPoolSize to prevent memory bloat. */
+/** Returns a used effect object to the pool, capping at the configured max pool size to prevent memory bloat. */
 void UTransitionManagerSubsystem::ReturnEffectToPool(UObject* EffectObj)
 {
 	if (!EffectObj)
@@ -356,8 +357,8 @@ void UTransitionManagerSubsystem::ReturnEffectToPool(UObject* EffectObj)
 
 	FTransitionEffectPool& Pool = EffectPool.FindOrAdd(EffectObj->GetClass());
 
-	// Cap the pool size to prevent memory bloat
-	constexpr int32 MaxPoolSize = 3;
+	// Cap the pool size to prevent memory bloat (configurable in Project Settings > Plugins > TransitionFX)
+	const int32 MaxPoolSize = GetDefault<UTransitionFXSettings>()->MaxPoolSizePerEffectClass;
 	if (Pool.Effects.Num() < MaxPoolSize)
 	{
 		Pool.Effects.Add(EffectObj);
