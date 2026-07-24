@@ -7,6 +7,7 @@
 #include "Tickable.h"
 #include "TransitionPreset.h"
 #include "ITransitionEffect.h"
+#include "TransitionEffectPool.h"
 #include "TransitionManagerSubsystem.generated.h"
 
 /** Delegate broadcast when a transition begins playing. */
@@ -36,16 +37,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSequenceStepChanged, int32, StepI
 class APlayerController;
 class UAudioComponent;
 class UTransitionSequence;
-
-/** Pool for transition effects. */
-USTRUCT()
-struct FTransitionEffectPool
-{
-	GENERATED_BODY()
-
-	UPROPERTY()
-	TArray<TObjectPtr<UObject>> Effects;
-};
 
 /**
  * Direction mode for transition playback.
@@ -224,12 +215,9 @@ private:
 	/** Returns the cached player controller, refreshing the cache if stale. */
 	APlayerController* GetOrCachePlayerController();
 
-	/** Internal helper to return an effect to the pool with size checks. */
-	void ReturnEffectToPool(UObject* EffectObj);
-
 	/** Pool of available transition effects. */
 	UPROPERTY(Transient)
-	TMap<UClass*, FTransitionEffectPool> EffectPool;
+	FTransitionEffectPoolManager EffectPool;
 
 	/** The current transition preset. */
 	UPROPERTY(Transient)

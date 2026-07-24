@@ -53,10 +53,12 @@ Material parameter "Progress" [0.0→1.0] drives SDF shader on screen
 | `UTransitionBlueprintLibrary` | `Public/TransitionBlueprintLibrary.h` | Blueprint-callable latent actions and helper nodes |
 | `UTransitionSequence` | `Public/TransitionSequence.h` | Data Asset for chaining multiple transitions; each `FTransitionSequenceEntry` holds preset, mode, duration override, delay |
 | `UTransitionFXConfig` | `Public/TransitionFXConfig.h` | Compile-time constants: material parameter names (`Progress`, `Invert`, `TransitionColor`), default asset path |
+| `FTransitionEffectPoolManager` | `Public/TransitionEffectPool.h` | Per-class effect instance pooling (`Acquire`/`Release`/`Empty`), embedded in the subsystem as a `UPROPERTY` |
+| `FTransitionPresetPreloader` | `Public/TransitionPresetPreloader.h` | Stateless preset preloading + PSO/shader warmup helpers behind the subsystem's preload API |
 
 ### Effect Pool
 
-`UTransitionManagerSubsystem` maintains a `TMap<UClass*, FTransitionEffectPool>` capped at **3 instances per class**. Always return effects to the pool via `CleanupAndPoolCurrentEffect()` — never destroy them directly.
+`UTransitionManagerSubsystem` embeds an `FTransitionEffectPoolManager` (`TransitionEffectPool.h`) that pools effect instances per class, capped at **3 instances per class**. Always return effects to the pool via `CleanupAndPoolCurrentEffect()` — never destroy them directly.
 
 ### Easing
 
@@ -85,9 +87,11 @@ Plugins/TransitionFX/
 │   │   ├── ITransitionEffect.h            ← effect interface
 │   │   ├── TransitionBlueprintLibrary.h   ← Blueprint nodes
 │   │   ├── TransitionSequence.h           ← sequence data asset
+│   │   ├── TransitionEffectPool.h         ← effect instance pooling
+│   │   ├── TransitionPresetPreloader.h    ← preload / shader warmup helpers
 │   │   └── TransitionFXConfig.h           ← material param name constants
 │   └── Private/
-│       ├── TransitionManagerSubsystem.cpp ← ~1,000 LOC, core tick loop
+│       ├── TransitionManagerSubsystem.cpp ← core tick loop + state machine
 │       └── TransitionBlueprintLibrary.cpp ← latent action implementations
 ├── Source/TransitionFXEditor/
 │   ├── Public/TransitionPreviewPanel.h    ← editor preview UI

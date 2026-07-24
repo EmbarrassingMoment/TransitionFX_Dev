@@ -2,9 +2,8 @@
 
 #include "TransitionManagerSubsystem.h"
 #include "TransitionFXConfig.h"
-#include "Engine/AssetManager.h"
-#include "Engine/StreamableManager.h"
 #include "TransitionPreset.h"
+#include "TransitionPresetPreloader.h"
 #include "TransitionSequence.h"
 #include "Sound/SoundBase.h"
 #include "Components/AudioComponent.h"
@@ -15,7 +14,6 @@
 #include "HAL/IConsoleManager.h"
 #include "TimerManager.h"
 #include "TransitionBlueprintLibrary.h"
-#include "Materials/MaterialInstanceDynamic.h"
 #include "TransitionFX.h"
 
 /** Registers console commands, preloads default assets, and binds the post-load-map delegate. */
@@ -193,41 +191,10 @@ bool UTransitionManagerSubsystem::IsTickable() const
  */
 void UTransitionManagerSubsystem::AsyncLoadTransitionPresets(const TArray<TSoftObjectPtr<UTransitionPreset>>& SoftPresets, FTransitionPreloadCompleteDelegate OnComplete)
 {
-	if (SoftPresets.Num() == 0)
+	FTransitionPresetPreloader::AsyncLoadAndWarmup(this, SoftPresets, [OnComplete]()
 	{
 		OnComplete.ExecuteIfBound();
-		return;
-	}
-
-	// Create Path List
-	TArray<FSoftObjectPath> ItemsToStream;
-	for (const auto& Ref : SoftPresets)
-	{
-		ItemsToStream.Add(Ref.ToSoftObjectPath());
-	}
-
-	// Get StreamableManager (from AssetManager)
-	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-
-	// Kick Async Load
-	Streamable.RequestAsyncLoad(ItemsToStream, FStreamableDelegate::CreateWeakLambda(this, [this, SoftPresets, OnComplete]()
-	{
-		// Post-Load Processing
-		TArray<UTransitionPreset*> LoadedPresets;
-		for (const auto& Ref : SoftPresets)
-		{
-			if (UTransitionPreset* Preset = Ref.Get())
-			{
-				LoadedPresets.Add(Preset);
-			}
-		}
-
-		// Execute Shader Warmup (Synchronous Preload)
-		PreloadTransitionPresets(LoadedPresets);
-
-		// Notify Completion
-		OnComplete.ExecuteIfBound();
-	}));
+	});
 }
 
 /**
@@ -310,63 +277,7 @@ void UTransitionManagerSubsystem::OnPostLoadMapWithWorld(UWorld* LoadedWorld)
  */
 void UTransitionManagerSubsystem::PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets)
 {
-	if (Presets.IsEmpty())
-	{
-		return;
-	}
-
-	UE_LOG(LogTransitionFX, Log, TEXT("Preloading %d Transition Presets..."), Presets.Num());
-
-	TSet<UMaterialInterface*> ProcessedMaterials;
-
-	for (UTransitionPreset* Preset : Presets)
-	{
-		if (Preset && Preset->TransitionMaterial)
-		{
-			bool bIsAlreadyInSet = false;
-			ProcessedMaterials.Add(Preset->TransitionMaterial, &bIsAlreadyInSet);
-
-			if (bIsAlreadyInSet)
-			{
-				continue;
-			}
-
-			// Create a temporary Dynamic Material Instance (MID)
-			UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Preset->TransitionMaterial, this);
-
-			if (MID)
-			{
-				// Set a scalar parameter to ensure the uniform buffer is initialized
-				MID->SetScalarParameterValue(TransitionFXConfig::ProgressParamName, 0.0f);
-
-				// Do not store this MID. We want it to be garbage collected immediately.
-				// The sole purpose is to force the engine to compile/cache the PSOs (Pipeline State Objects) for this material.
-			}
-		}
-	}
-}
-
-/** Returns a used effect object to the pool, capping at MaxPoolSize to prevent memory bloat. */
-void UTransitionManagerSubsystem::ReturnEffectToPool(UObject* EffectObj)
-{
-	if (!EffectObj)
-	{
-		return;
-	}
-
-	FTransitionEffectPool& Pool = EffectPool.FindOrAdd(EffectObj->GetClass());
-
-	// Cap the pool size to prevent memory bloat
-	constexpr int32 MaxPoolSize = 3;
-	if (Pool.Effects.Num() < MaxPoolSize)
-	{
-		Pool.Effects.Add(EffectObj);
-	}
-	else
-	{
-		// Do nothing. Let the Garbage Collector handle the unreferenced object.
-		UE_LOG(LogTransitionFX, Verbose, TEXT("Pool for %s is full. Discarding effect instance for GC."), *EffectObj->GetClass()->GetName());
-	}
+	FTransitionPresetPreloader::WarmupShaders(this, Presets);
 }
 
 /** Stops the current audio component and releases the reference. */
@@ -392,7 +303,7 @@ void UTransitionManagerSubsystem::CleanupAndPoolCurrentEffect()
 		// Return to pool
 		if (UObject* EffectObj = CurrentEffect.GetObject())
 		{
-			ReturnEffectToPool(EffectObj);
+			EffectPool.Release(EffectObj);
 		}
 
 		CurrentEffect = nullptr;
@@ -610,20 +521,8 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 					CurrentEffect = nullptr;
 				}
 
-				UObject* EffectObj = nullptr;
-
-				// Check Pool (Reuse existing instance to avoid allocation and reduce GC pressure)
-				FTransitionEffectPool& Pool = EffectPool.FindOrAdd(Preset->EffectClass);
-				if (Pool.Effects.Num() > 0)
-				{
-					EffectObj = Pool.Effects.Pop();
-				}
-
-				// Create New if not found
-				if (!EffectObj)
-				{
-					EffectObj = NewObject<UObject>(this, Preset->EffectClass);
-				}
+				// Reuse a pooled instance if available, otherwise create a new one.
+				UObject* EffectObj = EffectPool.Acquire(Preset->EffectClass, this);
 
 				if (EffectObj && EffectObj->Implements<UTransitionEffect>())
 				{
@@ -648,7 +547,7 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 					PendingOldEffect->Cleanup();
 					if (UObject* OldEffectObj = PendingOldEffect.GetObject())
 					{
-						ReturnEffectToPool(OldEffectObj);
+						EffectPool.Release(OldEffectObj);
 					}
 				}
 			}
