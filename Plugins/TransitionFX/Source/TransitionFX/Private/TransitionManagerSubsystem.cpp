@@ -2,6 +2,7 @@
 
 #include "TransitionManagerSubsystem.h"
 #include "TransitionFXConfig.h"
+#include "TransitionLevelTravelHandler.h"
 #include "TransitionPreset.h"
 #include "TransitionPresetPreloader.h"
 #include "TransitionSequence.h"
@@ -16,7 +17,7 @@
 #include "TransitionBlueprintLibrary.h"
 #include "TransitionFX.h"
 
-/** Registers console commands, preloads default assets, and binds the post-load-map delegate. */
+/** Registers console commands, preloads default assets, and creates the level travel handler. */
 void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -31,7 +32,8 @@ void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	// Preload default assets to avoid hitching during gameplay
 	GetDefaultFadePreset();
 
-	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UTransitionManagerSubsystem::OnPostLoadMapWithWorld);
+	LevelTravelHandler = NewObject<UTransitionLevelTravelHandler>(this);
+	LevelTravelHandler->Initialize(this);
 }
 
 /** Lazily loads and caches the default Fade to Black preset from the configured asset path. */
@@ -49,7 +51,11 @@ void UTransitionManagerSubsystem::Deinitialize()
 {
 	IConsoleManager::Get().UnregisterConsoleObject(TEXT("TransitionFX.ForceClear"));
 
-	FCoreUObjectDelegates::PostLoadMapWithWorld.RemoveAll(this);
+	if (LevelTravelHandler)
+	{
+		LevelTravelHandler->Deinitialize();
+		LevelTravelHandler = nullptr;
+	}
 
 	// Clear any pending sequence timer and state before releasing the pool
 	if (UWorld* World = GetWorld())
@@ -199,7 +205,7 @@ void UTransitionManagerSubsystem::AsyncLoadTransitionPresets(const TArray<TSoftO
 
 /**
  * Orchestrates a "Fade Out -> Open Level -> Fade In" sequence.
- * Stores level transition state and binds the fade-out completion callback.
+ * Cancels any running sequence, resolves the preset, and delegates to the level travel handler.
  */
 void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration)
 {
@@ -215,60 +221,13 @@ void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldCo
 		Preset = GetDefaultFadePreset();
 	}
 
-	PendingLevelName = LevelName;
-	PendingPreset = Preset;
-	PendingDuration = Duration;
-	bAutoReverseOnLevelLoad = true;
-
-	// Ensure we don't have stale bindings
-	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
-	OnTransitionCompleted.AddDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
-
-	float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(Preset->DefaultDuration, Duration);
-
-	// Start Fade Out (Forward, Invert=False)
-	StartTransition(Preset, ETransitionMode::Forward, PlaySpeed, false);
+	LevelTravelHandler->BeginLevelTransition(LevelName, Preset, Duration);
 }
 
 /** Stores preset and duration for an auto-reverse transition on the next level load without starting playback. */
 void UTransitionManagerSubsystem::PrepareAutoReverseTransition(UTransitionPreset* Preset, float Duration)
 {
-	PendingPreset = Preset;
-	PendingDuration = Duration;
-	bAutoReverseOnLevelLoad = true;
-}
-
-/** One-shot callback that opens the pending level after the fade-out transition completes. */
-void UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished()
-{
-	// One-shot callback
-	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
-
-	UGameplayStatics::OpenLevel(this, PendingLevelName);
-}
-
-/** Called after a new level is loaded. Triggers the auto-reverse fade-in if one was prepared. */
-void UTransitionManagerSubsystem::OnPostLoadMapWithWorld(UWorld* LoadedWorld)
-{
-	if (bAutoReverseOnLevelLoad)
-	{
-		bAutoReverseOnLevelLoad = false;
-
-		// Verify the loaded world matches our current world context
-		if (LoadedWorld && LoadedWorld != GetWorld())
-		{
-			UE_LOG(LogTransitionFX, Warning, TEXT("TransitionFX: OnPostLoadMapWithWorld called with mismatched world. Skipping auto-reverse."));
-			return;
-		}
-
-		if (PendingPreset)
-		{
-			float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(PendingPreset->DefaultDuration, PendingDuration);
-
-			// Start Fade In (Forward, Invert=True to go from Black to Clear if using standard mask behavior)
-			StartTransition(PendingPreset, ETransitionMode::Forward, PlaySpeed, true);
-		}
-	}
+	LevelTravelHandler->PrepareAutoReverse(Preset, Duration);
 }
 
 /**
@@ -698,9 +657,9 @@ void UTransitionManagerSubsystem::PlaySequence(UTransitionSequence* Sequence)
 	}
 
 	// Sequences and level transitions are mutually exclusive: refuse if a level
-	// transition (or auto-reverse plan) is pending. bAutoReverseOnLevelLoad is
-	// the authoritative in-flight flag — it is cleared in OnPostLoadMapWithWorld.
-	if (bAutoReverseOnLevelLoad)
+	// transition (or auto-reverse plan) is pending. The handler's pending flag is
+	// the authoritative in-flight state — it is cleared in OnPostLoadMapWithWorld.
+	if (LevelTravelHandler && LevelTravelHandler->IsLevelTransitionPending())
 	{
 		UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: A level transition is pending. Sequences cannot run during level transitions. Ignoring."));
 		return;

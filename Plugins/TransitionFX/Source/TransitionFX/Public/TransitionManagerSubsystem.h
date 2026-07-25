@@ -37,6 +37,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSequenceStepChanged, int32, StepI
 class APlayerController;
 class UAudioComponent;
 class UTransitionSequence;
+class UTransitionLevelTravelHandler;
 
 /**
  * Direction mode for transition playback.
@@ -277,25 +278,9 @@ private:
 
 	// Level Transition State
 
-	/** Whether to automatically play a reverse transition when a new level finishes loading. */
-	bool bAutoReverseOnLevelLoad = false;
-
-	/** The name of the level to open after the fade-out completes. */
-	FName PendingLevelName;
-
-	/** The duration to use for the pending level transition. */
-	float PendingDuration = 1.0f;
-
-	/** The preset to use for the pending level transition. */
-	UPROPERTY()
-	TObjectPtr<UTransitionPreset> PendingPreset;
-
-	/** Callback fired when the fade-out phase of a level transition completes. Opens the pending level. */
-	UFUNCTION()
-	void OnLevelTransitionFadeOutFinished();
-
-	/** Callback fired after a new level is loaded. Triggers the auto-reverse fade-in if configured. */
-	void OnPostLoadMapWithWorld(UWorld* LoadedWorld);
+	/** Handler owning the "Fade Out -> Open Level -> Fade In" flow and its pending state. */
+	UPROPERTY(Transient)
+	TObjectPtr<UTransitionLevelTravelHandler> LevelTravelHandler;
 
 	// --- Sequence State (Phase 1 implementation — TODO: extract into UTransitionSequencePlayer in Phase 2) ---
 

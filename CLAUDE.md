@@ -55,6 +55,7 @@ Material parameter "Progress" [0.0→1.0] drives SDF shader on screen
 | `UTransitionFXConfig` | `Public/TransitionFXConfig.h` | Compile-time constants: material parameter names (`Progress`, `Invert`, `TransitionColor`), default asset path |
 | `FTransitionEffectPoolManager` | `Public/TransitionEffectPool.h` | Per-class effect instance pooling (`Acquire`/`Release`/`Empty`), embedded in the subsystem as a `UPROPERTY` |
 | `FTransitionPresetPreloader` | `Public/TransitionPresetPreloader.h` | Stateless preset preloading + PSO/shader warmup helpers behind the subsystem's preload API |
+| `UTransitionLevelTravelHandler` | `Public/TransitionLevelTravelHandler.h` | Subsystem-owned UObject driving the "Fade Out → Open Level → Fade In" flow; holds pending level transition state |
 
 ### Effect Pool
 
@@ -66,11 +67,11 @@ Easing is applied in the subsystem's `Tick()` using `ETransitionEasing` (12+ bui
 
 ### Level Transition Pattern
 
-`OpenLevelWithTransition()` uses a two-step delegate chain:
-1. Fade-out completes → `OnLevelTransitionFadeOutFinished()` opens the level
+`OpenLevelWithTransition()` delegates to `UTransitionLevelTravelHandler` (a subsystem-owned UObject) which uses a two-step delegate chain:
+1. Fade-out completes → `OnFadeOutFinished()` opens the level
 2. `OnPostLoadMapWithWorld()` fires → auto-reverse fade-in plays
 
-`PrepareAutoReverseTransition()` stores state so it survives level unload.
+`PrepareAutoReverseTransition()` stores state on the handler so it survives level unload.
 
 ### Sequence System (Phase 1, unreleased v1.2.0)
 
@@ -89,6 +90,7 @@ Plugins/TransitionFX/
 │   │   ├── TransitionSequence.h           ← sequence data asset
 │   │   ├── TransitionEffectPool.h         ← effect instance pooling
 │   │   ├── TransitionPresetPreloader.h    ← preload / shader warmup helpers
+│   │   ├── TransitionLevelTravelHandler.h ← level transition (fade out → open level → fade in)
 │   │   └── TransitionFXConfig.h           ← material param name constants
 │   └── Private/
 │       ├── TransitionManagerSubsystem.cpp ← core tick loop + state machine
