@@ -218,7 +218,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | **Hexagon** | SFテイストのハニカム（六角形）ワイプです。画面中央から波紋のように、各セルが滑らかに縮小して消滅します。 | ![Hexagon](docs/images/effect_hexagon.gif) |
 | **Triangle** | 鋭利な三角形（ポリゴン）が画面中央から波紋のように縮小して消えていくスタイリッシュなワイプ。 | ![Triangle](docs/images/effect_triangle.gif) |
 | **Checkerboard** | 画面をチェッカーボード（市松模様）パターンで分割し、各タイルが拡大して画面を覆います。クラシックなレトロ風。 | ![Checkerboard](docs/images/effect_checkerboard.gif) |
-| **Pixelate** | 画面の解像度を徐々に下げていくピクセル化エフェクト。フェードアウトまでモザイクが進行します。 | |
+| **Pixelate** | 画面の解像度を徐々に下げていくピクセル化エフェクト。フェードアウトまでモザイクが進行します。 | — |
 
 > **Texture Mask（テクスチャマスク）のヒント:**
 > マスクテクスチャをインポートする際は、正確な値を読み取るために **sRGB** のチェックを外し（sRGBオフ）、Compression Settings（圧縮設定）を **Masks (no sRGB)** または **Grayscale** に設定してください。
