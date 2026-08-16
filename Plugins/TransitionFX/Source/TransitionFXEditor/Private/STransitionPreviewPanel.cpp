@@ -2,7 +2,8 @@
 
 #include "STransitionPreviewPanel.h"
 #include "TransitionPreviewViewport.h"
-#include "GifEncoder.h"
+#include "TransitionPreviewGifCapture.h"
+#include "TransitionPreviewBatchCaptureDriver.h"
 #include "Widgets/Input/SComboBox.h"
 #include "Widgets/Input/SSlider.h"
 #include "Widgets/Input/SSpinBox.h"
@@ -11,12 +12,9 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SSeparator.h"
 #include "Widgets/Text/STextBlock.h"
-#include "Widgets/Notifications/SNotificationList.h"
-#include "Framework/Notifications/NotificationManager.h"
 #include "TransitionBlueprintLibrary.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Materials/MaterialInstanceConstant.h"
-#include "DesktopPlatformModule.h"
 
 #define LOCTEXT_NAMESPACE "TransitionFXEditor"
 
@@ -32,22 +30,33 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 	bLooping = true;
 	bInvert = false;
 	bSliderCaptured = false;
-	bIsCapturing = false;
-	bCaptureWaitFrame = false;
-	CaptureFrameIndex = 0;
-	TotalCaptureFrames = 0;
 	CaptureFrameRate = 30;
-	CaptureStabilizeFrames = 0;
 	GifPlaySpeed = 0.5f;
 	ViewportWidth = 480.0f;
 	ViewportHeight = 270.0f;
+	// Create the GIF capture engine before the widget tree binds lambdas that query it
+	GifCapture = MakeUnique<FTransitionPreviewGifCapture>();
 #if TRANSITIONFX_DEV_TOOLS
-	bIsBatchCapturing = false;
-	BatchCaptureIndex = 0;
-	bIsBatchCapturingEasing = false;
-	BatchEasingIndex = 0;
-	SavedEffectIndex = 0;
-	SavedEasing = ETransitionEasing::Linear;
+	GifCapture->OnWriteFinished.BindSP(this, &STransitionPreviewPanel::OnGifWriteFinished);
+
+	// The batch driver owns all batch state and steers this panel purely through callbacks
+	FTransitionPreviewBatchCaptureDriver::FPanelHooks BatchHooks;
+	BatchHooks.IsCaptureActive = [this]() { return GifCapture->IsCapturing(); };
+	BatchHooks.GetEffectCount = [this]() { return Effects.Num(); };
+	BatchHooks.GetEffectDisplayName = [this](int32 Index) { return Effects.IsValidIndex(Index) ? Effects[Index].DisplayName : FString(); };
+	BatchHooks.GetSelectedEffectIndex = [this]() { return SelectedIndex; };
+	BatchHooks.SelectEffect = [this](int32 Index)
+	{
+		if (EffectNames.IsValidIndex(Index))
+		{
+			SelectedIndex = Index;
+			OnEffectSelected(EffectNames[Index], ESelectInfo::Direct);
+		}
+	};
+	BatchHooks.GetSelectedEasing = [this]() { return SelectedEasing; };
+	BatchHooks.SelectEasing = [this](ETransitionEasing Easing) { SelectedEasing = Easing; };
+	BatchHooks.StartCaptureToFile = [this](const FString& SavePath) { StartGifCapture(SavePath); };
+	BatchDriver = MakeUnique<FTransitionPreviewBatchCaptureDriver>(MoveTemp(BatchHooks));
 #endif
 
 	// Resolution options
@@ -377,9 +386,9 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 			.Padding(8, 0, 0, 0)
 			[
 				SNew(SButton)
-				.Text(this, &STransitionPreviewPanel::GetBatchCaptureButtonText)
-				.IsEnabled(this, &STransitionPreviewPanel::IsBatchCaptureButtonEnabled)
-				.OnClicked_Lambda([this]() { StartBatchCapture(); return FReply::Handled(); })
+				.Text_Lambda([this]() { return BatchDriver->GetEffectBatchButtonText(); })
+				.IsEnabled_Lambda([this]() { return BatchDriver->IsEffectBatchButtonEnabled(); })
+				.OnClicked_Lambda([this]() { BatchDriver->StartEffectBatch(); return FReply::Handled(); })
 			]
 
 			+ SHorizontalBox::Slot()
@@ -387,9 +396,9 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 			.Padding(8, 0, 0, 0)
 			[
 				SNew(SButton)
-				.Text(this, &STransitionPreviewPanel::GetBatchCaptureEasingButtonText)
-				.IsEnabled(this, &STransitionPreviewPanel::IsBatchCaptureEasingButtonEnabled)
-				.OnClicked_Lambda([this]() { StartBatchCaptureEasing(); return FReply::Handled(); })
+				.Text_Lambda([this]() { return BatchDriver->GetEasingBatchButtonText(); })
+				.IsEnabled_Lambda([this]() { return BatchDriver->IsEasingBatchButtonEnabled(); })
+				.OnClicked_Lambda([this]() { BatchDriver->StartEasingBatch(); return FReply::Handled(); })
 			]
 #endif
 
@@ -402,31 +411,31 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 				.Text_Lambda([this]()
 				{
 #if TRANSITIONFX_DEV_TOOLS
-					if (bIsCapturing && bIsBatchCapturingEasing)
+					if (GifCapture->IsCapturing() && BatchDriver->IsEasingBatchActive())
 					{
 						return FText::Format(
 							LOCTEXT("EasingBatchCaptureProgress", "Easing {0}/{1} — Frame {2}/{3}"),
-							FText::AsNumber(BatchEasingIndex + 1),
-							FText::AsNumber(BatchEasingList.Num()),
-							FText::AsNumber(CaptureFrameIndex),
-							FText::AsNumber(TotalCaptureFrames));
+							FText::AsNumber(BatchDriver->GetEasingBatchIndex() + 1),
+							FText::AsNumber(BatchDriver->GetEasingBatchCount()),
+							FText::AsNumber(GifCapture->GetFrameIndex()),
+							FText::AsNumber(GifCapture->GetTotalFrames()));
 					}
-					if (bIsCapturing && bIsBatchCapturing)
+					if (GifCapture->IsCapturing() && BatchDriver->IsEffectBatchActive())
 					{
 						return FText::Format(
 							LOCTEXT("BatchCaptureProgress", "Batch {0}/{1} — Frame {2}/{3}"),
-							FText::AsNumber(BatchCaptureIndex + 1),
+							FText::AsNumber(BatchDriver->GetEffectBatchIndex() + 1),
 							FText::AsNumber(Effects.Num()),
-							FText::AsNumber(CaptureFrameIndex),
-							FText::AsNumber(TotalCaptureFrames));
+							FText::AsNumber(GifCapture->GetFrameIndex()),
+							FText::AsNumber(GifCapture->GetTotalFrames()));
 					}
 #endif
-					if (bIsCapturing)
+					if (GifCapture->IsCapturing())
 					{
 						return FText::Format(
 							LOCTEXT("CaptureProgress", "Capturing... {0}/{1}"),
-							FText::AsNumber(CaptureFrameIndex),
-							FText::AsNumber(TotalCaptureFrames));
+							FText::AsNumber(GifCapture->GetFrameIndex()),
+							FText::AsNumber(GifCapture->GetTotalFrames()));
 					}
 					return FText::GetEmpty();
 				})
@@ -444,6 +453,8 @@ void STransitionPreviewPanel::Construct(const FArguments& InArgs)
 	TickDelegateHandle = FTSTicker::GetCoreTicker().AddTicker(
 		FTickerDelegate::CreateSP(this, &STransitionPreviewPanel::OnTick));
 }
+
+STransitionPreviewPanel::STransitionPreviewPanel() = default;
 
 STransitionPreviewPanel::~STransitionPreviewPanel()
 {
@@ -512,9 +523,11 @@ void STransitionPreviewPanel::OnEffectSelected(TSharedPtr<FString> NewValue, ESe
 bool STransitionPreviewPanel::OnTick(float DeltaTime)
 {
 	// GIF capture mode — driven by fixed-step frame capture
-	if (bIsCapturing)
+	if (GifCapture->IsCapturing())
 	{
-		OnCaptureFrameTick();
+		GifCapture->Tick();
+		// Keep the progress slider tracking the capture
+		CurrentProgress = GifCapture->GetCurrentRawProgress();
 		return true;
 	}
 
@@ -744,570 +757,61 @@ FText STransitionPreviewPanel::GetLoopButtonText() const
 // GIF Capture
 // ─────────────────────────────────────────────
 
-void STransitionPreviewPanel::StartGifCapture()
+void STransitionPreviewPanel::StartGifCapture(TOptional<FString> SavePath)
 {
-	if (bIsCapturing || !PreviewViewport.IsValid() || Effects.Num() == 0)
+	if (GifCapture->IsCapturing() || !PreviewViewport.IsValid() || Effects.Num() == 0)
 	{
 		return;
-	}
-
-	// Calculate total frames: forward only (0 → 1) at CaptureFrameRate fps
-	TotalCaptureFrames = FMath::RoundToInt32(CaptureFrameRate * Duration);
-	if (TotalCaptureFrames < 2)
-	{
-		TotalCaptureFrames = 2;
 	}
 
 	// Stop normal playback and reset
 	bIsPlaying = false;
 	bIsReversing = false;
 	CurrentProgress = 0.0f;
-	PreviewViewport->SetProgress(0.0f);
 
-	// Initialize capture state
-	CapturedFrames.Reset();
-	CapturedFrames.Reserve(TotalCaptureFrames);
-	CaptureFrameIndex = 0;
-	CaptureStabilizeFrames = 2; // Wait extra ticks for viewport to stabilize before first capture
-	bCaptureWaitFrame = true; // Wait one frame for the viewport to render progress=0
-	bIsCapturing = true;
+	FTransitionPreviewGifCapture::FStartParams CaptureParams;
+	CaptureParams.Viewport = PreviewViewport;
+	CaptureParams.FrameRate = CaptureFrameRate;
+	CaptureParams.Duration = Duration;
+	CaptureParams.GifPlaySpeed = GifPlaySpeed;
+	CaptureParams.EasingEvaluator = [this](float RawProgress) { return GetEasedProgress(RawProgress); };
+
+	if (EffectNames.IsValidIndex(SelectedIndex))
+	{
+		CaptureParams.DialogDefaultFileName = *EffectNames[SelectedIndex];
+	}
+
+	// Batch captures pass an explicit destination and skip the per-file success toast.
+	if (SavePath.IsSet())
+	{
+		CaptureParams.SavePath = MoveTemp(SavePath);
+		CaptureParams.bShowSuccessNotification = false;
+	}
+
+	GifCapture->Start(CaptureParams);
 }
 
-void STransitionPreviewPanel::OnCaptureFrameTick()
+#if TRANSITIONFX_DEV_TOOLS
+void STransitionPreviewPanel::OnGifWriteFinished(bool bSucceeded)
 {
-	if (!PreviewViewport.IsValid())
-	{
-		bIsCapturing = false;
-		return;
-	}
-
-	// Wait for viewport to stabilize after capture start
-	if (CaptureStabilizeFrames > 0)
-	{
-		CaptureStabilizeFrames--;
-		return;
-	}
-
-	// Wait one frame after setting progress so the viewport can render
-	if (bCaptureWaitFrame)
-	{
-		bCaptureWaitFrame = false;
-		return;
-	}
-
-	// Capture the current frame
-	TArray<FColor> Pixels;
-	if (PreviewViewport->CaptureFrame(Pixels))
-	{
-		CapturedFrames.Add(MoveTemp(Pixels));
-	}
-	else
-	{
-		// Capture failed — abort
-		bIsCapturing = false;
-		CapturedFrames.Reset();
-
-		FNotificationInfo Info(LOCTEXT("CaptureFailedNotification", "GIF capture failed: could not read viewport pixels."));
-		Info.ExpireDuration = 4.0f;
-		FSlateNotificationManager::Get().AddNotification(Info);
-		return;
-	}
-
-	CaptureFrameIndex++;
-
-	if (CaptureFrameIndex >= TotalCaptureFrames)
-	{
-		// All frames captured — finalize
-		FinalizeGifCapture();
-		return;
-	}
-
-	// Set progress for the next frame
-	float Progress = static_cast<float>(CaptureFrameIndex) / static_cast<float>(TotalCaptureFrames - 1);
-	CurrentProgress = Progress;
-	PreviewViewport->SetProgress(GetEasedProgress(Progress));
-	bCaptureWaitFrame = true; // Wait for render
+	BatchDriver->HandleWriteFinished();
 }
-
-void STransitionPreviewPanel::FinalizeGifCapture()
-{
-	bIsCapturing = false;
-
-	if (CapturedFrames.Num() == 0)
-	{
-		return;
-	}
-
-	// Get actual render target dimensions (accounts for DPI scaling)
-	FIntPoint ActualSize = PreviewViewport->GetViewportSize();
-	int32 CaptureWidth = ActualSize.X;
-	int32 CaptureHeight = ActualSize.Y;
-	int32 FramePixelCount = CapturedFrames[0].Num();
-
-	if (CaptureWidth <= 0 || CaptureHeight <= 0 || CaptureWidth * CaptureHeight != FramePixelCount)
-	{
-		FNotificationInfo Info(FText::Format(
-			LOCTEXT("CaptureSizeMismatch", "GIF capture failed: dimension mismatch (viewport {0}x{1}, pixels {2})."),
-			FText::AsNumber(CaptureWidth),
-			FText::AsNumber(CaptureHeight),
-			FText::AsNumber(FramePixelCount)));
-		Info.ExpireDuration = 4.0f;
-		FSlateNotificationManager::Get().AddNotification(Info);
-		CapturedFrames.Reset();
-		return;
-	}
-
-	// Determine save path
-	FString SavePath;
-
-#if TRANSITIONFX_DEV_TOOLS
-	if (bIsBatchCapturingEasing)
-	{
-		// Easing batch mode: auto-save with easing-mapped filename
-		FString GifFilename = GetGifFilenameForEasing(SelectedEasing);
-		SavePath = BatchOutputDir / GifFilename;
-	}
-	else if (bIsBatchCapturing)
-	{
-		// Batch mode: auto-save with mapped filename
-		FString GifFilename = GetGifFilenameForEffect(Effects[SelectedIndex].DisplayName);
-		SavePath = BatchOutputDir / GifFilename;
-	}
-	else
 #endif
-	{
-		// Single mode: show save file dialog
-		IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
-		if (!DesktopPlatform)
-		{
-			CapturedFrames.Reset();
-			return;
-		}
-
-		FString DefaultName = TEXT("Transition");
-		if (EffectNames.IsValidIndex(SelectedIndex))
-		{
-			DefaultName = *EffectNames[SelectedIndex];
-		}
-
-		TArray<FString> OutFiles;
-		bool bSaved = DesktopPlatform->SaveFileDialog(
-			FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr),
-			TEXT("Save GIF"),
-			FPaths::ProjectSavedDir(),
-			DefaultName + TEXT(".gif"),
-			TEXT("GIF Files (*.gif)|*.gif"),
-			0,
-			OutFiles);
-
-		if (!bSaved || OutFiles.Num() == 0)
-		{
-			CapturedFrames.Reset();
-			return;
-		}
-
-		SavePath = OutFiles[0];
-		if (!SavePath.EndsWith(TEXT(".gif"), ESearchCase::IgnoreCase))
-		{
-			SavePath += TEXT(".gif");
-		}
-	}
-
-	// Encode GIF (delay in centiseconds: 100 / fps)
-	int32 FrameDelayCentiseconds = FMath::Max(1, FMath::RoundToInt32(100.0f / CaptureFrameRate / GifPlaySpeed));
-	FGifEncoder Encoder(CaptureWidth, CaptureHeight, FrameDelayCentiseconds);
-
-	for (const TArray<FColor>& Frame : CapturedFrames)
-	{
-		Encoder.AddFrame(Frame);
-	}
-
-	CapturedFrames.Reset();
-
-	if (Encoder.WriteToFile(SavePath))
-	{
-#if TRANSITIONFX_DEV_TOOLS
-		if (!bIsBatchCapturing && !bIsBatchCapturingEasing)
-#endif
-		{
-			FNotificationInfo Info(FText::Format(
-				LOCTEXT("CaptureSuccessNotification", "GIF saved: {0}"),
-				FText::FromString(FPaths::GetCleanFilename(SavePath))));
-			Info.ExpireDuration = 5.0f;
-			FSlateNotificationManager::Get().AddNotification(Info);
-		}
-	}
-	else
-	{
-		FNotificationInfo Info(FText::Format(
-			LOCTEXT("CaptureWriteFailedNotification2", "GIF capture failed: could not write {0}"),
-			FText::FromString(FPaths::GetCleanFilename(SavePath))));
-		Info.ExpireDuration = 4.0f;
-		FSlateNotificationManager::Get().AddNotification(Info);
-	}
-
-#if TRANSITIONFX_DEV_TOOLS
-	// Advance batch if in batch mode
-	if (bIsBatchCapturingEasing)
-	{
-		AdvanceBatchCaptureEasing();
-	}
-	else if (bIsBatchCapturing)
-	{
-		AdvanceBatchCapture();
-	}
-#endif
-}
 
 FText STransitionPreviewPanel::GetCaptureButtonText() const
 {
-	return bIsCapturing
+	return GifCapture->IsCapturing()
 		? LOCTEXT("CaptureButtonCapturing", "Capturing...")
 		: LOCTEXT("CaptureButtonIdle", "Capture GIF");
 }
 
 bool STransitionPreviewPanel::IsCaptureButtonEnabled() const
 {
-	return !bIsCapturing
+	return !GifCapture->IsCapturing()
 #if TRANSITIONFX_DEV_TOOLS
-		&& !bIsBatchCapturing && !bIsBatchCapturingEasing
+		&& !BatchDriver->IsAnyBatchActive()
 #endif
 		&& Effects.Num() > 0;
 }
-
-#if TRANSITIONFX_DEV_TOOLS
-
-// ─────────────────────────────────────────────
-// Batch GIF Capture
-// ─────────────────────────────────────────────
-
-FString STransitionPreviewPanel::GetGifFilenameForEffect(const FString& DisplayName)
-{
-	// Mapping from dropdown DisplayName to MISSING_IMAGES.md filenames
-	static const TMap<FString, FString> NameToFile = {
-		{ TEXT("Fade"),          TEXT("effect_fade.gif") },
-		{ TEXT("Iris"),          TEXT("effect_iris.gif") },
-		{ TEXT("Heart"),         TEXT("effect_heart_iris.gif") },
-		{ TEXT("FlowerIris"),    TEXT("effect_flower_iris.gif") },
-		{ TEXT("Diamond"),       TEXT("effect_diamond.gif") },
-		{ TEXT("Box"),           TEXT("effect_box.gif") },
-		{ TEXT("LinearWipe"),    TEXT("effect_linear_wipe.gif") },
-		{ TEXT("Split"),         TEXT("effect_split.gif") },
-		{ TEXT("WavyCurtain"),   TEXT("effect_wavy_curtain.gif") },
-		{ TEXT("RadialWipe"),    TEXT("effect_radial_wipe.gif") },
-		{ TEXT("Tiles"),         TEXT("effect_tiles.gif") },
-		{ TEXT("PolkaDots"),     TEXT("effect_polka_dots.gif") },
-		{ TEXT("Blinds"),        TEXT("effect_blinds.gif") },
-		{ TEXT("Spiral"),        TEXT("effect_spiral.gif") },
-		{ TEXT("RandomTiles"),   TEXT("effect_random_tiles.gif") },
-		{ TEXT("Wind"),          TEXT("effect_wind.gif") },
-		{ TEXT("CrossWipe"),     TEXT("effect_cross_wipe.gif") },
-		{ TEXT("ZoomWipe"),      TEXT("effect_zoom_wipe.gif") },
-		{ TEXT("TextureMask"),   TEXT("effect_texture_mask.gif") },
-		{ TEXT("TVSwitchOff"),   TEXT("effect_tv_switch_off.gif") },
-		{ TEXT("Hexagon"),       TEXT("effect_hexagon.gif") },
-		{ TEXT("Checkerboard"),  TEXT("effect_checkerboard.gif") },
-		{ TEXT("Triangle"),      TEXT("effect_triangle.gif") },
-		{ TEXT("Pixelate"),      TEXT("effect_pixelate.gif") },
-	};
-
-	const FString* Found = NameToFile.Find(DisplayName);
-	if (Found)
-	{
-		return *Found;
-	}
-
-	// Fallback: convert PascalCase to snake_case
-	FString Result;
-	Result.Reserve(7 + DisplayName.Len() * 2 + 4); // "effect_" + worst-case snake_case + ".gif"
-	Result += TEXT("effect_");
-	for (int32 i = 0; i < DisplayName.Len(); ++i)
-	{
-		TCHAR Ch = DisplayName[i];
-		if (FChar::IsUpper(Ch) && i > 0)
-		{
-			Result += TEXT("_");
-		}
-		Result += FChar::ToLower(Ch);
-	}
-	Result += TEXT(".gif");
-	return Result;
-}
-
-void STransitionPreviewPanel::StartBatchCapture()
-{
-	if (bIsCapturing || bIsBatchCapturing || bIsBatchCapturingEasing || Effects.Num() == 0)
-	{
-		return;
-	}
-
-	// Ask user for output directory
-	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
-	if (!DesktopPlatform)
-	{
-		return;
-	}
-
-	// Default to docs/images/ under project root
-	FString DefaultDir = FPaths::ProjectDir() / TEXT("docs") / TEXT("images");
-	FString ChosenDir;
-	bool bChosen = DesktopPlatform->OpenDirectoryDialog(
-		FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr),
-		TEXT("Select Batch GIF Output Folder"),
-		DefaultDir,
-		ChosenDir);
-
-	if (!bChosen)
-	{
-		return;
-	}
-
-	// Ensure directory exists
-	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	PlatformFile.CreateDirectoryTree(*ChosenDir);
-
-	BatchOutputDir = ChosenDir;
-	BatchCaptureIndex = 0;
-	bIsBatchCapturing = true;
-
-	FNotificationInfo Info(FText::Format(
-		LOCTEXT("BatchCaptureStartNotification", "Batch capture started: {0} effects"),
-		FText::AsNumber(Effects.Num())));
-	Info.ExpireDuration = 3.0f;
-	FSlateNotificationManager::Get().AddNotification(Info);
-
-	// Select the first effect and start capturing
-	SelectedIndex = BatchCaptureIndex;
-	OnEffectSelected(EffectNames[SelectedIndex], ESelectInfo::Direct);
-	StartGifCapture();
-}
-
-void STransitionPreviewPanel::AdvanceBatchCapture()
-{
-	BatchCaptureIndex++;
-
-	if (BatchCaptureIndex >= Effects.Num())
-	{
-		// Batch complete
-		bIsBatchCapturing = false;
-
-		FNotificationInfo Info(FText::Format(
-			LOCTEXT("BatchCaptureCompleteNotification", "Batch capture complete! {0} GIFs saved to {1}"),
-			FText::AsNumber(Effects.Num()),
-			FText::FromString(BatchOutputDir)));
-		Info.ExpireDuration = 8.0f;
-		FSlateNotificationManager::Get().AddNotification(Info);
-		return;
-	}
-
-	// Select next effect and start capture
-	SelectedIndex = BatchCaptureIndex;
-	OnEffectSelected(EffectNames[SelectedIndex], ESelectInfo::Direct);
-	StartGifCapture();
-}
-
-FText STransitionPreviewPanel::GetBatchCaptureButtonText() const
-{
-	if (bIsBatchCapturing)
-	{
-		return FText::Format(
-			LOCTEXT("BatchCapturing", "Batch... ({0}/{1})"),
-			FText::AsNumber(BatchCaptureIndex + 1),
-			FText::AsNumber(Effects.Num()));
-	}
-	return LOCTEXT("BatchCaptureButton", "Batch Capture All");
-}
-
-bool STransitionPreviewPanel::IsBatchCaptureButtonEnabled() const
-{
-	return !bIsCapturing && !bIsBatchCapturing && !bIsBatchCapturingEasing && Effects.Num() > 0;
-}
-
-// ─────────────────────────────────────────────
-// Batch Easing GIF Capture
-// ─────────────────────────────────────────────
-
-FString STransitionPreviewPanel::GetGifFilenameForEasing(ETransitionEasing Easing)
-{
-	static const TMap<ETransitionEasing, FString> EasingToFile = {
-		{ ETransitionEasing::Linear,          TEXT("easing_linear.gif") },
-		{ ETransitionEasing::EaseInSine,      TEXT("easing_ease_in_sine.gif") },
-		{ ETransitionEasing::EaseOutSine,     TEXT("easing_ease_out_sine.gif") },
-		{ ETransitionEasing::EaseInOutSine,   TEXT("easing_ease_in_out_sine.gif") },
-		{ ETransitionEasing::EaseInCubic,     TEXT("easing_ease_in_cubic.gif") },
-		{ ETransitionEasing::EaseOutCubic,    TEXT("easing_ease_out_cubic.gif") },
-		{ ETransitionEasing::EaseInOutCubic,  TEXT("easing_ease_in_out_cubic.gif") },
-		{ ETransitionEasing::EaseInExpo,      TEXT("easing_ease_in_expo.gif") },
-		{ ETransitionEasing::EaseOutExpo,     TEXT("easing_ease_out_expo.gif") },
-		{ ETransitionEasing::EaseInOutExpo,   TEXT("easing_ease_in_out_expo.gif") },
-		{ ETransitionEasing::EaseOutElastic,  TEXT("easing_ease_out_elastic.gif") },
-		{ ETransitionEasing::EaseOutBounce,   TEXT("easing_ease_out_bounce.gif") },
-	};
-
-	const FString* Found = EasingToFile.Find(Easing);
-	if (Found)
-	{
-		return *Found;
-	}
-
-	// Fallback: convert enum display name to snake_case
-	const UEnum* EnumPtr = StaticEnum<ETransitionEasing>();
-	FString DisplayName = EnumPtr ? EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(Easing)).ToString() : TEXT("unknown");
-	FString Result;
-	Result.Reserve(7 + DisplayName.Len() * 2 + 4); // "easing_" + worst-case snake_case + ".gif"
-	Result += TEXT("easing_");
-	for (int32 i = 0; i < DisplayName.Len(); ++i)
-	{
-		TCHAR Ch = DisplayName[i];
-		if (FChar::IsUpper(Ch) && i > 0)
-		{
-			Result += TEXT("_");
-		}
-		Result += FChar::ToLower(Ch);
-	}
-	Result += TEXT(".gif");
-	return Result;
-}
-
-void STransitionPreviewPanel::StartBatchCaptureEasing()
-{
-	if (bIsCapturing || bIsBatchCapturing || bIsBatchCapturingEasing || Effects.Num() == 0)
-	{
-		return;
-	}
-
-	// Ask user for output directory
-	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
-	if (!DesktopPlatform)
-	{
-		return;
-	}
-
-	FString DefaultDir = FPaths::ProjectDir() / TEXT("docs") / TEXT("images");
-	FString ChosenDir;
-	bool bChosen = DesktopPlatform->OpenDirectoryDialog(
-		FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr),
-		TEXT("Select Easing GIF Output Folder"),
-		DefaultDir,
-		ChosenDir);
-
-	if (!bChosen)
-	{
-		return;
-	}
-
-	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	PlatformFile.CreateDirectoryTree(*ChosenDir);
-
-	// Build list of easing types (skip Custom)
-	BatchEasingList.Reset();
-	const UEnum* EnumPtr = StaticEnum<ETransitionEasing>();
-	if (EnumPtr)
-	{
-		for (int32 i = 0; i < EnumPtr->NumEnums() - 1; ++i)
-		{
-			ETransitionEasing Value = static_cast<ETransitionEasing>(EnumPtr->GetValueByIndex(i));
-			if (Value == ETransitionEasing::Custom)
-			{
-				continue;
-			}
-			BatchEasingList.Add(Value);
-		}
-	}
-
-	if (BatchEasingList.Num() == 0)
-	{
-		return;
-	}
-
-	// Find the Iris effect
-	int32 IrisIndex = INDEX_NONE;
-	for (int32 i = 0; i < Effects.Num(); ++i)
-	{
-		if (Effects[i].DisplayName == TEXT("Iris"))
-		{
-			IrisIndex = i;
-			break;
-		}
-	}
-
-	if (IrisIndex == INDEX_NONE)
-	{
-		FNotificationInfo Info(LOCTEXT("EasingBatchNoIris", "Easing batch capture failed: Iris effect not found."));
-		Info.ExpireDuration = 4.0f;
-		FSlateNotificationManager::Get().AddNotification(Info);
-		return;
-	}
-
-	// Save current user selection
-	SavedEffectIndex = SelectedIndex;
-	SavedEasing = SelectedEasing;
-
-	// Select Iris effect
-	SelectedIndex = IrisIndex;
-	OnEffectSelected(EffectNames[IrisIndex], ESelectInfo::Direct);
-
-	// Start easing batch
-	BatchOutputDir = ChosenDir;
-	BatchEasingIndex = 0;
-	bIsBatchCapturingEasing = true;
-	SelectedEasing = BatchEasingList[0];
-
-	FNotificationInfo Info(FText::Format(
-		LOCTEXT("EasingBatchStartNotification", "Easing batch capture started: {0} easing curves"),
-		FText::AsNumber(BatchEasingList.Num())));
-	Info.ExpireDuration = 3.0f;
-	FSlateNotificationManager::Get().AddNotification(Info);
-
-	StartGifCapture();
-}
-
-void STransitionPreviewPanel::AdvanceBatchCaptureEasing()
-{
-	BatchEasingIndex++;
-
-	if (BatchEasingIndex >= BatchEasingList.Num())
-	{
-		// Batch complete — restore user's previous selection
-		bIsBatchCapturingEasing = false;
-		SelectedEasing = SavedEasing;
-		SelectedIndex = SavedEffectIndex;
-		if (EffectNames.IsValidIndex(SavedEffectIndex))
-		{
-			OnEffectSelected(EffectNames[SavedEffectIndex], ESelectInfo::Direct);
-		}
-
-		FNotificationInfo Info(FText::Format(
-			LOCTEXT("EasingBatchCompleteNotification", "Easing batch complete! {0} GIFs saved to {1}"),
-			FText::AsNumber(BatchEasingList.Num()),
-			FText::FromString(BatchOutputDir)));
-		Info.ExpireDuration = 8.0f;
-		FSlateNotificationManager::Get().AddNotification(Info);
-		return;
-	}
-
-	// Set next easing and start capture
-	SelectedEasing = BatchEasingList[BatchEasingIndex];
-	StartGifCapture();
-}
-
-FText STransitionPreviewPanel::GetBatchCaptureEasingButtonText() const
-{
-	if (bIsBatchCapturingEasing)
-	{
-		return FText::Format(
-			LOCTEXT("EasingBatchCapturing", "Easing... ({0}/{1})"),
-			FText::AsNumber(BatchEasingIndex + 1),
-			FText::AsNumber(BatchEasingList.Num()));
-	}
-	return LOCTEXT("BatchCaptureEasingButton", "Batch Capture Easing");
-}
-
-bool STransitionPreviewPanel::IsBatchCaptureEasingButtonEnabled() const
-{
-	return !bIsCapturing && !bIsBatchCapturing && !bIsBatchCapturingEasing && Effects.Num() > 0;
-}
-
-#endif // TRANSITIONFX_DEV_TOOLS
 
 #undef LOCTEXT_NAMESPACE

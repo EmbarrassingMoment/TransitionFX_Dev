@@ -97,7 +97,9 @@ Plugins/TransitionFX/
 ├── Source/TransitionFXEditor/
 │   ├── Public/TransitionPreviewPanel.h    ← editor preview UI
 │   └── Private/
-│       ├── STransitionPreviewPanel.cpp    ← preview panel (800+ LOC)
+│       ├── STransitionPreviewPanel.cpp    ← preview panel UI + playback
+│       ├── TransitionPreviewGifCapture.cpp ← single-GIF capture engine (frames/encode/save)
+│       ├── TransitionPreviewBatchCaptureDriver.cpp ← dev-tools batch GIF workflows (TRANSITIONFX_DEV_TOOLS)
 │       └── GifEncoder.cpp                ← GIF89a encoder for docs
 └── Content/
     ├── Data/          ← 26 DA_*.uasset transition presets
