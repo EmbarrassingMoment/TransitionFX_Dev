@@ -9,6 +9,7 @@
 
 class STransitionPreviewViewport;
 class FTransitionPreviewGifCapture;
+class FTransitionPreviewBatchCaptureDriver;
 
 /** Entry in the effect dropdown list. */
 struct FEffectEntry
@@ -67,28 +68,15 @@ private:
 	// Resolution
 	void OnResolutionSelected(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo);
 
-	// GIF capture (frame grabbing / encoding / saving lives in FTransitionPreviewGifCapture)
-	void StartGifCapture();
+	// GIF capture (frame grabbing / encoding / saving lives in FTransitionPreviewGifCapture).
+	// An explicit SavePath (batch mode) saves without a dialog and suppresses the success toast.
+	void StartGifCapture(TOptional<FString> SavePath = TOptional<FString>());
 	FText GetCaptureButtonText() const;
 	bool IsCaptureButtonEnabled() const;
 
 #if TRANSITIONFX_DEV_TOOLS
-	/** Bound to the capture engine's OnWriteFinished; advances whichever batch is running. */
+	/** Bound to the capture engine's OnWriteFinished; forwards to the batch driver. */
 	void OnGifWriteFinished(bool bSucceeded);
-
-	// Batch GIF capture (captures all effects with filenames from MISSING_IMAGES.md)
-	static FString GetGifFilenameForEffect(const FString& DisplayName);
-	void StartBatchCapture();
-	void AdvanceBatchCapture();
-	FText GetBatchCaptureButtonText() const;
-	bool IsBatchCaptureButtonEnabled() const;
-
-	// Batch easing GIF capture (captures Iris effect with all easing types)
-	static FString GetGifFilenameForEasing(ETransitionEasing Easing);
-	void StartBatchCaptureEasing();
-	void AdvanceBatchCaptureEasing();
-	FText GetBatchCaptureEasingButtonText() const;
-	bool IsBatchCaptureEasingButtonEnabled() const;
 #endif
 
 	// UI helpers
@@ -129,17 +117,8 @@ private:
 	float GifPlaySpeed;
 
 #if TRANSITIONFX_DEV_TOOLS
-	// Batch capture state
-	bool bIsBatchCapturing;
-	int32 BatchCaptureIndex;
-	FString BatchOutputDir;
-
-	// Easing batch capture state
-	bool bIsBatchCapturingEasing;
-	int32 BatchEasingIndex;
-	TArray<ETransitionEasing> BatchEasingList;
-	int32 SavedEffectIndex;
-	ETransitionEasing SavedEasing;
+	// Batch capture driver (owns all batch state; steers this panel via callbacks)
+	TUniquePtr<FTransitionPreviewBatchCaptureDriver> BatchDriver;
 #endif
 
 	// Tick delegate
