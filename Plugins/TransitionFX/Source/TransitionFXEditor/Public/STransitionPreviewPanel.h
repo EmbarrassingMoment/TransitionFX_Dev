@@ -8,6 +8,7 @@
 #include "TransitionFXTypes.h"
 
 class STransitionPreviewViewport;
+class FTransitionPreviewGifCapture;
 
 /** Entry in the effect dropdown list. */
 struct FEffectEntry
@@ -27,6 +28,10 @@ public:
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
+
+	// Defined in the .cpp (not defaulted inline) so the TUniquePtr members'
+	// deleters instantiate where FTransitionPreviewGifCapture is complete.
+	STransitionPreviewPanel();
 	virtual ~STransitionPreviewPanel() override;
 
 private:
@@ -62,14 +67,15 @@ private:
 	// Resolution
 	void OnResolutionSelected(TSharedPtr<FString> NewValue, ESelectInfo::Type SelectInfo);
 
-	// GIF capture
+	// GIF capture (frame grabbing / encoding / saving lives in FTransitionPreviewGifCapture)
 	void StartGifCapture();
-	void OnCaptureFrameTick();
-	void FinalizeGifCapture();
 	FText GetCaptureButtonText() const;
 	bool IsCaptureButtonEnabled() const;
 
 #if TRANSITIONFX_DEV_TOOLS
+	/** Bound to the capture engine's OnWriteFinished; advances whichever batch is running. */
+	void OnGifWriteFinished(bool bSucceeded);
+
 	// Batch GIF capture (captures all effects with filenames from MISSING_IMAGES.md)
 	static FString GetGifFilenameForEffect(const FString& DisplayName);
 	void StartBatchCapture();
@@ -117,14 +123,9 @@ private:
 	float ViewportWidth;
 	float ViewportHeight;
 
-	// GIF capture state
-	bool bIsCapturing;
-	bool bCaptureWaitFrame;
-	int32 CaptureFrameIndex;
-	int32 TotalCaptureFrames;
+	// GIF capture engine (owns all per-run capture state)
+	TUniquePtr<FTransitionPreviewGifCapture> GifCapture;
 	int32 CaptureFrameRate;
-	int32 CaptureStabilizeFrames;
-	TArray<TArray<FColor>> CapturedFrames;
 	float GifPlaySpeed;
 
 #if TRANSITIONFX_DEV_TOOLS
