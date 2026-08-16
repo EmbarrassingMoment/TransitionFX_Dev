@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Project Settings page (`UTransitionFXSettings`)** — New developer settings class exposing plugin configuration under **Project Settings > Plugins > TransitionFX** (saved to `DefaultGame.ini`). This page is the future home for additional plugin-wide options.
 - **Configurable effect pool size** — The per-effect-class pool cap (previously hardcoded at 3) is now exposed as `MaxPoolSizePerEffectClass` in the settings page. Set to 0 to disable pooling entirely.
 
+### Changed
+
+- Sample project build settings updated for Unreal Engine 5.8. `TransitionFX_Dev.Target.cs` and `TransitionFX_DevEditor.Target.cs` now use `DefaultBuildSettings = BuildSettingsVersion.V7` and `IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_8`, clearing UBT's backward-compatibility `[Upgrade]` notices. The new defaults (strict MSVC inline conformance, `Precise` floating-point semantics for Editor targets, and undefined-identifier / return-type / dangling-reference / unreachable-code diagnostics promoted to errors) are accepted without overrides — both plugin modules rebuild warning-free under them. Note that these UBT values require Unreal Engine 5.7 or newer; the `TransitionFX` plugin itself is unaffected and still targets 5.5+.
+
 ## [1.3.0] - 2026-07-19
 
 ### Added
