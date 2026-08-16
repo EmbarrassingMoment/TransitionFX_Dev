@@ -36,6 +36,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSequenceStepChanged, int32, StepI
 class APlayerController;
 class UAudioComponent;
 class UTransitionSequence;
+class UTransitionSequencePlayer;
 
 /** Pool for transition effects. */
 USTRUCT()
@@ -167,7 +168,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void ClearProgressThresholds();
 
-	// --- Sequence API (Phase 1 implementation — moves to UTransitionSequencePlayer in future refactor) ---
+	// --- Sequence API (playback logic lives in UTransitionSequencePlayer) ---
 
 	/** Starts playing a transition sequence. Stops any currently playing sequence or transition. */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX|Sequence")
@@ -309,38 +310,14 @@ private:
 	/** Callback fired after a new level is loaded. Triggers the auto-reverse fade-in if configured. */
 	void OnPostLoadMapWithWorld(UWorld* LoadedWorld);
 
-	// --- Sequence State (Phase 1 implementation — TODO: extract into UTransitionSequencePlayer in Phase 2) ---
-
-	/** The currently playing sequence, or null when no sequence is active. */
-	UPROPERTY(Transient)
-	TObjectPtr<UTransitionSequence> CurrentSequence = nullptr;
-
-	/** Index of the entry currently playing, or -1 when no sequence is active. */
-	int32 CurrentSequenceStep = -1;
-
-	/** Number of completed loop iterations (0 == on the first pass). */
-	int32 CurrentLoopIteration = 0;
-
-	/** True while a sequence is in progress. */
-	bool bIsSequencePlaying = false;
+	// --- Sequence State ---
 
 	/**
-	 * Scope-limited flag set by StartSequenceStep while dispatching the per-entry
-	 * StartTransition call. Lets StartTransition distinguish internal sequence-driven
-	 * calls from external callers that should interrupt the sequence.
+	 * Lazily created playback engine for transition sequences. Owns all sequence
+	 * state (current sequence, step index, loop iteration, delay timer) and drives
+	 * StartTransition per entry. This subsystem remains the Blueprint-facing API
+	 * and forwards PlaySequence / StopSequence calls to it.
 	 */
-	bool bIsDispatchingSequenceStep = false;
-
-	/** Timer handle for DelayAfter between entries. */
-	FTimerHandle SequenceDelayTimerHandle;
-
-	/** Begins the entry at StepIndex, or finishes/loops the sequence if out of range. Moves to UTransitionSequencePlayer in future refactor. */
-	void StartSequenceStep(int32 StepIndex);
-
-	/** Bound one-shot to OnTransitionCompleted for each entry. Advances to the next step (with optional DelayAfter). Moves to UTransitionSequencePlayer in future refactor. */
-	UFUNCTION()
-	void OnSequenceStepFinished();
-
-	/** Resets sequence state and broadcasts OnSequenceCompleted. Does not stop the final transition (assumed already finished). Moves to UTransitionSequencePlayer in future refactor. */
-	void FinishSequence();
+	UPROPERTY(Transient)
+	TObjectPtr<UTransitionSequencePlayer> SequencePlayer;
 };
