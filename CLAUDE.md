@@ -53,7 +53,7 @@ Material parameter "Progress" [0.0→1.0] drives SDF shader on screen
 | `UTransitionBlueprintLibrary` | `Public/TransitionBlueprintLibrary.h` | Blueprint-callable latent actions and helper nodes |
 | `UTransitionSequence` | `Public/TransitionSequence.h` | Data Asset for chaining multiple transitions; each `FTransitionSequenceEntry` holds preset, mode, duration override, delay |
 | `UTransitionSequencePlayer` | `Public/TransitionSequencePlayer.h` | Internal sequence playback engine owned by the subsystem; owns step/loop/delay state and drives `StartTransition` per entry |
-| `UTransitionFXConfig` | `Public/TransitionFXConfig.h` | Compile-time constants: material parameter names (`Progress`, `Invert`, `TransitionColor`), default asset path |
+| `UTransitionFXConfig` | `Public/TransitionFXConfig.h` | Compile-time constants: material parameter names (`Progress`, `Invert`, `FadeColor`), default asset path |
 | `UTransitionFXSettings` | `Public/TransitionFXSettings.h` | `UDeveloperSettings`-based project settings (Project Settings > Plugins > TransitionFX): effect pool cap |
 
 ### Effect Pool
