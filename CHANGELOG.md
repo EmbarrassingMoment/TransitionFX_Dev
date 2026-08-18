@@ -20,6 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Sequence playback extracted into `UTransitionSequencePlayer`** — The Phase 2 refactor planned since v1.2.0: sequence step/loop/delay logic moved out of `UTransitionManagerSubsystem` into a dedicated internal `UTransitionSequencePlayer` object (created lazily on first `PlaySequence` call). No public API change — `PlaySequence`, `StopSequence`, `IsSequencePlaying`, `GetCurrentSequenceStep`, and the sequence delegates remain on the subsystem and behave identically.
 - Sample project build settings updated for Unreal Engine 5.8. `TransitionFX_Dev.Target.cs` and `TransitionFX_DevEditor.Target.cs` now use `DefaultBuildSettings = BuildSettingsVersion.V7` and `IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_8`, clearing UBT's backward-compatibility `[Upgrade]` notices. The new defaults (strict MSVC inline conformance, `Precise` floating-point semantics for Editor targets, and undefined-identifier / return-type / dangling-reference / unreachable-code diagnostics promoted to errors) are accepted without overrides — both plugin modules rebuild warning-free under them. Note that these UBT values require Unreal Engine 5.7 or newer; the `TransitionFX` plugin itself is unaffected and still targets 5.5+. The sample project's `EngineAssociation` is now `5.8` accordingly, so project file generation and builds resolve to a UE 5.8 install (older engines' UBT cannot parse the V7 target settings).
 
+### Fixed
+
+- Fixed a misspelled scalar parameter on `M_Transition_Pixelate`: `MaxResoluution` is now `MaxResolution`. The shipped `MI_Transition_Pixelate` instance and `DA_Pixelate` preset never overrode this parameter, so the built-in effect is unaffected. If your project overrides it by name — in a custom material instance or via `FTransitionParameters` — update the name to `MaxResolution`.
+
 ## [1.3.0] - 2026-07-19
 
 ### Added
