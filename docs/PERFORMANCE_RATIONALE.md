@@ -7,7 +7,7 @@ The functions `UTransitionBlueprintLibrary::QuickFadeToBlack` and `QuickFadeFrom
 
 ## Optimization
 The optimization involves:
-1.  **Preloading:** Moving the asset loading to `UTransitionManagerSubsystem::Initialize`. This ensures the assets (`DA_FadeToBlack` and `M_Transition_Master`) are loaded when the GameInstance starts, which is part of the loading phase, not gameplay.
+1.  **Preloading:** Moving the asset loading to `UTransitionManagerSubsystem::Initialize`. This ensures the assets (`DA_FadeToBlack` and the material it references) are loaded when the GameInstance starts, which is part of the loading phase, not gameplay.
 2.  **Caching:** Storing the loaded assets in `UPROPERTY(Transient)` pointers within the Subsystem. This prevents them from being garbage collected.
 3.  **Fast Access:** Replacing the `LoadObject` call with a simple pointer access (O(1)) via the Subsystem.
 

@@ -101,11 +101,12 @@ Use the `Override Params` pin on `Play Transition And Wait` (or `StartTransition
 | All | `FadeColor` | Vector (LinearColor) | Transition color (default: black) |
 | Linear Wipe | `Angle` | Scalar (float) | Wipe angle in degrees |
 | Split | `Angle` | Scalar (float) | Split direction angle |
-| Tiles / Polka Dots / Blinds / Checkerboard | `TileCount` | Scalar (float) | Number of tiles / dots / stripes |
+| Tiles / Polka Dots / Checkerboard / Random Tiles | `GridSize` | Scalar (float) | Number of grid cells / dots |
+| Blinds | `SplitCount` | Scalar (float) | Number of stripes |
 | Spiral | `Spin` | Scalar (float) | Rotation intensity |
-| Flower Iris | `PetalCount` | Scalar (float) | Number of petals |
-| Random Tiles | `Seed` | Scalar (float) | Random seed value |
-| Wavy Curtain | `WaveFrequency` | Scalar (float) | Wave frequency |
+| Flower Iris | `Points` | Scalar (float) | Number of petals |
+| Random Tiles | `RandomDelay` | Scalar (float) | Random per-tile delay amount |
+| Wavy Curtain | `Frequency` | Scalar (float) | Wave frequency |
 | Texture Mask | `MaskTexture` | Texture | Custom grayscale mask |
 
 > **Note:** Parameter names depend on the material implementation. Open the master material in the Material Editor to see the exact parameter names available.

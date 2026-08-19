@@ -101,11 +101,12 @@ Latent Action は UE の Blueprint 機能で、非同期操作が完了するま
 | 全エフェクト共通 | `FadeColor` | Vector (LinearColor) | トランジションカラー（デフォルト: 黒） |
 | Linear Wipe | `Angle` | Scalar (float) | ワイプの角度 |
 | Split | `Angle` | Scalar (float) | 分割方向の角度 |
-| Tiles / Polka Dots / Blinds / Checkerboard | `TileCount` | Scalar (float) | タイル数 / ドット数 / ストライプ数 |
+| Tiles / Polka Dots / Checkerboard / Random Tiles | `GridSize` | Scalar (float) | グリッドの分割数 / ドット数 |
+| Blinds | `SplitCount` | Scalar (float) | ストライプ数 |
 | Spiral | `Spin` | Scalar (float) | 回転の強さ |
-| Flower Iris | `PetalCount` | Scalar (float) | 花びらの数 |
-| Random Tiles | `Seed` | Scalar (float) | ランダムシード値 |
-| Wavy Curtain | `WaveFrequency` | Scalar (float) | 波の周波数 |
+| Flower Iris | `Points` | Scalar (float) | 花びらの数 |
+| Random Tiles | `RandomDelay` | Scalar (float) | タイルごとのランダム遅延量 |
+| Wavy Curtain | `Frequency` | Scalar (float) | 波の周波数 |
 | Texture Mask | `MaskTexture` | Texture | カスタムグレースケールマスク |
 
 > **Note:** パラメータ名はマテリアルの実装に依存します。正確なパラメータ名はマスターマテリアルをマテリアルエディタで開いて確認してください。
