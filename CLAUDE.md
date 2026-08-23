@@ -14,7 +14,7 @@ This is an Unreal Engine 5.5 plugin project. There are no CLI build scripts — 
 **Requirements:** Visual Studio 2022 (C++ Game Development workload), UE 5.5+, Windows with DX12/SM6 GPU.
 
 **Testing:** No automated test suite. Test manually using:
-- The `L_ShowCase` level (showcases 27 of the 28 transition effects; `DA_LinearWipe` is currently not referenced by the level)
+- The `L_ShowCase` level (showcases 27 of the 29 transition effects; `DA_LinearWipe` and `DA_StripeCascade` are currently not referenced by the level)
 - The in-editor **Transition Preview Panel** (real-time playback with easing/duration controls)
 
 ## Architecture
@@ -102,9 +102,9 @@ Plugins/TransitionFX/
 │       ├── TransitionPreviewBatchCaptureDriver.cpp ← dev-tools batch GIF workflows (TRANSITIONFX_DEV_TOOLS)
 │       └── GifEncoder.cpp                ← GIF89a encoder for docs
 └── Content/
-    ├── Data/          ← 29 DA_*.uasset presets (28 effects + DA_FadeToBlack) + Sequence/ sample
+    ├── Data/          ← 30 DA_*.uasset presets (29 effects + DA_FadeToBlack) + Sequence/ sample
     ├── Materials/     ← M_Transition_*.uasset master materials + instances
-    └── MaterialFunctions/  ← 9 reusable SDF helper functions
+    └── MaterialFunctions/  ← 10 reusable SDF helper functions
 ```
 
 ## Conventions

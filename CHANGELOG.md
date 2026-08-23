@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+**Built-in Effects (+1, total 29)**
+- **Stripe Cascade** — The screen is divided into stripes that wipe closed one after another with a staggered delay, cascading across the screen. Stripe count, direction (4-way), stagger delay, and edge softness are adjustable (`SplitCount`, `Direction`, `StripeDelay`, `Smoothness`). Adds the `DA_StripeCascade` preset, `M_Transition_StripeCascade` master material, `MI_Transition_StripeCascade` instance, the `MF_StripePos` material function, and README (EN/JA) Built-in Effects table entries.
+
 - **Project Settings page (`UTransitionFXSettings`)** — New developer settings class exposing plugin configuration under **Project Settings > Plugins > TransitionFX** (saved to `DefaultGame.ini`). This page is the future home for additional plugin-wide options.
 - **Configurable effect pool size** — The per-effect-class pool cap (previously hardcoded at 3) is now exposed as `MaxPoolSizePerEffectClass` in the settings page. Set to 0 to disable pooling entirely.
 

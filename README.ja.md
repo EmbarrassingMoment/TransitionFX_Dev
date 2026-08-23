@@ -208,6 +208,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | **Polka Dots** | 拡大する円（ハーフトーンパターン）の波が画面を覆います。ポップでモダンな外観。 | ![Polka Dots](docs/images/effect_polka_dots.gif) |
 | **Blinds** | スタイリッシュなストライプ/ベネチアンブラインド効果。ストライプが拡大・結合して画面を覆います。 | ![Blinds](docs/images/effect_blinds.gif) |
 | **Slice** | 画面が短冊（ストリップ）状に分割され、交互に反対方向へスライドしながら画面外へ抜けていくトランジション。分割数、方向、エッジの柔らかさ、タイミングのずれを調整可能。 | ![Slice](docs/images/effect_slice.gif) |
+| **Stripe Cascade** | 画面がストライプ状に分割され、1本ずつ遅延を伴って順番にワイプが流れていくトランジション。分割数、方向（4方向）、ストライプ間の遅延、エッジの柔らかさを調整可能。 | — |
 | **Spiral** | 中央に渦巻く催眠的なスパイラル効果。回転スピンと開始角度を調整可能。 | ![Spiral](docs/images/effect_spiral.gif) |
 | **Random Tiles** | プロシージャルノイズを使用して、グリッドタイルがランダムな順序で現れる確率的なトランジション。 | ![Random Tiles](docs/images/effect_random_tiles.gif) |
 | **Dissolve** | プロシージャルノイズを使用し、画面が霧や砂のように溶けていく王道のトランジション。最小限のマージン設定によりリニアなアニメーションを実現。 | ![Dissolve](docs/images/effect_dissolve.gif) |
