@@ -65,7 +65,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 ## サンプルプロジェクト
 
-全22種以上のトランジションエフェクトを確認できるサンプルプロジェクトを [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から入手できます。
+全28種のトランジションエフェクトを確認できるサンプルプロジェクトを [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から入手できます。
 
 **動作環境:** Unreal Engine 5.5、Windows、DX12 SM6、Visual Studio 2022（C++ によるゲーム開発ワークロード）
 
@@ -101,7 +101,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 <!-- IMAGE: quickstart_create_data_asset.png - Content Browser で Data Asset を作成する手順のスクリーンショット -->
 
 *   **Effect Class:** `PostProcessTransitionEffect`を選択します。
-*   **Transition Material:** `M_Transition_Master`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。
+*   **Transition Material:** `M_Transition_Fade`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。
 *   **Default Duration:** 秒単位で時間を設定します（例：`1.0`）。
 *   **Progress Curve:** (任意) トランジションのイージングを制御するためのフロートカーブを設定します。
 *   **bAutoBlockInput:** トランジション中のプレイヤー入力を自動的に無効にするには `True` に設定します。
@@ -195,7 +195,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | **Iris** | 中央に向かって閉じるクラシックな円形ワイプ。アスペクト比補正済み。 | ![Iris](docs/images/effect_iris.gif) |
 | **Flower Iris** | 丸い花びらを持つ花形のアイリスワイプ。花びらの数や形状（鋭さ）を調整可能。 | ![Flower Iris](docs/images/effect_flower_iris.gif) |
 | **Diamond** | 中央に向かって閉じるダイヤモンド型のワイプ。レトロなスタイル。 | ![Diamond](docs/images/effect_diamond.gif) |
-| **Diamond Band Wipe** | 画面中央からひし形の帯（バンド）が拡大しながら割れ、元のシーンをスタイリッシュに表示するユニークなトランジション。 | ![Diamond Band](effect_diamondband.gif) |
+| **Diamond Band Wipe** | 画面中央からひし形の帯（バンド）が拡大しながら割れ、元のシーンをスタイリッシュに表示するユニークなトランジション。 | ![Diamond Band](docs/images/effect_diamond_wipe.gif) |
 | **Box** | 中央から拡大するシンプルな正方形。基本的な幾何学的トランジション。 | ![Box](docs/images/effect_box.gif) |
 | **Linear Wipe** | 方向性のあるワイプ（角度調整可能）。画面の端から端まで正確に覆います。 | ![Linear Wipe](docs/images/effect_linear_wipe.gif) |
 | **Sliding Doors** | エレベーターやエアロックのドアのように、2枚のパネルが左右からスライドして中央で合流するワイプ。 | ![Sliding Doors](docs/images/effect_slidingdoor.gif) |
@@ -210,7 +210,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | **Slice** | 画面が短冊（ストリップ）状に分割され、交互に反対方向へスライドしながら画面外へ抜けていくトランジション。分割数、方向、エッジの柔らかさ、タイミングのずれを調整可能。 | ![Slice](docs/images/effect_slice.gif) |
 | **Spiral** | 中央に渦巻く催眠的なスパイラル効果。回転スピンと開始角度を調整可能。 | ![Spiral](docs/images/effect_spiral.gif) |
 | **Random Tiles** | プロシージャルノイズを使用して、グリッドタイルがランダムな順序で現れる確率的なトランジション。 | ![Random Tiles](docs/images/effect_random_tiles.gif) |
-| **Dissolve** | プロシージャルノイズを使用し、画面が霧や砂のように溶けていく王道のトランジション。最小限のマージン設定によりリニアなアニメーションを実現。 | ![Dissolve](effect_dissolve.gif) |
+| **Dissolve** | プロシージャルノイズを使用し、画面が霧や砂のように溶けていく王道のトランジション。最小限のマージン設定によりリニアなアニメーションを実現。 | ![Dissolve](docs/images/effect_dissolve.gif) |
 | **Wind** | ストリークノイズを伴う方向性ワイプで、風が画像を吹き飛ばすような表現。 | ![Wind](docs/images/effect_wind.gif) |
 | **Cross Wipe** | 十字の形が中央から拡大し、画像を四隅に押しやって消滅させます。 | ![Cross Wipe](docs/images/effect_cross_wipe.gif) |
 | **Texture Mask** | グレースケールテクスチャを使用してトランジションの順序を決定します（黒=開始、白=終了）。パラメータオーバーライドによるカスタムマスクテクスチャをサポート。 | ![Texture Mask](docs/images/effect_texture_mask.gif) |

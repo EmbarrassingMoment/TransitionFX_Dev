@@ -19,7 +19,7 @@ These nodes wait for the transition to complete before proceeding.
 
 #### Play Transition And Wait
 
-![Blueprint screenshot of the Play Transition And Wait latent action node](docs/images/api_play_transition_node.png)
+![Blueprint screenshot of the Play Transition And Wait latent action node](images/api_play_transition_node.png)
 
 Plays a transition using the specified preset and waits for completion.
 
@@ -86,6 +86,13 @@ Forcefully clears all transition states and resets input. Used for emergency sto
 #### Reverse Transition
 Reverses the playback direction of the current transition (e.g., from Fade Out to Fade In). If `bAutoStop` is true (default), the transition will automatically stop when the reverse completes.
 
+#### Invert Transition
+Toggles the current transition's mask inversion and replays it forward (0 → 1) with the flipped mask. If `bAutoComplete` is true (default), the replayed transition completes normally; if false, it holds at max progress (release with `Release Hold`).
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **bAutoComplete** | Input | If true (default), the replayed transition completes normally. If false, it holds at progress 1.0. |
+
 #### Set Play Speed
 Changes the playback speed multiplier dynamically. The value is clamped to a minimum of 0.01.
 
@@ -129,7 +136,7 @@ Returns true if the current transition has finished its hold phase or completed.
 
 #### Open Level With Transition
 
-![Open Level With Transition node](docs/images/api_open_level_node.png)
+![Open Level With Transition node](images/api_open_level_node.png)
 
 Handles the sequence of "Fade Out -> Open Level -> Fade In". The fade-in on the new level side is automatically started via `PostLoadMapWithWorld`.
 
@@ -157,7 +164,7 @@ Plays a transition (Fade Out), waits for it to complete, then opens the specifie
 
 #### Quick Fade To Black
 
-![Blueprint screenshot of the Quick Fade To Black / Quick Fade From Black nodes](docs/images/api_quick_fade_node.png)
+![Blueprint screenshot of the Quick Fade To Black / Quick Fade From Black nodes](images/api_quick_fade_node.png)
 
 Quickly fades the screen to black using the default `DA_FadeToBlack` preset. This is a **fire-and-forget** function that does not wait for the transition to complete.
 
@@ -196,7 +203,7 @@ Applies an easing function to the given alpha value. A pure math node useful for
 
 #### Preload Transition Presets
 
-![Preload Transition Presets node](docs/images/api_preload_node.png)
+![Preload Transition Presets node](images/api_preload_node.png)
 
 Pre-compiles shaders for the given presets to prevent first-frame hitching. Available on the `TransitionManagerSubsystem`.
 
@@ -211,6 +218,35 @@ Asynchronously loads presets from Soft Object References and warms up their shad
 | :--- | :--- | :--- |
 | **Soft Presets** | Input | Array of soft object references to transition presets. |
 | **On Complete** | Output | Delegate fired when loading and shader warmup is complete. |
+
+### Sequence Nodes
+
+Play multiple transitions back-to-back using a `UTransitionSequence` data asset. Sequences cannot contain level transitions, and only one sequence can play at a time — calling `StartTransition` or `OpenLevelWithTransition` while a sequence is playing cancels it.
+
+#### Play Sequence And Wait
+Latent action that plays a transition sequence and waits for it to complete (including all loops). If the sequence is null or empty, the node completes immediately with a warning.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **World Context Object** | Input | The world context object. |
+| **Sequence** | Input | The transition sequence (`UTransitionSequence`) to play. |
+| **Completed** | Output | Executed after the entire sequence (and all loops) finishes. |
+
+#### Play Sequence
+Starts playing a transition sequence without waiting. Available on the `TransitionManagerSubsystem`. A null or empty sequence is a no-op (with a warning log). Stops any currently playing sequence or transition first. Ignored (with a warning) while a level transition is pending.
+
+| Pin Name | Type | Description |
+| :--- | :--- | :--- |
+| **Sequence** | Input | The transition sequence (`UTransitionSequence`) to play. |
+
+#### Stop Sequence
+Stops the currently playing sequence (if any) and the underlying transition. Does **not** fire `OnSequenceCompleted` (cancellation is not a successful completion).
+
+#### Is Sequence Playing
+Returns true if a sequence is currently playing.
+
+#### Get Current Sequence Step
+Returns the index of the currently playing entry, or `-1` if no sequence is playing.
 
 ## 3. C++ API Reference
 
@@ -257,6 +293,13 @@ Reverses the playback direction of the current transition (e.g., from Fade Out t
 
 ```cpp
 void ReverseTransition(bool bAutoStop = true);
+```
+
+#### InvertTransition
+Toggles the current transition's mask inversion and replays it forward (0 → 1). If `bAutoComplete` is false, the replayed transition holds at max progress (release with `ReleaseHold`).
+
+```cpp
+void InvertTransition(bool bAutoComplete = true);
 ```
 
 #### SetPlaySpeed
@@ -322,6 +365,16 @@ Removes all registered progress thresholds.
 void ClearProgressThresholds();
 ```
 
+#### Sequence Playback
+Plays a `UTransitionSequence` data asset's entries back-to-back. `PlaySequence` validates the sequence (null or empty is a no-op with a warning) and stops any currently playing transition or sequence first; it is ignored while a level transition is pending. `StopSequence` cancels playback without firing `OnSequenceCompleted`.
+
+```cpp
+void PlaySequence(UTransitionSequence* Sequence);
+void StopSequence();
+bool IsSequencePlaying() const;
+int32 GetCurrentSequenceStep() const; // -1 if no sequence is playing
+```
+
 #### GetDefaultFadePreset
 Returns the default `DA_FadeToBlack` preset, loading it lazily if necessary.
 
@@ -345,6 +398,8 @@ The subsystem provides the following event dispatchers:
 *   **OnTransitionHoldStarted**: Called when a transition holds at max progress (1.0) (if `bHoldAtMax` is true).
 *   **OnTransitionProgressChanged** `(float Progress)`: Broadcasts the eased progress value (0.0 to 1.0) every tick while a transition is active. Removes the need to poll `GetCurrentProgress()`.
 *   **OnProgressThresholdReached** `(float Threshold)`: Fires once when the eased progress crosses a value registered via `AddProgressThreshold`. Thresholds are reset automatically when a new transition starts.
+*   **OnSequenceStepChanged** `(int32 StepIndex)`: Broadcast each time a sequence advances to a new entry (including the first).
+*   **OnSequenceCompleted**: Broadcast when the entire sequence finishes (after all loops, if any). Not fired when a sequence is cancelled via `StopSequence`.
 
 *Note: There is no delegate named `OnTransitionStop`, but calling `StopTransition` will interrupt the transition.*
 

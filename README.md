@@ -56,7 +56,7 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 ## Sample Project
 
 A ready-to-use sample project is available on the [Releases page](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases).
-It includes the full plugin source and a showcase level demonstrating all 22+ transition effects.
+It includes the full plugin source and a showcase level demonstrating the 28 built-in transition effects.
 
 ▶ [Watch the sample video on YouTube](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
 
@@ -94,7 +94,7 @@ Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
 <!-- IMAGE: quickstart_create_data_asset.png - Screenshot of Content Browser showing Data Asset creation flow -->
 
 *   **Effect Class:** Select `PostProcessTransitionEffect`.
-*   **Transition Material:** Select `M_Transition_Master` (or `M_Transition_Iris`, `M_Transition_Diamond`, etc.).
+*   **Transition Material:** Select `M_Transition_Fade` (or `M_Transition_Iris`, `M_Transition_Diamond`, etc.).
 *   **Default Duration:** Set duration in seconds (e.g., `1.0`).
 *   **Progress Curve:** (Optional) Set a float curve to control the ease-in/out of the transition.
 *   **bAutoBlockInput:** Set to `True` to automatically disable player input during the transition.
@@ -188,7 +188,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Iris** | Classic circular wipe closing toward the center. Aspect ratio corrected. | ![Iris](docs/images/effect_iris.gif) |
 | **Flower Iris** | An iris wipe in the shape of a flower with rounded petals. The number of petals and the flower's shape (sharpness) are adjustable. | ![Flower Iris](docs/images/effect_flower_iris.gif) |
 | **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | ![Diamond](docs/images/effect_diamond.gif) |
-| **Diamond Band Wipe** | A dynamic transition where a diamond-shaped band expands from the center, splitting apart to reveal the underlying scene. | ![Diamond Band](effect_diamondband.gif) |
+| **Diamond Band Wipe** | A dynamic transition where a diamond-shaped band expands from the center, splitting apart to reveal the underlying scene. | ![Diamond Band](docs/images/effect_diamond_wipe.gif) |
 | **Box** | A simple square expanding from the center. Basic geometric transition. | ![Box](docs/images/effect_box.gif) |
 | **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | ![Linear Wipe](docs/images/effect_linear_wipe.gif) |
 | **Sliding Doors** | A horizontal wipe where two panels slide from opposite sides and meet in the center, like elevator or airlock doors. | ![Sliding Doors](docs/images/effect_slidingdoor.gif) |
@@ -203,7 +203,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Slice** | The screen is cut into strips that slide off-screen in alternating directions with staggered timing. Slice count, direction, softness, and stagger are adjustable. | ![Slice](docs/images/effect_slice.gif) |
 | **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | ![Spiral](docs/images/effect_spiral.gif) |
 | **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | ![Random Tiles](docs/images/effect_random_tiles.gif) |
-| **Dissolve** | A classic transition where the screen dissolves like mist or sand using procedural noise. Optimized with a precise threshold margin. | ![Dissolve](effect_dissolve.gif) |
+| **Dissolve** | A classic transition where the screen dissolves like mist or sand using procedural noise. Optimized with a precise threshold margin. | ![Dissolve](docs/images/effect_dissolve.gif) |
 | **Wind** | A directional wipe with streak noise, simulating wind blowing the image away. | ![Wind](docs/images/effect_wind.gif) |
 | **Cross Wipe** | A cross shape expands from the center, pushing the image into the four corners until it vanishes. | ![Cross Wipe](docs/images/effect_cross_wipe.gif) |
 | **Texture Mask** | Uses a grayscale texture to determine the transition order (Black=Start, White=End). Supports custom mask textures via Parameter Overrides. | ![Texture Mask](docs/images/effect_texture_mask.gif) |
