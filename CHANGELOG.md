@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed a misspelled function output on `MF_CorrectAspectRatio` and `MF_GetMaxScreenRadius`: `AspectRaito` is now `AspectRatio`. The 15 master materials that consume this output connect by pin, so they are unaffected; only the pin label shown in the material editor changes.
 - Fixed a misspelled scalar parameter on `M_Transition_Pixelate`: `MaxResoluution` is now `MaxResolution`. The shipped `MI_Transition_Pixelate` instance and `DA_Pixelate` preset never overrode this parameter, so the built-in effect is unaffected. If your project overrides it by name — in a custom material instance or via `FTransitionParameters` — update the name to `MaxResolution`.
 
 ## [1.3.0] - 2026-07-19
