@@ -27,7 +27,9 @@ void UTransitionSequencePlayer::Play(UTransitionSequence* Sequence)
 
 /**
  * Begins the entry at StepIndex, handles loop wrap-around / completion, and skips
- * null-preset entries with a warning.
+ * null-preset entries with a warning. Skipping advances iteratively — once every
+ * entry has been visited without finding a playable preset, the sequence
+ * finishes instead of cycling forever.
  */
 void UTransitionSequencePlayer::StartSequenceStep(int32 StepIndex)
 {
@@ -38,53 +40,72 @@ void UTransitionSequencePlayer::StartSequenceStep(int32 StepIndex)
 
 	const int32 NumEntries = CurrentSequence->Entries.Num();
 
-	// Loop / completion handling when we run off the end.
-	if (StepIndex >= NumEntries)
+	// Entries is Blueprint-writable and can be emptied while a delay timer is pending.
+	if (NumEntries == 0)
 	{
-		if (!CurrentSequence->bLoop)
-		{
-			FinishSequence();
-			return;
-		}
-
-		CurrentLoopIteration++;
-
-		const int32 LoopCount = CurrentSequence->LoopCount;
-		if (LoopCount > 0 && CurrentLoopIteration > LoopCount)
-		{
-			FinishSequence();
-			return;
-		}
-
-		StepIndex = 0;
-	}
-
-	const FTransitionSequenceEntry& Entry = CurrentSequence->Entries[StepIndex];
-
-	if (!Entry.Preset)
-	{
-		UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: Entry %d has a null preset. Skipping."), StepIndex);
-		StartSequenceStep(StepIndex + 1);
+		FinishSequence();
 		return;
 	}
 
-	UTransitionManagerSubsystem* Manager = GetManager();
+	// Iterate rather than recurse over null-preset skips: a looping sequence whose
+	// entries are all null would otherwise self-recurse without bound. Each pass
+	// visits one slot (wrapping first if needed), so NumEntries + 1 passes
+	// guarantee every entry has been checked at least once.
+	for (int32 VisitedSlots = 0; VisitedSlots <= NumEntries; ++VisitedSlots)
+	{
+		// Loop / completion handling when we run off the end.
+		if (StepIndex >= NumEntries)
+		{
+			if (!CurrentSequence->bLoop)
+			{
+				FinishSequence();
+				return;
+			}
 
-	CurrentSequenceStep = StepIndex;
-	Manager->OnSequenceStepChanged.Broadcast(StepIndex);
+			CurrentLoopIteration++;
 
-	const float SafeOverride = FMath::Max(0.0f, Entry.DurationOverride);
-	const float TargetDuration = (SafeOverride > 0.0f) ? SafeOverride : Entry.Preset->DefaultDuration;
-	const float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(Entry.Preset->DefaultDuration, TargetDuration);
+			const int32 LoopCount = CurrentSequence->LoopCount;
+			if (LoopCount > 0 && CurrentLoopIteration > LoopCount)
+			{
+				FinishSequence();
+				return;
+			}
 
-	// One-shot bind: remove any stale binding before adding to prevent duplicates.
-	Manager->OnTransitionCompleted.RemoveDynamic(this, &UTransitionSequencePlayer::OnSequenceStepFinished);
-	Manager->OnTransitionCompleted.AddDynamic(this, &UTransitionSequencePlayer::OnSequenceStepFinished);
+			StepIndex = 0;
+		}
 
-	// Scope-limit the internal-dispatch flag so StartTransition's sequence guard
-	// lets our own per-step call through without aborting the sequence.
-	TGuardValue<bool> DispatchGuard(bIsDispatchingSequenceStep, true);
-	Manager->StartTransition(Entry.Preset, Entry.Mode, PlaySpeed, Entry.bInvert, /*bHoldAtMax=*/false, Entry.OverrideParams);
+		const FTransitionSequenceEntry& Entry = CurrentSequence->Entries[StepIndex];
+
+		if (!Entry.Preset)
+		{
+			UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: Entry %d has a null preset. Skipping."), StepIndex);
+			StepIndex++;
+			continue;
+		}
+
+		UTransitionManagerSubsystem* Manager = GetManager();
+
+		CurrentSequenceStep = StepIndex;
+		Manager->OnSequenceStepChanged.Broadcast(StepIndex);
+
+		const float SafeOverride = FMath::Max(0.0f, Entry.DurationOverride);
+		const float TargetDuration = (SafeOverride > 0.0f) ? SafeOverride : Entry.Preset->DefaultDuration;
+		const float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(Entry.Preset->DefaultDuration, TargetDuration);
+
+		// One-shot bind: remove any stale binding before adding to prevent duplicates.
+		Manager->OnTransitionCompleted.RemoveDynamic(this, &UTransitionSequencePlayer::OnSequenceStepFinished);
+		Manager->OnTransitionCompleted.AddDynamic(this, &UTransitionSequencePlayer::OnSequenceStepFinished);
+
+		// Scope-limit the internal-dispatch flag so StartTransition's sequence guard
+		// lets our own per-step call through without aborting the sequence.
+		TGuardValue<bool> DispatchGuard(bIsDispatchingSequenceStep, true);
+		Manager->StartTransition(Entry.Preset, Entry.Mode, PlaySpeed, Entry.bInvert, /*bHoldAtMax=*/false, Entry.OverrideParams);
+		return;
+	}
+
+	// Every entry was visited and none has a preset — nothing is playable.
+	UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: Sequence '%s' has no playable entries (all presets are null). Finishing."), *CurrentSequence->GetName());
+	FinishSequence();
 }
 
 /**
