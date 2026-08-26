@@ -12,6 +12,9 @@
 [![Blueprint](https://img.shields.io/badge/Blueprint-Ready-9B59B6?style=flat&logo=unrealengine&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Sponsor](https://img.shields.io/badge/Sponsor-EmbarrassingMoment-ff69b4?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/EmbarrassingMoment)
 
+> [!NOTE]
+> The documentation is currently behind the latest code changes. Some sections may not reflect the current functionality — updates are in progress.
+
 > 日本語版はこちら → [README.ja.md](README.ja.md)
 
 ## Description
