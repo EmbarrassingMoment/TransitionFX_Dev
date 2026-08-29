@@ -7,6 +7,7 @@
 class UMaterial;
 class UMaterialFunction;
 class UMaterialExpression;
+class UMaterialExpressionComment;
 class UMaterialExpressionNamedRerouteDeclaration;
 
 /**
@@ -38,4 +39,22 @@ public:
 	/** Returns the name of the declaration a Usage node is linked to, or an empty string if unlinked. For verification from Python. */
 	UFUNCTION(BlueprintCallable, Category = "DevMaterialTools")
 	static FString GetNamedRerouteUsageDisplayName(UMaterialExpression* UsageExpression);
+
+	/**
+	 * Comment boxes need the same treatment as reroute usages: SizeX/SizeY are
+	 * plain UPROPERTY() and comments live in the separate EditorComments array,
+	 * which CreateMaterialExpression / DeleteAllMaterialExpressions never touch.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "DevMaterialTools")
+	static UMaterialExpressionComment* CreateCommentInMaterial(UMaterial* Material, const FString& Text, int32 NodePosX, int32 NodePosY, int32 SizeX, int32 SizeY, FLinearColor Color);
+
+	UFUNCTION(BlueprintCallable, Category = "DevMaterialTools")
+	static UMaterialExpressionComment* CreateCommentInFunction(UMaterialFunction* MaterialFunction, const FString& Text, int32 NodePosX, int32 NodePosY, int32 SizeX, int32 SizeY, FLinearColor Color);
+
+	/** Removes every comment box. Returns the number removed. Pair with delete_all_material_expressions when rebuilding a graph in place. */
+	UFUNCTION(BlueprintCallable, Category = "DevMaterialTools")
+	static int32 ClearCommentsInMaterial(UMaterial* Material);
+
+	UFUNCTION(BlueprintCallable, Category = "DevMaterialTools")
+	static int32 ClearCommentsInFunction(UMaterialFunction* MaterialFunction);
 };
