@@ -14,7 +14,7 @@ This is an Unreal Engine 5.5 plugin project. There are no CLI build scripts — 
 **Requirements:** Visual Studio 2022 (C++ Game Development workload), UE 5.5+, Windows with DX12/SM6 GPU.
 
 **Testing:** No automated test suite. Test manually using:
-- The `L_ShowCase` level (showcases 27 of the 29 transition effects; `DA_LinearWipe` and `DA_StripeCascade` are currently not referenced by the level)
+- The `L_ShowCase` level (showcases 28 of the 29 transition effects; only `DA_LinearWipe` is currently not referenced by the level. The preset list lives in the level Blueprint's `PostProcess` variable — a soft-object array, kept in alphabetical order)
 - The in-editor **Transition Preview Panel** (real-time playback with easing/duration controls)
 
 ## Architecture
