@@ -65,7 +65,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 ## サンプルプロジェクト
 
-全28種のトランジションエフェクトを確認できるサンプルプロジェクトを [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から入手できます。
+全30種のトランジションエフェクトを確認できるサンプルプロジェクトを [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から入手できます。
 
 **動作環境:** Unreal Engine 5.5、Windows、DX12 SM6、Visual Studio 2022（C++ によるゲーム開発ワークロード）
 
@@ -205,6 +205,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | **Radial Wipe** | 時計のような放射状ワイプ。滑らかなエッジと開始角度の調整をサポート。 | ![Radial Wipe](docs/images/effect_radial_wipe.gif) |
 | **Fan** | 中央から扇状のブレードが放射状に広がり、回転しながら画面を覆っていく風車（扇）のようなワイプ。 | ![Fan](docs/images/effect_fan.gif) |
 | **Tiles** | 画面がグリッド状に分割され、ブロックが中央から波のように拡大します。 | ![Tiles](docs/images/effect_tiles.gif) |
+| **Box Roll** | 画面右から箱が転がり込み、下の段から順に積み上がって画面を覆うトランジション。段数、転がる速度、列・段ごとの遅延を調整可能。 | ![Box Roll](docs/images/effect_boxroll.gif) |
 | **Polka Dots** | 拡大する円（ハーフトーンパターン）の波が画面を覆います。ポップでモダンな外観。 | ![Polka Dots](docs/images/effect_polka_dots.gif) |
 | **Blinds** | スタイリッシュなストライプ/ベネチアンブラインド効果。ストライプが拡大・結合して画面を覆います。 | ![Blinds](docs/images/effect_blinds.gif) |
 | **Slice** | 画面が短冊（ストリップ）状に分割され、交互に反対方向へスライドしながら画面外へ抜けていくトランジション。分割数、方向、エッジの柔らかさ、タイミングのずれを調整可能。 | ![Slice](docs/images/effect_slice.gif) |
