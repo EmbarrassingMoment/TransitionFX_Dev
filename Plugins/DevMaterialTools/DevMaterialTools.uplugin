@@ -1,0 +1,19 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1",
+	"FriendlyName": "Dev Material Tools (Local)",
+	"Description": "Local-only editor helpers that expose material graph operations (Named Reroute Usage linking) to Python. Not part of the TransitionFX distribution.",
+	"Category": "Developer",
+	"CreatedBy": "EmbarrassingMoment",
+	"EnabledByDefault": true,
+	"CanContainContent": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "DevMaterialTools",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	]
+}
