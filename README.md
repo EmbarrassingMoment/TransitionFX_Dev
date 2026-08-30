@@ -56,7 +56,7 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 ## Sample Project
 
 A ready-to-use sample project is available on the [Releases page](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases).
-It includes the full plugin source and a showcase level demonstrating the 30 built-in transition effects.
+It includes the full plugin source and a showcase level demonstrating 29 of the 30 built-in transition effects.
 
 ▶ [Watch the sample video on YouTube](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
 

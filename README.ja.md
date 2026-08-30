@@ -65,7 +65,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 ## サンプルプロジェクト
 
-全30種のトランジションエフェクトを確認できるサンプルプロジェクトを [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から入手できます。
+30種の組み込みエフェクトのうち29種を確認できるサンプルプロジェクトを [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から入手できます。
 
 **動作環境:** Unreal Engine 5.5、Windows、DX12 SM6、Visual Studio 2022（C++ によるゲーム開発ワークロード）
 
