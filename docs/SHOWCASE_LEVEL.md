@@ -8,7 +8,7 @@ TransitionFX プラグインに含まれる全トランジションエフェク�
 - **ウィジェット**: `Content/Widget/WBP_ShowCase.uasset`
 
 ShowCase レベルを PIE (Play In Editor) で実行すると、画面下部に操作パネルが表示される。
-ボタン操作で全 29 種のトランジションプリセットを切り替え・再生できる。
+ボタン操作で全 30 種のトランジションプリセットを切り替え・再生できる。
 
 ## 操作方法
 
@@ -54,9 +54,9 @@ StartTransition(Forward, bHoldAtMax=true)
 | `bIsPlayAll` | `Boolean` | Play All モードフラグ |
 | `TransitionManager` | `UTransitionManagerSubsystem*` | サブシステム参照キャッシュ |
 
-## 含まれるプリセット (29 種)
+## 含まれるプリセット (30 種)
 
-Fade, Iris, Diamond, DiamondWipe, RadialWipe, CrossWipe, CornerWipe, Box, Triangle,
+Fade, Iris, Diamond, DiamondWipe, RadialWipe, CrossWipe, CornerWipe, Box, BoxRoll, Triangle,
 Hexagon, Spiral, Tiles, RandomTiles, Blinds, PolkaDots, CheckerBoard, FlowerIris,
 TVSwitchOff, WavyCurtain, Wind, Pixelate, Split, SlidingDoor, Fan, Slice, Dissolve,
 TextureMask, StripeCascade, FadeToBlack

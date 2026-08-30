@@ -56,7 +56,7 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 ## Sample Project
 
 A ready-to-use sample project is available on the [Releases page](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases).
-It includes the full plugin source and a showcase level demonstrating 28 of the 29 built-in transition effects.
+It includes the full plugin source and a showcase level demonstrating 29 of the 30 built-in transition effects.
 
 ▶ [Watch the sample video on YouTube](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
 
@@ -198,6 +198,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Radial Wipe** | Clock-like radial wipe. Supports smooth edges and adjustable start angle. | ![Radial Wipe](docs/images/effect_radial_wipe.gif) |
 | **Fan** | A pinwheel-style wipe where angular blades sweep out from the center and rotate to cover the screen, like an opening folding fan. | ![Fan](docs/images/effect_fan.gif) |
 | **Tiles** | The screen is divided into a grid, and blocks expand outward from the center like a wave. | ![Tiles](docs/images/effect_tiles.gif) |
+| **Box Roll** | Boxes roll in from the right edge and stack up row by row until they cover the screen. Row count, roll speed, and per-column/per-row stagger are adjustable. | ![Box Roll](docs/images/effect_boxroll.gif) |
 | **Polka Dots** | A wave of expanding circles (halftone pattern) covers the screen. Pop and modern look. | ![Polka Dots](docs/images/effect_polka_dots.gif) |
 | **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | ![Blinds](docs/images/effect_blinds.gif) |
 | **Slice** | The screen is cut into strips that slide off-screen in alternating directions with staggered timing. Slice count, direction, softness, and stagger are adjustable. | ![Slice](docs/images/effect_slice.gif) |

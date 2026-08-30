@@ -10,8 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-**Built-in Effects (+1, total 29)**
-- **Stripe Cascade** — The screen is divided into stripes that wipe closed one after another with a staggered delay, cascading across the screen. Stripe count, direction (4-way), stagger delay, and edge softness are adjustable (`SplitCount`, `Direction`, `StripeDelay`, `Smoothness`). Adds the `DA_StripeCascade` preset, `M_Transition_StripeCascade` master material, `MI_Transition_StripeCascade` instance, the `MF_StripePos` material function, README (EN/JA) Built-in Effects table entries, and the `L_ShowCase` sample level entry. Effect-count references were updated to 29 across the `.uplugin` description, the Preview Tool manual, and `docs/SHOWCASE_LEVEL.md`.
+**Built-in Effects (+2, total 30)**
+- **Stripe Cascade** — The screen is divided into stripes that wipe closed one after another with a staggered delay, cascading across the screen. Stripe count, direction (4-way), stagger delay, and edge softness are adjustable (`SplitCount`, `Direction`, `StripeDelay`, `Smoothness`). Adds the `DA_StripeCascade` preset, `M_Transition_StripeCascade` master material, `MI_Transition_StripeCascade` instance, the `MF_StripePos` material function, README (EN/JA) Built-in Effects table entries, and the `L_ShowCase` sample level entry.
+- **Box Roll** — Boxes roll in from the right edge and stack up row by row until they cover the screen. Row count, roll speed, and per-column/per-row stagger are adjustable (`Rows`, `Speed`, `DTCol`, `DTRow`). Anti-aliasing is analytic (1.5 px from `ViewSize`), and the whole animation is driven by the standard `Progress` parameter. Adds the `DA_BoxRoll` preset, `M_Transition_BoxRoll` master material, `MI_Transition_BoxRoll` instance, the `MF_Rotate2D` / `MF_SdBox2D` / `MF_BoxDist` / `MF_RowDist` material functions, a showcase level entry, preview GIF, and README (EN/JA) Built-in Effects table entries.
+
+Effect-count references were updated to 30 across the `.uplugin` description, the Preview Tool manual, and `docs/SHOWCASE_LEVEL.md`.
 
 - **Project Settings page (`UTransitionFXSettings`)** — New developer settings class exposing plugin configuration under **Project Settings > Plugins > TransitionFX** (saved to `DefaultGame.ini`). This page is the future home for additional plugin-wide options.
 - **Configurable effect pool size** — The per-effect-class pool cap (previously hardcoded at 3) is now exposed as `MaxPoolSizePerEffectClass` in the settings page. Set to 0 to disable pooling entirely.
