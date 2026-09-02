@@ -1,9 +1,9 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.3.0",
+	"VersionName": "1.4.0",
 	"FriendlyName": "TransitionFX",
-	"Description": "A lightweight, texture-free screen transition system for Unreal Engine 5. Play 22+ procedural SDF-based transitions from a single Blueprint node — no textures, no code, no tech artist required.",
+	"Description": "A lightweight, texture-free screen transition system for Unreal Engine 5. Play 30 procedural SDF-based transitions from a single Blueprint node — no textures, no code, no tech artist required.",
 	"Category": "Visual Effects",
 	"CreatedBy": "Kurorekishi",
 	"CreatedByURL": "https://github.com/EmbarrassingMoment",

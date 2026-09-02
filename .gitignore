@@ -1,6 +1,7 @@
 # Visual Studio / IDE
 .vs/
 *.sln
+*.slnx
 *.suo
 *.opensdf
 *.sdf

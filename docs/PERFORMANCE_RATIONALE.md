@@ -7,7 +7,7 @@ The functions `UTransitionBlueprintLibrary::QuickFadeToBlack` and `QuickFadeFrom
 
 ## Optimization
 The optimization involves:
-1.  **Preloading:** Moving the asset loading to `UTransitionManagerSubsystem::Initialize`. This ensures the assets (`DA_FadeToBlack` and `M_Transition_Master`) are loaded when the GameInstance starts, which is part of the loading phase, not gameplay.
+1.  **Preloading:** Moving the asset loading to `UTransitionManagerSubsystem::Initialize`. This ensures the assets (`DA_FadeToBlack` and the material it references) are loaded when the GameInstance starts, which is part of the loading phase, not gameplay.
 2.  **Caching:** Storing the loaded assets in `UPROPERTY(Transient)` pointers within the Subsystem. This prevents them from being garbage collected.
 3.  **Fast Access:** Replacing the `LoadObject` call with a simple pointer access (O(1)) via the Subsystem.
 
@@ -25,5 +25,5 @@ To further enhance performance and stability, particularly for large-scale proje
 ### Strategy
 Instead of creating and destroying `UTransitionEffect` objects and `UMaterialInstanceDynamic` (MIDs) for every transition, the system recycles them.
 1.  **Allocation Prevention:** Creating UObjects and Material Instances involves memory allocation and initialization, which can cause micro-stutters (hitching). Pooling reuses existing instances, bypassing this cost.
-2.  **Pool Size Limit:** To prevent unbounded memory growth (memory leaks) during extended play sessions, the pool is capped (e.g., max 3 instances per effect class).
+2.  **Pool Size Limit:** To prevent unbounded memory growth (memory leaks) during extended play sessions, the pool is capped per effect class (default: 3 instances, configurable via Project Settings > Plugins > TransitionFX).
 3.  **Garbage Collection:** Excess instances beyond the pool limit are properly dereferenced and handled by Unreal Engine's Garbage Collector (GC), ensuring memory usage remains stable even in games with hundreds of scene transitions.

@@ -33,7 +33,7 @@ TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition
 | プロパティ | 説明 | 推奨値 |
 | :--- | :--- | :--- |
 | `Effect Class` | 使用するエフェクトのクラス | `PostProcessTransitionEffect` |
-| `Transition Material` | 遷移に使用するマテリアル | `M_Transition_Master`、`M_Transition_Iris`、`M_Transition_Diamond` など |
+| `Transition Material` | 遷移に使用するマテリアル | `M_Transition_Fade`、`M_Transition_Iris`、`M_Transition_Diamond` など |
 | `Default Duration` | 遷移の長さ（秒） | `1.0` |
 
 **動作設定**
@@ -54,14 +54,14 @@ TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition
 | `Sound Volume` | 音量（デフォルト: `1.0`） |
 | `Sound Pitch` | ピッチ（デフォルト: `1.0`） |
 
-![TransitionPreset の詳細パネルのスクリーンショット](docs/images/quickstart_preset_settings.png)
+![TransitionPreset の詳細パネルのスクリーンショット](images/quickstart_preset_settings.png)
 
 ### 設定例：シンプルなフェードアウト
 
 ```
 DA_FadeToBlack
 ├─ Effect Class        : PostProcessTransitionEffect
-├─ Transition Material : M_Transition_Master
+├─ Transition Material : M_Transition_Fade
 ├─ Default Duration    : 1.0
 ├─ Easing Type         : EaseInOutSine
 ├─ bAutoBlockInput     : True
@@ -112,7 +112,7 @@ Unreal Engine はシェーダーを**初回使用時にコンパイル**しま�
 
 `GameInstance` の `Init` イベント、または最初のレベルの `BeginPlay` でノードを呼び出します。
 
-![GameInstance Init での PreloadTransitionPresets ノードの Blueprint スクリーンショット](docs/images/quickstart_preload_bp.png)
+![GameInstance Init での PreloadTransitionPresets ノードの Blueprint スクリーンショット](images/quickstart_preload_bp.png)
 
 ```
 Event Init (GameInstance)
@@ -180,7 +180,7 @@ TransitionSystem->AsyncLoadTransitionPresets(SoftPresets,
 
 ### 基本パターン：フェードアウト → 処理 → フェードイン
 
-![フェードアウト → 処理 → フェードインの Blueprint グラフ全体](docs/images/quickstart_fadeout_fadein_bp.png)
+![フェードアウト → 処理 → フェードインの Blueprint グラフ全体](images/quickstart_fadeout_fadein_bp.png)
 
 最もよく使う構成です。画面を暗転させてから処理を行い、フェードインで戻します。
 
@@ -232,7 +232,7 @@ Play Random Transition And Wait
 
 ### レベル遷移をシームレスに行いたい場合
 
-![Open Level With Transition And Wait ノード](docs/images/quickstart_open_level_bp.png)
+![Open Level With Transition And Wait ノード](images/quickstart_open_level_bp.png)
 
 フェードアウト → レベルオープン → フェードインを 1 ノードで完結させたい場合は **`Open Level With Transition And Wait`**を使います。
 

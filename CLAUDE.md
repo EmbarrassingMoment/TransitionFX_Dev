@@ -14,7 +14,7 @@ This is an Unreal Engine 5.5 plugin project. There are no CLI build scripts — 
 **Requirements:** Visual Studio 2022 (C++ Game Development workload), UE 5.5+, Windows with DX12/SM6 GPU.
 
 **Testing:** No automated test suite. Test manually using:
-- The `L_ShowCase` level (showcases all 26 transition effects)
+- The `L_ShowCase` level (showcases 29 of the 30 transition effects; only `DA_LinearWipe` is currently not referenced by the level. The preset list lives in the level Blueprint's `PostProcess` variable — a soft-object array, kept in alphabetical order)
 - The in-editor **Transition Preview Panel** (real-time playback with easing/duration controls)
 
 ## Architecture
@@ -52,11 +52,13 @@ Material parameter "Progress" [0.0→1.0] drives SDF shader on screen
 | `UPostProcessTransitionEffect` | `Public/PostProcessTransitionEffect.h` | Concrete implementation: creates a PostProcess volume + dynamic material instance |
 | `UTransitionBlueprintLibrary` | `Public/TransitionBlueprintLibrary.h` | Blueprint-callable latent actions and helper nodes |
 | `UTransitionSequence` | `Public/TransitionSequence.h` | Data Asset for chaining multiple transitions; each `FTransitionSequenceEntry` holds preset, mode, duration override, delay |
-| `UTransitionFXConfig` | `Public/TransitionFXConfig.h` | Compile-time constants: material parameter names (`Progress`, `Invert`, `TransitionColor`), default asset path |
+| `UTransitionSequencePlayer` | `Public/TransitionSequencePlayer.h` | Internal sequence playback engine owned by the subsystem; owns step/loop/delay state and drives `StartTransition` per entry |
+| `UTransitionFXConfig` | `Public/TransitionFXConfig.h` | Compile-time constants: material parameter names (`Progress`, `Invert`, `FadeColor`), default asset path |
+| `UTransitionFXSettings` | `Public/TransitionFXSettings.h` | `UDeveloperSettings`-based project settings (Project Settings > Plugins > TransitionFX): effect pool cap |
 
 ### Effect Pool
 
-`UTransitionManagerSubsystem` maintains a `TMap<UClass*, FTransitionEffectPool>` capped at **3 instances per class**. Always return effects to the pool via `CleanupAndPoolCurrentEffect()` — never destroy them directly.
+`UTransitionManagerSubsystem` maintains a `TMap<UClass*, FTransitionEffectPool>` capped per class by `UTransitionFXSettings::MaxPoolSizePerEffectClass` (default 3, Project Settings > Plugins > TransitionFX). Always return effects to the pool via `CleanupAndPoolCurrentEffect()` — never destroy them directly.
 
 ### Easing
 
@@ -70,9 +72,9 @@ Easing is applied in the subsystem's `Tick()` using `ETransitionEasing` (12+ bui
 
 `PrepareAutoReverseTransition()` stores state so it survives level unload.
 
-### Sequence System (Phase 1, unreleased v1.2.0)
+### Sequence System
 
-Sequence logic lives inline in `UTransitionManagerSubsystem` with a comment marking it for extraction into a `UTransitionSequencePlayer` in Phase 2. The `bIsDispatchingSequenceStep` flag prevents external `StartTransition()` calls from interrupting internal sequence steps.
+Sequence playback logic lives in `UTransitionSequencePlayer` (Phase 2 extraction complete), a `UObject` owned by `UTransitionManagerSubsystem` (its Outer) and created lazily on the first `PlaySequence()` call. The subsystem remains the Blueprint-facing API: it validates sequences and forwards `PlaySequence`/`StopSequence` to the player, which drives `StartTransition()` per entry and broadcasts the subsystem's `OnSequenceStepChanged`/`OnSequenceCompleted` delegates. The player's `IsDispatchingStep()` flag prevents external `StartTransition()` calls from interrupting internal sequence steps.
 
 ## Key Files
 
@@ -85,19 +87,24 @@ Plugins/TransitionFX/
 │   │   ├── ITransitionEffect.h            ← effect interface
 │   │   ├── TransitionBlueprintLibrary.h   ← Blueprint nodes
 │   │   ├── TransitionSequence.h           ← sequence data asset
-│   │   └── TransitionFXConfig.h           ← material param name constants
+│   │   ├── TransitionSequencePlayer.h     ← sequence playback engine
+│   │   ├── TransitionFXConfig.h           ← material param name constants
+│   │   └── TransitionFXSettings.h         ← project settings (effect pool cap)
 │   └── Private/
-│       ├── TransitionManagerSubsystem.cpp ← ~1,000 LOC, core tick loop
+│       ├── TransitionManagerSubsystem.cpp ← core tick loop + state machine
+│       ├── TransitionSequencePlayer.cpp   ← sequence step/loop/delay logic
 │       └── TransitionBlueprintLibrary.cpp ← latent action implementations
 ├── Source/TransitionFXEditor/
 │   ├── Public/TransitionPreviewPanel.h    ← editor preview UI
 │   └── Private/
-│       ├── STransitionPreviewPanel.cpp    ← preview panel (800+ LOC)
+│       ├── STransitionPreviewPanel.cpp    ← preview panel UI + playback
+│       ├── TransitionPreviewGifCapture.cpp ← single-GIF capture engine (frames/encode/save)
+│       ├── TransitionPreviewBatchCaptureDriver.cpp ← dev-tools batch GIF workflows (TRANSITIONFX_DEV_TOOLS)
 │       └── GifEncoder.cpp                ← GIF89a encoder for docs
 └── Content/
-    ├── Data/          ← 26 DA_*.uasset transition presets
+    ├── Data/          ← 31 DA_*.uasset presets (30 effects + DA_FadeToBlack) + Sequence/ sample
     ├── Materials/     ← M_Transition_*.uasset master materials + instances
-    └── MaterialFunctions/  ← 9 reusable SDF helper functions
+    └── MaterialFunctions/  ← 10 reusable SDF helper functions
 ```
 
 ## Conventions

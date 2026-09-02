@@ -33,7 +33,7 @@ First, create this asset.
 | Property | Description | Recommended Value |
 | :--- | :--- | :--- |
 | `Effect Class` | The class of the effect to use | `PostProcessTransitionEffect` |
-| `Transition Material` | The material used for the transition | `M_Transition_Master`, `M_Transition_Iris`, `M_Transition_Diamond`, etc. |
+| `Transition Material` | The material used for the transition | `M_Transition_Fade`, `M_Transition_Iris`, `M_Transition_Diamond`, etc. |
 | `Default Duration` | The length of the transition (seconds) | `1.0` |
 
 **Behavior Settings**
@@ -54,14 +54,14 @@ First, create this asset.
 | `Sound Volume` | Volume (default: `1.0`) |
 | `Sound Pitch` | Pitch (default: `1.0`) |
 
-![Screenshot of the TransitionPreset detail panel showing all properties](docs/images/quickstart_preset_settings.png)
+![Screenshot of the TransitionPreset detail panel showing all properties](images/quickstart_preset_settings.png)
 
 ### Example Setting: Simple Fade Out
 
 ```
 DA_FadeToBlack
 ├─ Effect Class        : PostProcessTransitionEffect
-├─ Transition Material : M_Transition_Master
+├─ Transition Material : M_Transition_Fade
 ├─ Default Duration    : 1.0
 ├─ Easing Type         : EaseInOutSine
 ├─ bAutoBlockInput     : True
@@ -112,7 +112,7 @@ Unreal Engine compiles shaders **the first time they are used**. If nothing is d
 
 Call the node in the `Init` event of the `GameInstance`, or in `BeginPlay` of the first level.
 
-![Blueprint screenshot of PreloadTransitionPresets node in GameInstance Init](docs/images/quickstart_preload_bp.png)
+![Blueprint screenshot of PreloadTransitionPresets node in GameInstance Init](images/quickstart_preload_bp.png)
 
 ```
 Event Init (GameInstance)
@@ -180,7 +180,7 @@ Both fade-out and fade-in use the same preset, switched via the `Mode` pin.
 
 ### Basic Pattern: Fade Out → Processing → Fade In
 
-![Blueprint graph showing Fade Out → Processing → Fade In pattern](docs/images/quickstart_fadeout_fadein_bp.png)
+![Blueprint graph showing Fade Out → Processing → Fade In pattern](images/quickstart_fadeout_fadein_bp.png)
 
 This is the most common configuration. Darken the screen, perform the processing, and return with a fade-in.
 
@@ -232,7 +232,7 @@ Play Random Transition And Wait
 
 ### When Making Level Transitions Seamless
 
-![Open Level With Transition And Wait node](docs/images/quickstart_open_level_bp.png)
+![Open Level With Transition And Wait node](images/quickstart_open_level_bp.png)
 
 If you want to complete Fade Out → Open Level → Fade In using a single node, use **`Open Level With Transition And Wait`**.
 

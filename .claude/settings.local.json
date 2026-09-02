@@ -10,5 +10,8 @@
       "Bash(git pull *)",
       "Bash(git tag *)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "unreal-mcp"
+  ]
 }

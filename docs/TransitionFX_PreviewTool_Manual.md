@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-The TransitionFX Preview Tool is a tool for directly previewing the 22 types of SDF-based screen transitions included in the TransitionFX plugin within the editor.
+The TransitionFX Preview Tool is a tool for directly previewing the 30 types of SDF-based screen transitions included in the TransitionFX plugin within the editor.
 
 - **No PIE (Play In Editor) required** -- You can instantly check effects within the editor.
 - **Ideal for capturing GIFs** -- Designed to be used with external capture tools like ScreenToGif with a fixed-size viewport.
@@ -115,7 +115,7 @@ The material (or its parent material) must have the following **Scalar Parameter
 
 ### 5.3 Steps to Create a Material Instance
 
-1. **Create a Parent Material** (or use the existing `M_Transition_Master` as a parent)
+1. **Create a Parent Material** (or use the existing `M_Transition_Fade` as a parent)
    - Create a material in `Content/TransitionFX/Materials/`.
    - Material Domain: `Post Process`.
    - Add `Progress` and `Invert` Scalar Parameters.
@@ -145,16 +145,21 @@ The material (or its parent material) must have the following **Scalar Parameter
 
 ### 5.4 Reference List of Existing Materials
 
-The plugin includes the following 22 transition types. Use them as a reference when creating new ones.
+The plugin includes the following 30 transition types. Use them as a reference when creating new ones.
 
 | Effect Name | Material Instance |
 |---|---|
 | Blinds | `MI_Transition_Blinds` |
 | Box | `MI_Transition_Box` |
+| BoxRoll | `MI_Transition_BoxRoll` |
 | Checkerboard | `MI_Transition_Checkerboard` |
+| CornerWipe | `MI_Transition_CornerWipe` |
 | CrossWipe | `MI_Transition_CrossWipe` |
 | Diamond | `MI_Transition_Diamond` |
+| DiamondWipe | `MI_Transition_DiamondWipe` |
+| Dissolve | `MI_Transition_Dissolve` |
 | Fade | `MI_Transition_Fade` |
+| Fan | `MI_Transition_Fan` |
 | FlowerIris | `MI_Transition_FlowerIris` |
 | Hexagon | `MI_Transition_Hexagon` |
 | Iris | `MI_Transition_Iris` |
@@ -163,8 +168,11 @@ The plugin includes the following 22 transition types. Use them as a reference w
 | PolkaDots | `MI_Transition_PolkaDots` |
 | RadialWipe | `MI_Transition_RadialWipe` |
 | RandomTiles | `MI_Transition_RandomTiles` |
-| Split | `MI_Transition_Split` |
+| Slice | `MI_Transition_Slice` |
+| SlidingDoor | `MI_Transition_SlidingDoor` |
 | Spiral | `MI_Transition_Spiral` |
+| Split | `MI_Transition_Split` |
+| StripeCascade | `MI_Transition_StripeCascade` |
 | TVSwitchOff | `MI_Transition_TVSwitchOff` |
 | TextureMask | `MI_Transition_TextureMask` |
 | Tiles | `MI_Transition_Tiles` |
@@ -199,7 +207,7 @@ To use the materials you checked in the Preview Tool as in-game transitions, cre
 ```
 Play Transition And Wait
 ├── Preset: The created TransitionPreset asset
-├── Mode: TransitionIn / TransitionOut / TransitionInOut
+├── Mode: Forward (Fade Out / 0→1) / Reverse (Fade In / 1→0)
 ├── Speed: Playback speed multiplier (Default: 1.0)
 └── Invert: Inversion flag
 ```

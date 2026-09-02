@@ -68,7 +68,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 ## サンプルプロジェクト
 
-全22種以上のトランジションエフェクトを確認できるサンプルプロジェクトを [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から入手できます。
+30種の組み込みエフェクトのうち29種を確認できるサンプルプロジェクトを [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から入手できます。
 
 **動作環境:** Unreal Engine 5.5、Windows、DX12 SM6、Visual Studio 2022（C++ によるゲーム開発ワークロード）
 
@@ -104,7 +104,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 <!-- IMAGE: quickstart_create_data_asset.png - Content Browser で Data Asset を作成する手順のスクリーンショット -->
 
 *   **Effect Class:** `PostProcessTransitionEffect`を選択します。
-*   **Transition Material:** `M_Transition_Master`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。
+*   **Transition Material:** `M_Transition_Fade`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。
 *   **Default Duration:** 秒単位で時間を設定します（例：`1.0`）。
 *   **Progress Curve:** (任意) トランジションのイージングを制御するためのフロートカーブを設定します。
 *   **bAutoBlockInput:** トランジション中のプレイヤー入力を自動的に無効にするには `True` に設定します。
@@ -198,7 +198,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | **Iris** | 中央に向かって閉じるクラシックな円形ワイプ。アスペクト比補正済み。 | ![Iris](docs/images/effect_iris.gif) |
 | **Flower Iris** | 丸い花びらを持つ花形のアイリスワイプ。花びらの数や形状（鋭さ）を調整可能。 | ![Flower Iris](docs/images/effect_flower_iris.gif) |
 | **Diamond** | 中央に向かって閉じるダイヤモンド型のワイプ。レトロなスタイル。 | ![Diamond](docs/images/effect_diamond.gif) |
-| **Diamond Band Wipe** | 画面中央からひし形の帯（バンド）が拡大しながら割れ、元のシーンをスタイリッシュに表示するユニークなトランジション。 | ![Diamond Band](effect_diamondband.gif) |
+| **Diamond Band Wipe** | 画面中央からひし形の帯（バンド）が拡大しながら割れ、元のシーンをスタイリッシュに表示するユニークなトランジション。 | ![Diamond Band](docs/images/effect_diamond_wipe.gif) |
 | **Box** | 中央から拡大するシンプルな正方形。基本的な幾何学的トランジション。 | ![Box](docs/images/effect_box.gif) |
 | **Linear Wipe** | 方向性のあるワイプ（角度調整可能）。画面の端から端まで正確に覆います。 | ![Linear Wipe](docs/images/effect_linear_wipe.gif) |
 | **Sliding Doors** | エレベーターやエアロックのドアのように、2枚のパネルが左右からスライドして中央で合流するワイプ。 | ![Sliding Doors](docs/images/effect_slidingdoor.gif) |
@@ -208,12 +208,14 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | **Radial Wipe** | 時計のような放射状ワイプ。滑らかなエッジと開始角度の調整をサポート。 | ![Radial Wipe](docs/images/effect_radial_wipe.gif) |
 | **Fan** | 中央から扇状のブレードが放射状に広がり、回転しながら画面を覆っていく風車（扇）のようなワイプ。 | ![Fan](docs/images/effect_fan.gif) |
 | **Tiles** | 画面がグリッド状に分割され、ブロックが中央から波のように拡大します。 | ![Tiles](docs/images/effect_tiles.gif) |
+| **Box Roll** | 画面右から箱が転がり込み、下の段から順に積み上がって画面を覆うトランジション。段数、転がる速度、列・段ごとの遅延を調整可能。 | ![Box Roll](docs/images/effect_boxroll.gif) |
 | **Polka Dots** | 拡大する円（ハーフトーンパターン）の波が画面を覆います。ポップでモダンな外観。 | ![Polka Dots](docs/images/effect_polka_dots.gif) |
 | **Blinds** | スタイリッシュなストライプ/ベネチアンブラインド効果。ストライプが拡大・結合して画面を覆います。 | ![Blinds](docs/images/effect_blinds.gif) |
 | **Slice** | 画面が短冊（ストリップ）状に分割され、交互に反対方向へスライドしながら画面外へ抜けていくトランジション。分割数、方向、エッジの柔らかさ、タイミングのずれを調整可能。 | ![Slice](docs/images/effect_slice.gif) |
+| **Stripe Cascade** | 画面がストライプ状に分割され、1本ずつ遅延を伴って順番にワイプが流れていくトランジション。分割数、方向（4方向）、ストライプ間の遅延、エッジの柔らかさを調整可能。 | — |
 | **Spiral** | 中央に渦巻く催眠的なスパイラル効果。回転スピンと開始角度を調整可能。 | ![Spiral](docs/images/effect_spiral.gif) |
 | **Random Tiles** | プロシージャルノイズを使用して、グリッドタイルがランダムな順序で現れる確率的なトランジション。 | ![Random Tiles](docs/images/effect_random_tiles.gif) |
-| **Dissolve** | プロシージャルノイズを使用し、画面が霧や砂のように溶けていく王道のトランジション。最小限のマージン設定によりリニアなアニメーションを実現。 | ![Dissolve](effect_dissolve.gif) |
+| **Dissolve** | プロシージャルノイズを使用し、画面が霧や砂のように溶けていく王道のトランジション。最小限のマージン設定によりリニアなアニメーションを実現。 | ![Dissolve](docs/images/effect_dissolve.gif) |
 | **Wind** | ストリークノイズを伴う方向性ワイプで、風が画像を吹き飛ばすような表現。 | ![Wind](docs/images/effect_wind.gif) |
 | **Cross Wipe** | 十字の形が中央から拡大し、画像を四隅に押しやって消滅させます。 | ![Cross Wipe](docs/images/effect_cross_wipe.gif) |
 | **Texture Mask** | グレースケールテクスチャを使用してトランジションの順序を決定します（黒=開始、白=終了）。パラメータオーバーライドによるカスタムマスクテクスチャをサポート。 | ![Texture Mask](docs/images/effect_texture_mask.gif) |
@@ -300,6 +302,19 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 **API リファレンス:**
 *   **関数:** `AsyncLoadTransitionPresets(TArray<TSoftObjectPtr<UTransitionPreset>> Presets, FTransitionPreloadCompleteDelegate OnComplete)`
 
+## プロジェクト設定 (Project Settings)
+
+プラグイン全体のオプションは **編集 > プロジェクト設定 > プラグイン > TransitionFX**（`UTransitionFXSettings`）から変更できます。設定値は `Config/DefaultGame.ini` に保存されるため、ini ファイルを直接編集することも可能です:
+
+```ini
+[/Script/TransitionFX.TransitionFXSettings]
+MaxPoolSizePerEffectClass=3
+```
+
+| 設定 | デフォルト | 説明 |
+| :--- | :--- | :--- |
+| **Max Pool Size Per Effect Class** | `3` | エフェクトクラスごとにプールへ保持するインスタンスの最大数。値を大きくすると異なるエフェクトを頻繁に切り替える際のアロケーションが減り、小さくするとアイドル状態のインスタンスが保持するメモリを削減できます。`0` に設定するとプーリングが完全に無効になります（使用済みインスタンスは GC に委ねられます）。 |
+
 ## 制約事項・注意点
 
 *   **同時再生は 1 つのみ:** トランジションは一度に 1 つだけ再生できます。新しいトランジションを開始すると、現在アクティブなトランジションが置き換えられます。
@@ -329,7 +344,7 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 - [ ] **エディタでのプリセットバリデーション** `High` — マテリアル未設定や必須パラメータ `Progress` の欠落を警告する
 - [ ] **エディタプリセットサムネイル** `Medium` — コンテンツブラウザで TransitionPreset アセットの静的サムネイルを自動生成し、一目で識別しやすくする
 - [ ] **ブループリントプリセットピッカーウィジェット** `Medium` — ミニプレビュー付きのビジュアルドロップダウンで利用可能なプリセットを表示
-- [ ] **プールサイズの設定** `Low` — エフェクトプールの上限（現在は 3 にハードコード）をプロジェクト設定で公開する
+- [x] **プールサイズの設定** `Low` — エフェクトプールの上限（従来は 3 にハードコード）を **プロジェクト設定 > プラグイン > TransitionFX** の `MaxPoolSizePerEffectClass` で公開
 - [ ] **シェーダー複雑度ティア** `Low` — パフォーマンスに敏感なプラットフォーム向けの簡略化されたマテリアルバリアント
 
 ### ドキュメント・チュートリアル

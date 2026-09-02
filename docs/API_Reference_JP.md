@@ -19,7 +19,7 @@ TransitionFXプラグインは、主に以下の2つのコンポーネントで�
 
 #### Play Transition And Wait
 
-![Play Transition And Wait Latent Action ノードの Blueprint スクリーンショット](docs/images/api_play_transition_node.png)
+![Play Transition And Wait Latent Action ノードの Blueprint スクリーンショット](images/api_play_transition_node.png)
 
 指定されたプリセットを使用して遷移を再生し、完了まで待機します。
 
@@ -86,6 +86,13 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 #### Reverse Transition
 現在の遷移の再生方向を反転します（例：フェードアウトからフェードインへ）。`bAutoStop` が true（デフォルト）の場合、リバース完了時に自動的に停止します。
 
+#### Invert Transition
+現在の遷移のマスク反転状態をトグルし、反転したマスクで最初から（0→1）再生し直します。`bAutoComplete` が true（デフォルト）の場合は通常どおり完了し、false の場合は最大進行度でホールドします（`Release Hold` で解除）。
+
+| ピン名 | タイプ | 説明 |
+| :--- | :--- | :--- |
+| **bAutoComplete** | Input | true（デフォルト）で通常完了。false で進行度 1.0 でホールドします。 |
+
 #### Set Play Speed
 再生速度の乗数を動的に変更します。値は最小 0.01 にクランプされます。
 
@@ -129,7 +136,7 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 
 #### Open Level With Transition
 
-![Open Level With Transition ノード](docs/images/api_open_level_node.png)
+![Open Level With Transition ノード](images/api_open_level_node.png)
 
 「フェードアウト → レベルオープン → フェードイン」のシーケンスを処理します。新レベル側のフェードインは `PostLoadMapWithWorld` を通じて自動的に開始されます。
 
@@ -157,7 +164,7 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 
 #### Quick Fade To Black
 
-![Quick Fade To Black / Quick Fade From Black ノードの Blueprint スクリーンショット](docs/images/api_quick_fade_node.png)
+![Quick Fade To Black / Quick Fade From Black ノードの Blueprint スクリーンショット](images/api_quick_fade_node.png)
 
 デフォルトの `DA_FadeToBlack` プリセットを使用して、画面を素早く黒にフェードします。これは遷移の完了を待たない **Fire-and-Forget** 関数です。
 
@@ -196,7 +203,7 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 
 #### Preload Transition Presets
 
-![Preload Transition Presets ノード](docs/images/api_preload_node.png)
+![Preload Transition Presets ノード](images/api_preload_node.png)
 
 指定されたプリセットのシェーダーを事前コンパイルし、初回再生時のヒッチングを防ぎます。`TransitionManagerSubsystem` で利用可能です。
 
@@ -211,6 +218,35 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 | :--- | :--- | :--- |
 | **Soft Presets** | Input | トランジションプリセットのソフトオブジェクト参照の配列。 |
 | **On Complete** | Output | ロードとシェーダーウォームアップ完了時に発火するデリゲート。 |
+
+### シーケンスノード (Sequence Nodes)
+
+`UTransitionSequence` データアセットを使って複数のトランジションを連続再生します。シーケンスにレベル遷移は含められません。また同時に再生できるシーケンスは 1 つだけで、シーケンス再生中に `StartTransition` や `OpenLevelWithTransition` を呼び出すとシーケンスはキャンセルされます。
+
+#### Play Sequence And Wait
+トランジションシーケンスを再生し、（ループを含む）全体の完了を待つレイテントアクションです。シーケンスが null または空の場合は警告を出して即座に完了します。
+
+| ピン名 | タイプ | 説明 |
+| :--- | :--- | :--- |
+| **World Context Object** | Input | ワールドコンテキストオブジェクト。 |
+| **Sequence** | Input | 再生するトランジションシーケンス（`UTransitionSequence`）。 |
+| **Completed** | Output | シーケンス全体（全ループ含む）の完了後に実行されます。 |
+
+#### Play Sequence
+完了を待たずにシーケンスの再生を開始します。`TransitionManagerSubsystem` で利用可能です。null または空のシーケンスは警告ログを出して何もしません。再生中のシーケンスやトランジションがあれば先に停止します。レベル遷移が保留中の場合は警告を出して無視されます。
+
+| ピン名 | タイプ | 説明 |
+| :--- | :--- | :--- |
+| **Sequence** | Input | 再生するトランジションシーケンス（`UTransitionSequence`）。 |
+
+#### Stop Sequence
+再生中のシーケンス（存在する場合）とその下で動作しているトランジションを停止します。`OnSequenceCompleted` は**発火しません**（キャンセルは正常完了ではないため）。
+
+#### Is Sequence Playing
+シーケンスが再生中であれば true を返します。
+
+#### Get Current Sequence Step
+現在再生中のエントリのインデックスを返します。シーケンスが再生されていない場合は `-1` を返します。
 
 ## 3. C++ API (C++ API Reference)
 
@@ -257,6 +293,13 @@ void ReleaseHold();
 
 ```cpp
 void ReverseTransition(bool bAutoStop = true);
+```
+
+#### InvertTransition
+現在の遷移のマスク反転状態をトグルし、最初から（0→1）再生し直します。`bAutoComplete` が false の場合は最大進行度でホールドします（`ReleaseHold` で解除）。
+
+```cpp
+void InvertTransition(bool bAutoComplete = true);
 ```
 
 #### SetPlaySpeed
@@ -322,6 +365,16 @@ void AddProgressThreshold(float Threshold);
 void ClearProgressThresholds();
 ```
 
+#### シーケンス再生 (Sequence Playback)
+`UTransitionSequence` データアセットのエントリを連続再生します。`PlaySequence` はシーケンスを検証し（null または空の場合は警告のみで何もしません）、再生中のトランジションやシーケンスがあれば先に停止します。レベル遷移が保留中の場合は無視されます。`StopSequence` は `OnSequenceCompleted` を発火せずに再生をキャンセルします。
+
+```cpp
+void PlaySequence(UTransitionSequence* Sequence);
+void StopSequence();
+bool IsSequencePlaying() const;
+int32 GetCurrentSequenceStep() const; // 再生中でない場合は -1
+```
+
 #### GetDefaultFadePreset
 デフォルトの `DA_FadeToBlack` プリセットを返します。必要に応じて遅延ロードされます。
 
@@ -345,6 +398,8 @@ static UTransitionManagerSubsystem* GetTransitionManager(const UObject* WorldCon
 *   **OnTransitionHoldStarted**: 遷移が最大進行度（1.0）でホールド（一時停止）されたときに呼び出されます（`bHoldAtMax` が true の場合）。
 *   **OnTransitionProgressChanged** `(float Progress)`: 遷移がアクティブな間、毎ティックでイージング適用済みの進捗値（0.0〜1.0）をブロードキャストします。`GetCurrentProgress()` のポーリングが不要になります。
 *   **OnProgressThresholdReached** `(float Threshold)`: `AddProgressThreshold` で登録した閾値をイージング適用済みの進捗が超えた際に1回だけ発火します。閾値は新しい遷移開始時に自動リセットされます。
+*   **OnSequenceStepChanged** `(int32 StepIndex)`: シーケンスが新しいエントリに進むたび（最初のエントリを含む）にブロードキャストされます。
+*   **OnSequenceCompleted**: シーケンス全体（ループがある場合は全ループ）の完了時にブロードキャストされます。`StopSequence` によるキャンセル時は発火しません。
 
 ※ `OnTransitionStop` という名前のデリゲートは存在しませんが、`StopTransition` を呼び出すと遷移は中断されます。
 
@@ -358,7 +413,7 @@ void AsyncLoadTransitionPresets(const TArray<TSoftObjectPtr<UTransitionPreset>>&
 ```
 
 ### オブジェクトプーリング (Object Pooling)
-サブシステムは遷移エフェクトのインスタンスを再利用のためにプールし、メモリの肥大化を防ぐために**エフェクトクラスごとに最大3インスタンス**に制限されています。制限を超えたインスタンスはガベージコレクションに委ねられます。
+サブシステムは遷移エフェクトのインスタンスを再利用のためにプールし、メモリの肥大化を防ぐためにエフェクトクラスごとに上限が設けられています（デフォルト: **3 インスタンス**）。上限は **プロジェクト設定 > プラグイン > TransitionFX > `MaxPoolSizePerEffectClass`** で変更でき、0 に設定するとプーリングを無効化できます。制限を超えたインスタンスはガベージコレクションに委ねられます。
 
 ### プリロード (Preloading)
 `PreloadTransitionPresets` は、ロード済みのプリセットを使用してシェーダーを事前にウォームアップし、遷移実行時のヒッチ（カクつき）を防ぎます。

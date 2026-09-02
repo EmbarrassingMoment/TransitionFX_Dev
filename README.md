@@ -59,7 +59,7 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 ## Sample Project
 
 A ready-to-use sample project is available on the [Releases page](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases).
-It includes the full plugin source and a showcase level demonstrating all 22+ transition effects.
+It includes the full plugin source and a showcase level demonstrating 29 of the 30 built-in transition effects.
 
 ▶ [Watch the sample video on YouTube](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
 
@@ -97,7 +97,7 @@ Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
 <!-- IMAGE: quickstart_create_data_asset.png - Screenshot of Content Browser showing Data Asset creation flow -->
 
 *   **Effect Class:** Select `PostProcessTransitionEffect`.
-*   **Transition Material:** Select `M_Transition_Master` (or `M_Transition_Iris`, `M_Transition_Diamond`, etc.).
+*   **Transition Material:** Select `M_Transition_Fade` (or `M_Transition_Iris`, `M_Transition_Diamond`, etc.).
 *   **Default Duration:** Set duration in seconds (e.g., `1.0`).
 *   **Progress Curve:** (Optional) Set a float curve to control the ease-in/out of the transition.
 *   **bAutoBlockInput:** Set to `True` to automatically disable player input during the transition.
@@ -191,7 +191,7 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Iris** | Classic circular wipe closing toward the center. Aspect ratio corrected. | ![Iris](docs/images/effect_iris.gif) |
 | **Flower Iris** | An iris wipe in the shape of a flower with rounded petals. The number of petals and the flower's shape (sharpness) are adjustable. | ![Flower Iris](docs/images/effect_flower_iris.gif) |
 | **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | ![Diamond](docs/images/effect_diamond.gif) |
-| **Diamond Band Wipe** | A dynamic transition where a diamond-shaped band expands from the center, splitting apart to reveal the underlying scene. | ![Diamond Band](effect_diamondband.gif) |
+| **Diamond Band Wipe** | A dynamic transition where a diamond-shaped band expands from the center, splitting apart to reveal the underlying scene. | ![Diamond Band](docs/images/effect_diamond_wipe.gif) |
 | **Box** | A simple square expanding from the center. Basic geometric transition. | ![Box](docs/images/effect_box.gif) |
 | **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | ![Linear Wipe](docs/images/effect_linear_wipe.gif) |
 | **Sliding Doors** | A horizontal wipe where two panels slide from opposite sides and meet in the center, like elevator or airlock doors. | ![Sliding Doors](docs/images/effect_slidingdoor.gif) |
@@ -201,12 +201,14 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 | **Radial Wipe** | Clock-like radial wipe. Supports smooth edges and adjustable start angle. | ![Radial Wipe](docs/images/effect_radial_wipe.gif) |
 | **Fan** | A pinwheel-style wipe where angular blades sweep out from the center and rotate to cover the screen, like an opening folding fan. | ![Fan](docs/images/effect_fan.gif) |
 | **Tiles** | The screen is divided into a grid, and blocks expand outward from the center like a wave. | ![Tiles](docs/images/effect_tiles.gif) |
+| **Box Roll** | Boxes roll in from the right edge and stack up row by row until they cover the screen. Row count, roll speed, and per-column/per-row stagger are adjustable. | ![Box Roll](docs/images/effect_boxroll.gif) |
 | **Polka Dots** | A wave of expanding circles (halftone pattern) covers the screen. Pop and modern look. | ![Polka Dots](docs/images/effect_polka_dots.gif) |
 | **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | ![Blinds](docs/images/effect_blinds.gif) |
 | **Slice** | The screen is cut into strips that slide off-screen in alternating directions with staggered timing. Slice count, direction, softness, and stagger are adjustable. | ![Slice](docs/images/effect_slice.gif) |
+| **Stripe Cascade** | The screen is divided into stripes that wipe closed one after another with a staggered delay, cascading across the screen. Stripe count, direction (4-way), stagger delay, and edge softness are adjustable. | — |
 | **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | ![Spiral](docs/images/effect_spiral.gif) |
 | **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | ![Random Tiles](docs/images/effect_random_tiles.gif) |
-| **Dissolve** | A classic transition where the screen dissolves like mist or sand using procedural noise. Optimized with a precise threshold margin. | ![Dissolve](effect_dissolve.gif) |
+| **Dissolve** | A classic transition where the screen dissolves like mist or sand using procedural noise. Optimized with a precise threshold margin. | ![Dissolve](docs/images/effect_dissolve.gif) |
 | **Wind** | A directional wipe with streak noise, simulating wind blowing the image away. | ![Wind](docs/images/effect_wind.gif) |
 | **Cross Wipe** | A cross shape expands from the center, pushing the image into the four corners until it vanishes. | ![Cross Wipe](docs/images/effect_cross_wipe.gif) |
 | **Texture Mask** | Uses a grayscale texture to determine the transition order (Black=Start, White=End). Supports custom mask textures via Parameter Overrides. | ![Texture Mask](docs/images/effect_texture_mask.gif) |
@@ -293,6 +295,19 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 **API Reference:**
 *   **Function:** `AsyncLoadTransitionPresets(TArray<TSoftObjectPtr<UTransitionPreset>> Presets, FTransitionPreloadCompleteDelegate OnComplete)`
 
+## Project Settings
+
+Plugin-wide options are available under **Edit > Project Settings > Plugins > TransitionFX** (`UTransitionFXSettings`). Values are saved to `Config/DefaultGame.ini`, so they can also be edited directly:
+
+```ini
+[/Script/TransitionFX.TransitionFXSettings]
+MaxPoolSizePerEffectClass=3
+```
+
+| Setting | Default | Description |
+| :--- | :--- | :--- |
+| **Max Pool Size Per Effect Class** | `3` | Maximum number of pooled effect instances kept per effect class. Higher values reduce allocations when frequently switching between different effects; lower values reduce memory held by idle instances. Set to `0` to disable pooling entirely (used instances are released for garbage collection). |
+
 ## Limitations & Notes
 
 *   **Single transition at a time:** Only one transition can play at a time. Starting a new transition will replace the currently active one.
@@ -322,7 +337,7 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadC
 - [ ] **Preset Validation in Editor** `High` — Warn if a preset has no material or is missing the required `Progress` parameter
 - [ ] **Editor Preset Thumbnails** `Medium` — Auto-generate static thumbnails for TransitionPreset assets in the Content Browser
 - [ ] **Blueprint Preset Picker Widget** `Medium` — A visual dropdown showing available presets with mini-previews
-- [ ] **Configurable Pool Size** `Low` — Expose the effect pool cap (currently hardcoded at 3) via project settings
+- [x] **Configurable Pool Size** `Low` — Expose the effect pool cap (previously hardcoded at 3) via **Project Settings > Plugins > TransitionFX** (`MaxPoolSizePerEffectClass`)
 - [ ] **Shader Complexity Tiers** `Low` — Simplified material variants for performance-sensitive platforms
 
 ### Documentation & Tutorials
