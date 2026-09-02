@@ -11,9 +11,6 @@
 [![Platform](https://img.shields.io/badge/Platform-Win64-blue?style=flat&logo=windows&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Blueprint](https://img.shields.io/badge/Blueprint-Ready-9B59B6?style=flat&logo=unrealengine&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 
-> [!NOTE]
-> 現在、ドキュメントの更新が最新のコードの変更に追いついていません。一部の記載が現状の機能と異なる場合があります。順次更新予定です。
-
 > English version is available here → [README.md](README.md)
 
 ## Description
