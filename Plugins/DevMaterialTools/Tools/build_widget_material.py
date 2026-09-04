@@ -14,7 +14,10 @@ DA_Widget_<Effect> (存在すれば) の TransitionMaterial を付け直す。
   7. MI_Widget_<Effect> (親 = M_Widget_<Effect>、上書き無し) を作成・保存
   8. DA_Widget_<Effect> があれば TransitionMaterial を MI に付け直して保存
 
-想定外のグラフ (SceneTexture/ComponentMask/Lerp が 1 個ずつでない等) は中断し、結果 JSON に理由を書く。
+想定外のグラフは中断し、結果 JSON の "aborted" に理由を書く。変則マスターは意図的に未対応:
+  - SceneTexture/ComponentMask/Lerp/FadeColor が 1 個ずつでない
+  - SceneTexture.UVs が接続されている (Pixelate のようにシーンを歪める効果はオーバーレイで再現不可)
+  - Lerp の A/B が逆 (Slice)。Alpha の意味が反転するため対象外
 print はコマンドレットでは見えないため、結果は OUT_FILE (Saved/DevMaterialTools/) に JSON で書く。
 
 実行例 (エディタは閉じておくこと):
@@ -109,6 +112,17 @@ def run():
         log["aborted"] = "unexpected graph; convert this master by hand"
         return
     lerp = lerps[0]
+    # 未対応パターンの検出 (変則マスターは意図的に変換しない):
+    #  - SceneTexture.UVs が接続されている = シーンを歪める効果 (Pixelate 等)。オーバーレイでは再現不可能
+    #  - Lerp.A が scene 側でない (Slice の A/B 逆転) = Alpha の意味が反転するので変換対象外
+    scene_uv, _ = input_source(mat, scenes[0], "UVs")
+    if not check("SceneTexture.UVs unconnected (no scene distortion)", scene_uv is None):
+        log["aborted"] = "unsupported: effect samples the scene with modified UVs (cannot be an overlay)"
+        return
+    lerp_a, _ = input_source(mat, lerp, "A")
+    if not check("Lerp.A is the scene mask (canonical A/B order)", lerp_a is masks[0]):
+        log["aborted"] = "unsupported: Lerp A/B swapped (alpha semantics inverted)"
+        return
     alpha_src, alpha_out = input_source(mat, lerp, "Alpha")
     if not check("Lerp.Alpha connected", alpha_src is not None):
         return
