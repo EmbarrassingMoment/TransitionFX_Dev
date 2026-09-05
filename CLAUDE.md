@@ -14,7 +14,7 @@ This is an Unreal Engine 5.5 plugin project. There are no CLI build scripts — 
 **Requirements:** Visual Studio 2022 (C++ Game Development workload), UE 5.5+, Windows with DX12/SM6 GPU.
 
 **Testing:** No automated test suite. Test manually using:
-- The `L_ShowCase` level (39 presets: 29 of the 30 PostProcess effects — only `DA_LinearWipe` is not referenced, its package holds an object misnamed `DA_LinerWipe` — plus the 9 `DA_Widget_*` presets. The preset list lives in the level Blueprint's `PostProcess` variable — a soft-object array, kept in alphabetical order; `Plugins/DevMaterialTools/Tools/register_widget_presets.py` appends missing widget presets headlessly)
+- The `L_ShowCase` level (39 presets: 29 of the 30 PostProcess effects — only `DA_LinearWipe` is not referenced — plus the 9 `DA_Widget_*` presets. The preset list lives in the level Blueprint's `PostProcess` variable — a soft-object array, kept in alphabetical order; `Plugins/DevMaterialTools/Tools/register_widget_presets.py` appends missing widget presets headlessly)
 - The in-editor **Transition Preview Panel** (real-time playback with easing/duration controls)
 
 ## Architecture
