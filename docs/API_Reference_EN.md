@@ -7,7 +7,7 @@ This document provides a detailed explanation of the API for the TransitionFX pl
 The TransitionFX plugin mainly consists of the following two components:
 
 *   **UTransitionManagerSubsystem**: A singleton subsystem that handles the execution, management, and ticking of transition effects.
-*   **UTransitionPreset**: A data asset that defines the settings for a transition effect (Effect Class, Material, Duration, Easing Type, etc.).
+*   **UTransitionPreset**: A data asset that defines the settings for a transition effect (Effect Class, Material, Duration, Easing Type, etc.). `Effect Class` selects the rendering path: `PostProcessTransitionEffect` (PostProcess volume, ordered by `Priority`) or `WidgetTransitionEffect` (full-screen Slate overlay that also covers UMG/Slate UI, ordered by `WidgetZOrder`, default 10000; requires a UI-domain material such as `MI_Widget_*`).
 
 ## 2. Blueprint API Reference
 

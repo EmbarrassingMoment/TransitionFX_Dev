@@ -45,6 +45,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 ## Features
 *   **UE 5.5+ Native:** 最新のUnreal Engine向けです。
 *   **Procedural Rendering:** テクスチャレスなSDFベースのレンダリングにより、あらゆる解像度で劣化せず、アスペクト比の歪みを自動的に補正します。
+*   **2 つの描画経路:** PostProcess（既定）に加え、UMG/Slate UI ごと覆えるフルスクリーンのウィジェットレイヤー版を用意。プリセットで切り替えるだけで Blueprint API は共通です。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照。
 *   **Design-First Workflow:**
     *   **Data Asset Driven:** トランジションパターン、持続時間、カーブを再利用可能な「プリセット」として管理します。
     *   **Auto Input Blocking:** トランジション中のプレイヤー入力ブロックを自動的に処理します。

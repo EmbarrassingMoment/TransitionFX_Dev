@@ -37,7 +37,9 @@ UTransitionBlueprintLibrary  (latent actions — PlayTransitionAndWait, OpenLeve
         ↓
 UTransitionManagerSubsystem  (GameInstance subsystem — state machine, pooling, event broadcasting)
         ↓
-ITransitionEffect / UPostProcessTransitionEffect  (PostProcess volume + dynamic material instance)
+ITransitionEffect
+  ├─ UPostProcessTransitionEffect  (PostProcess volume + dynamic material instance; below UMG/Slate)
+  └─ UWidgetTransitionEffect       (full-viewport Slate SImage + UI-domain dynamic material; above UMG/Slate)
         ↓
 Material parameter "Progress" [0.0→1.0] drives SDF shader on screen
 ```

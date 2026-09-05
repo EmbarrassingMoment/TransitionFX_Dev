@@ -34,6 +34,7 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 ## Features
 *   **UE 5.5+ Native:** Optimized for the latest Unreal Engine features.
 *   **Procedural Rendering:** Texture-less SDF-based rendering ensures no degradation at any resolution and automatically corrects aspect ratio distortion.
+*   **Two Rendering Paths:** PostProcess (default) or a full-screen widget-layer overlay that also covers UMG/Slate UI — switch by preset, same Blueprint API. See [Widget-Layer Variants](#widget-layer-variants).
 *   **Design-First Workflow:**
     *   **Data Asset Driven:** Manage transition patterns, duration, and curves as reusable "Presets".
     *   **Auto Input Blocking:** Automatically handles player input blocking during transitions.
