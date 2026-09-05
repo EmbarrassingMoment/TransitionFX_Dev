@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **Widget-layer transitions (`UWidgetTransitionEffect`)** — A second `ITransitionEffect` implementation that renders the transition material on a full-viewport Slate `SImage` added through `UGameViewportClient::AddViewportWidgetContent`, so the transition also covers UMG/Slate UI layers that the PostProcess path cannot reach. The overlay is hit-test invisible (input blocking still goes through the existing CinematicMode path), is re-added on every `Initialize` so it survives level travel, and its dynamic material is outered to the effect object so it can be pooled across worlds. Presets gain a `WidgetZOrder` property (default `10000`); `Priority` remains PostProcess-only.
+- **Widget-layer variants for 8 effects** — UI-domain, translucent copies of the PostProcess masters (`Materials/Widget/M_Widget_*` + `MI_Widget_*`) and matching presets `DA_Widget_Fade`, `DA_Widget_FadeToBlack`, `DA_Widget_Iris`, `DA_Widget_LinearWipe`, `DA_Widget_Dissolve`, `DA_Widget_RadialWipe`, `DA_Widget_CheckerBoard`, `DA_Widget_Blinds`, `DA_Widget_TextureMask`. The SDF logic and the `Progress` / `Invert` / `FadeColor` contract are unchanged; only the final `SceneTexture`/`Lerp` stage is replaced by `FadeColor → Emissive` and `mask → Opacity`. Effects that resample the scene (Pixelate) are not available on the widget layer; the remaining effects are planned for later releases. All 9 presets are registered in the `L_ShowCase` sample level.
+- `TransitionFXMaterialUtils::ApplyParameters` — shared scalar/vector/texture override logic used by both effect classes.
+
+### Changed
+
+- README (EN/JA): new *Widget-Layer Variants* section, Quick Start and Limitations updated for the widget path, roadmap item marked as shipped.
+
 ## [1.4.0] - 2026-09-02
 
 ### Added

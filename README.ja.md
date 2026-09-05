@@ -100,8 +100,8 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 <!-- IMAGE: quickstart_create_data_asset.png - Content Browser で Data Asset を作成する手順のスクリーンショット -->
 
-*   **Effect Class:** `PostProcessTransitionEffect`を選択します。
-*   **Transition Material:** `M_Transition_Fade`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。
+*   **Effect Class:** `PostProcessTransitionEffect`を選択します（UMG/Slate UI も覆いたい場合は `WidgetTransitionEffect`。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照）。
+*   **Transition Material:** `M_Transition_Fade`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。ウィジェットレイヤー版のプリセットでは対応する `MI_Widget_*` インスタンスを使用します。
 *   **Default Duration:** 秒単位で時間を設定します（例：`1.0`）。
 *   **Progress Curve:** (任意) トランジションのイージングを制御するためのフロートカーブを設定します。
 *   **bAutoBlockInput:** トランジション中のプレイヤー入力を自動的に無効にするには `True` に設定します。
@@ -225,6 +225,25 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 > **Texture Mask（テクスチャマスク）のヒント:**
 > マスクテクスチャをインポートする際は、正確な値を読み取るために **sRGB** のチェックを外し（sRGBオフ）、Compression Settings（圧縮設定）を **Masks (no sRGB)** または **Grayscale** に設定してください。
 
+### ウィジェットレイヤー版
+
+PostProcess 経路ではビューポートの上に描画される UMG/Slate ウィジェットを覆えません。利用頻度の高いエフェクトには**ウィジェットレイヤー版**を同梱しています。同じ SDF マテリアルをフルスクリーンの Slate オーバーレイ（`WidgetTransitionEffect`）に描画するため、UI ごとトランジションで覆えます。`DA_*` の代わりに `DA_Widget_*` プリセットを選ぶだけで、Blueprint API は共通です。
+
+| エフェクト | ウィジェットレイヤー版プリセット | マテリアルインスタンス |
+| :--- | :--- | :--- |
+| Fade | `DA_Widget_Fade`、`DA_Widget_FadeToBlack` | `MI_Widget_Fade` |
+| Iris | `DA_Widget_Iris` | `MI_Widget_Iris` |
+| Linear Wipe | `DA_Widget_LinearWipe` | `MI_Widget_LinearWipe` |
+| Dissolve | `DA_Widget_Dissolve` | `MI_Widget_Dissolve` |
+| Radial Wipe | `DA_Widget_RadialWipe` | `MI_Widget_RadialWipe` |
+| Checkerboard | `DA_Widget_CheckerBoard` | `MI_Widget_Checkerboard` |
+| Blinds | `DA_Widget_Blinds` | `MI_Widget_Blinds` |
+| Texture Mask | `DA_Widget_TextureMask` | `MI_Widget_TextureMask` |
+
+*   **Widget ZOrder:** プリセットの `WidgetZOrder`（既定 `10000`）で重ね順を指定できます。自作ウィジェットがこれより大きい Z-order を使う場合は値を上げてください。
+*   **ウィジェットレイヤーで利用できないエフェクト:** シーンを再サンプリングするエフェクト（**Pixelate**）はオーバーレイでは再現できません。それ以外のエフェクトのウィジェットレイヤー版は今後のリリースで追加予定です。
+*   ウィジェットレイヤー版のマテリアルは `Materials/Widget/` にあり、SDF ロジックと `Progress` / `Invert` / `FadeColor` パラメータは PostProcess 版と共通です。
+
 ## Transition Timing & Easing (イージングとタイミング)
 Transition Presetの`EasingType`プロパティを使用して、トランジションが時間とともにどのように進行するかを制御します。
 
@@ -315,10 +334,10 @@ MaxPoolSizePerEffectClass=3
 ## 制約事項・注意点
 
 *   **同時再生は 1 つのみ:** トランジションは一度に 1 つだけ再生できます。新しいトランジションを開始すると、現在アクティブなトランジションが置き換えられます。
-*   **PostProcess ベースの描画:** トランジションは PostProcess エフェクトとして描画されます。これにより：
+*   **PostProcess ベースの描画（既定の経路）:** `PostProcessTransitionEffect` はトランジションを PostProcess エフェクトとして描画します。これにより：
     *   エフェクトはビューポート全体の上に描画されます（ビューポートに描画されるデバッグ UI を含む）。
     *   ビューポートの上に描画される UMG/Slate ウィジェットはトランジションで**覆われません**。
-    *   トランジション中に UI を非表示にする必要がある場合は、`OnTransitionStarted` デリゲートを使用してウィジェットの Visibility を手動で設定してください。
+    *   UI ごと覆う必要がある場合は `DA_Widget_*` プリセット（`WidgetTransitionEffect`）を使うか、`OnTransitionStarted` デリゲートでウィジェットの Visibility を手動で設定してください。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照。
 *   **マルチプレイヤー:** TransitionFX は**各クライアントでローカルに動作**します。サブシステムは GameInstance ごとに実行されるため、本質的にクライアントサイドの処理です。レプリケーションやサーバーサイドのトランジション制御は組み込まれていません。
 *   **パッケージング:** プラグインウィンドウで有効になっていれば、パッケージビルドに自動的に含まれます。プラグイン参照を手動で管理している場合は、`.uproject` ファイルの `Plugins` セクションに `TransitionFX` が含まれていることを確認してください。
 
@@ -331,7 +350,7 @@ MaxPoolSizePerEffectClass=3
 
 ### 機能拡張
 - [x] **プリセットごとのトランジションカラー** `High` — プリセットにデフォルトカラーを設定可能にし、毎回パラメータオーバーライドを渡さずにフェード先の色（白など）を指定できるようにする
-- [ ] **UMG ウィジェットレイヤートランジション** `High` — フルスクリーン UMG ウィジェットを使用した代替レンダリングパスにより、Slate/UMG UI レイヤーもトランジションで覆えるようにする
+- [x] **UMG ウィジェットレイヤートランジション** `High` — フルスクリーン Slate オーバーレイ（`WidgetTransitionEffect`）による代替レンダリングパスで、Slate/UMG UI レイヤーもトランジションで覆えるようにする。まず 8 エフェクトで提供し、残りのエフェクトのウィジェットレイヤー版は今後追加予定
 - [ ] **原点オーバーライド** `Medium` — Iris、Diamond、Tiles などの中心ベースのトランジションを、任意のスクリーン座標から展開できるようにする
 - [x] **トランジションチェイン / シーケンス** `Medium` — DataAsset ベースでプリセットを連続再生し、任意でループも可能
 - [x] **OnTransitionProgress デリゲート** `Medium` — 毎ティックの進捗値をブロードキャストするデリゲートにより、`GetCurrentProgress()` のポーリングを不要にする。`AddProgressThreshold` による閾値コールバックも追加済み。
