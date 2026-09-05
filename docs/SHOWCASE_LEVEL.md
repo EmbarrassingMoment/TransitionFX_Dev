@@ -61,7 +61,7 @@ Hexagon, Spiral, Tiles, RandomTiles, Blinds, PolkaDots, CheckerBoard, FlowerIris
 TVSwitchOff, WavyCurtain, Wind, Pixelate, Split, SlidingDoor, Fan, Slice, Dissolve,
 TextureMask, StripeCascade, FadeToBlack
 
-> **Note:** `DA_LinearWipe` はプラグインに含まれるが、現在の ShowCase レベルからは参照されていない（唯一の未収録エフェクト。パッケージ内のオブジェクト名が `DA_LinerWipe` と綴り違いになっている）。
+> **Note:** `DA_LinearWipe` はプラグインに含まれるが、現在の ShowCase レベルからは参照されていない（唯一の未収録エフェクト）。
 
 ## ウィジェットレイヤー版プリセット (9 種)
 

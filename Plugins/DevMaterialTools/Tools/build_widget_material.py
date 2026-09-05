@@ -38,8 +38,7 @@ import unreal
 BATCH = [
     ("Fade", [("DA_Fade", "DA_Widget_Fade"), ("DA_FadeToBlack", "DA_Widget_FadeToBlack")]),
     ("Iris", [("DA_Iris", "DA_Widget_Iris")]),
-    # DA_LinearWipe.uasset の中身は "DA_LinerWipe" という綴り違いのオブジェクト名 (既存の typo) なのでオブジェクトパスで指定
-    ("LinearWipe", [("DA_LinearWipe.DA_LinerWipe", "DA_Widget_LinearWipe")]),
+    ("LinearWipe", [("DA_LinearWipe", "DA_Widget_LinearWipe")]),
     ("Dissolve", [("DA_Dissolve", "DA_Widget_Dissolve")]),
     ("RadialWipe", [("DA_RadialWipe", "DA_Widget_RadialWipe")]),
     ("Checkerboard", [("DA_CheckerBoard", "DA_Widget_CheckerBoard")]),
