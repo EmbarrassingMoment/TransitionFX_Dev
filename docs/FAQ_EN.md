@@ -21,12 +21,16 @@ Check the following in order:
 1. **Preset is not set:** Ensure the `Preset` pin of the node is connected. If `nullptr` is passed, an error is logged and `ForceClear` is called internally.
 2. **Material is not assigned:** Open your `TransitionPreset` data asset and confirm that `Transition Material` is set. If the material is missing, the transition will not render.
 3. **`Progress` parameter is missing from the material:** All transition materials require a scalar parameter named `Progress`. If it does not exist, the effect will not animate (a warning is output to the log).
-4. **Effect Class is not set:** Confirm that `Effect Class` is set to `PostProcessTransitionEffect` (or your custom effect class).
+4. **Effect Class is not set:** Confirm that `Effect Class` is set to `PostProcessTransitionEffect` or `WidgetTransitionEffect` (or your custom effect class). `WidgetTransitionEffect` requires a UI-domain material (`MI_Widget_*`); a PostProcess material will not render on the widget layer.
 5. **Post Process settings conflict:** If your project already uses a Post Process Volume with extreme settings, it may visually interfere. Check the `Priority` value in the preset (default: 1000).
 
 ### Q: The transition freezes when the game is paused.
 
 Set `bTickWhenPaused` to `true` in your `TransitionPreset`. By default, this is `false`, meaning the transition stops ticking when the game is paused. If you use transitions on a pause menu, you must enable this flag.
+
+### Q: The transition plays behind my UMG widgets / HUD.
+
+That is the expected behavior of the default `PostProcessTransitionEffect`: PostProcess runs before Slate, so UI drawn above the viewport is never covered. Use one of the widget-layer presets (`DA_Widget_Fade`, `DA_Widget_Iris`, `DA_Widget_LinearWipe`, `DA_Widget_Dissolve`, `DA_Widget_RadialWipe`, `DA_Widget_CheckerBoard`, `DA_Widget_Blinds`, `DA_Widget_TextureMask`, `DA_Widget_FadeToBlack`) — they use `WidgetTransitionEffect`, which renders the same material on a full-screen overlay above your UI. If your own widgets still appear on top, raise the preset's `WidgetZOrder` (default `10000`). Effects that resample the scene (Pixelate) have no widget-layer variant; for those, hide the UI from `OnTransitionStarted` instead.
 
 ### Q: I get an error about a missing Material Instance.
 

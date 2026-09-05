@@ -99,6 +99,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX")
 	float Priority;
 
+	/**
+	 * Z-order of the full-screen overlay when EffectClass is a widget-layer effect
+	 * (e.g. WidgetTransitionEffect). UMG's AddToViewport uses ZOrder + 10 internally,
+	 * so keep this well above your UI to ensure the transition covers it.
+	 * Ignored by PostProcess-based effects.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX|Widget")
+	int32 WidgetZOrder = 10000;
+
 	/** The sound to play (Optional). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
 	TObjectPtr<USoundBase> TransitionSound;

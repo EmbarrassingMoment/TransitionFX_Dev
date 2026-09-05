@@ -34,6 +34,7 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 ## Features
 *   **UE 5.5+ Native:** Optimized for the latest Unreal Engine features.
 *   **Procedural Rendering:** Texture-less SDF-based rendering ensures no degradation at any resolution and automatically corrects aspect ratio distortion.
+*   **Two Rendering Paths:** PostProcess (default) or a full-screen widget-layer overlay that also covers UMG/Slate UI — switch by preset, same Blueprint API. See [Widget-Layer Variants](#widget-layer-variants).
 *   **Design-First Workflow:**
     *   **Data Asset Driven:** Manage transition patterns, duration, and curves as reusable "Presets".
     *   **Auto Input Blocking:** Automatically handles player input blocking during transitions.
@@ -93,8 +94,8 @@ Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
 
 <!-- IMAGE: quickstart_create_data_asset.png - Screenshot of Content Browser showing Data Asset creation flow -->
 
-*   **Effect Class:** Select `PostProcessTransitionEffect`.
-*   **Transition Material:** Select `M_Transition_Fade` (or `M_Transition_Iris`, `M_Transition_Diamond`, etc.).
+*   **Effect Class:** Select `PostProcessTransitionEffect` (or `WidgetTransitionEffect` to also cover UMG/Slate UI — see [Widget-Layer Variants](#widget-layer-variants)).
+*   **Transition Material:** Select `M_Transition_Fade` (or `M_Transition_Iris`, `M_Transition_Diamond`, etc.). Widget-layer presets use the matching `MI_Widget_*` instance instead.
 *   **Default Duration:** Set duration in seconds (e.g., `1.0`).
 *   **Progress Curve:** (Optional) Set a float curve to control the ease-in/out of the transition.
 *   **bAutoBlockInput:** Set to `True` to automatically disable player input during the transition.
@@ -218,6 +219,25 @@ The `TransitionManagerSubsystem` provides several callable functions for advance
 > **Tip for Texture Masks:**
 > When importing your mask textures, ensure you uncheck **sRGB** and set Compression Settings to **Masks (no sRGB)** or **Grayscale** for accurate value reading.
 
+### Widget-Layer Variants
+
+The PostProcess path cannot cover UMG/Slate widgets drawn above the viewport. For the most commonly used effects, a **widget-layer variant** is included: the same SDF material is rendered on a full-screen Slate overlay (`WidgetTransitionEffect`), so the transition covers your UI as well. Pick the `DA_Widget_*` preset instead of the `DA_*` one — the Blueprint API is identical.
+
+| Effect | Widget-layer preset | Material instance |
+| :--- | :--- | :--- |
+| Fade | `DA_Widget_Fade`, `DA_Widget_FadeToBlack` | `MI_Widget_Fade` |
+| Iris | `DA_Widget_Iris` | `MI_Widget_Iris` |
+| Linear Wipe | `DA_Widget_LinearWipe` | `MI_Widget_LinearWipe` |
+| Dissolve | `DA_Widget_Dissolve` | `MI_Widget_Dissolve` |
+| Radial Wipe | `DA_Widget_RadialWipe` | `MI_Widget_RadialWipe` |
+| Checkerboard | `DA_Widget_CheckerBoard` | `MI_Widget_Checkerboard` |
+| Blinds | `DA_Widget_Blinds` | `MI_Widget_Blinds` |
+| Texture Mask | `DA_Widget_TextureMask` | `MI_Widget_TextureMask` |
+
+*   **Widget ZOrder:** Presets expose `WidgetZOrder` (default `10000`). Raise it if your own widgets use a higher Z-order.
+*   **Not available on the widget layer:** effects that resample the scene (**Pixelate**) cannot be reproduced by an overlay. The remaining effects are planned for future releases.
+*   The widget-layer materials live in `Materials/Widget/` and share the SDF logic and the `Progress` / `Invert` / `FadeColor` parameters of their PostProcess counterparts.
+
 ## Transition Timing & Easing
 Control how the transition progresses over time using the `EasingType` property in your Transition Preset.
 
@@ -308,10 +328,10 @@ MaxPoolSizePerEffectClass=3
 ## Limitations & Notes
 
 *   **Single transition at a time:** Only one transition can play at a time. Starting a new transition will replace the currently active one.
-*   **PostProcess-based rendering:** Transitions are rendered as a PostProcess effect. This means:
+*   **PostProcess-based rendering (default path):** `PostProcessTransitionEffect` renders the transition as a PostProcess effect. This means:
     *   The effect is drawn on top of the entire viewport, including debug UI rendered to the viewport.
     *   UMG/Slate widgets rendered above the viewport are **not** covered by the transition.
-    *   If you need to hide UI during transitions, use the `OnTransitionStarted` delegate to manually set widget visibility.
+    *   Use a `DA_Widget_*` preset (`WidgetTransitionEffect`) when the transition must cover UI, or use the `OnTransitionStarted` delegate to manually set widget visibility. See [Widget-Layer Variants](#widget-layer-variants).
 *   **Multiplayer:** TransitionFX operates **locally on each client**. The subsystem runs per GameInstance, so it is inherently client-side. There is no built-in replication or server-side transition control.
 *   **Packaging:** The plugin is included in packaged builds automatically when enabled in the Plugins window. Ensure `TransitionFX` is listed in your `.uproject` file under `Plugins` if you manage plugin references manually.
 
@@ -324,7 +344,7 @@ MaxPoolSizePerEffectClass=3
 
 ### Feature Extensions
 - [x] **Transition Color per Preset** `High` — Expose a default transition color property on presets (e.g., fade-to-white) without requiring parameter overrides at every call
-- [ ] **UMG Widget-Layer Transitions** `High` — An alternative rendering path using a full-screen UMG widget, allowing the transition to cover Slate/UMG UI layers
+- [x] **UMG Widget-Layer Transitions** `High` — An alternative rendering path using a full-screen Slate overlay (`WidgetTransitionEffect`), allowing the transition to cover Slate/UMG UI layers. Shipped for 8 effects first; widget-layer variants of the remaining effects are planned
 - [ ] **Origin Point Override** `Medium` — Allow center-based transitions (Iris, Diamond, Tiles, etc.) to expand from a custom screen-space coordinate
 - [x] **Transition Chaining / Sequencing** `Medium` — A DataAsset-based sequence of presets played back-to-back with optional looping
 - [x] **OnTransitionProgress Delegate** `Medium` — A delegate that broadcasts progress each tick, removing the need to poll `GetCurrentProgress()`. Also includes threshold-based callbacks via `AddProgressThreshold`.
