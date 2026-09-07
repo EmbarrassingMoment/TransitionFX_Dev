@@ -21,12 +21,16 @@ TransitionFX プラグインに関するよくある質問をまとめていま�
 1. **プリセットが設定されていない:** ノードの `Preset` ピンが接続されているか確認してください。`nullptr` が渡された場合、エラーがログに出力され、内部で `ForceClear` が呼ばれます。
 2. **マテリアルが未設定:** `TransitionPreset` データアセットを開き、`Transition Material` が設定されていることを確認してください。マテリアルが設定されていない場合、トランジションは描画されません。
 3. **マテリアルに `Progress` パラメータがない:** すべてのトランジションマテリアルには `Progress` というスカラーパラメータが必要です。存在しない場合、エフェクトはアニメーションしません（警告がログに出力されます）。
-4. **Effect Class が未設定:** `Effect Class` が `PostProcessTransitionEffect`（またはカスタムエフェクトクラス）に設定されていることを確認してください。
+4. **Effect Class が未設定:** `Effect Class` が `PostProcessTransitionEffect` または `WidgetTransitionEffect`（またはカスタムエフェクトクラス）に設定されていることを確認してください。`WidgetTransitionEffect` には UI ドメインのマテリアル（`MI_Widget_*`）が必要で、PostProcess 用マテリアルはウィジェットレイヤーでは描画されません。
 5. **PostProcess 設定の競合:** プロジェクトで既に極端な設定の Post Process Volume を使用している場合、視覚的に干渉する可能性があります。プリセットの `Priority` 値（デフォルト: 1000）を確認してください。
 
 ### Q: ゲームをポーズするとトランジションが止まります。
 
 `TransitionPreset` の `bTickWhenPaused` を `true` に設定してください。デフォルトは `false` で、ゲームがポーズ中はトランジションの Tick が停止します。ポーズメニューでトランジションを使用する場合は、このフラグを有効にする必要があります。
+
+### Q: トランジションが UMG ウィジェット / HUD の後ろで再生されます。
+
+既定の `PostProcessTransitionEffect` ではそれが正常な挙動です。PostProcess は Slate より前に処理されるため、ビューポートの上に描画される UI は覆われません。ウィジェットレイヤー版プリセット（`DA_Widget_Fade`、`DA_Widget_Iris`、`DA_Widget_LinearWipe`、`DA_Widget_Dissolve`、`DA_Widget_RadialWipe`、`DA_Widget_CheckerBoard`、`DA_Widget_Blinds`、`DA_Widget_TextureMask`、`DA_Widget_FadeToBlack`）を使ってください。これらは `WidgetTransitionEffect` で同じマテリアルを UI の上のフルスクリーンオーバーレイに描画します。それでも自作ウィジェットが手前に出る場合は、プリセットの `WidgetZOrder`（既定 `10000`）を上げてください。シーンを再サンプリングするエフェクト（Pixelate）にはウィジェットレイヤー版がないため、その場合は `OnTransitionStarted` で UI を非表示にしてください。
 
 ### Q: マテリアルインスタンスが見つからないというエラーが出ます。
 

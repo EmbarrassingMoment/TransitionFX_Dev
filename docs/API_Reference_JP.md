@@ -7,7 +7,7 @@
 TransitionFXプラグインは、主に以下の2つのコンポーネントで構成されています。
 
 *   **UTransitionManagerSubsystem**: 遷移効果の実行、管理、およびティック処理を行うシングルトンサブシステムです。
-*   **UTransitionPreset**: 遷移効果の設定（エフェクトクラス、マテリアル、持続時間、イージングタイプなど）を定義するデータアセットです。
+*   **UTransitionPreset**: 遷移効果の設定（エフェクトクラス、マテリアル、持続時間、イージングタイプなど）を定義するデータアセットです。`Effect Class` で描画経路を選びます。`PostProcessTransitionEffect`（PostProcess ボリューム、`Priority` で順序付け）か `WidgetTransitionEffect`（UMG/Slate UI も覆うフルスクリーン Slate オーバーレイ、`WidgetZOrder`（既定 10000）で順序付け、`MI_Widget_*` などの UI ドメインマテリアルが必要）です。
 
 ## 2. ブループリントAPI (Blueprint API Reference)
 

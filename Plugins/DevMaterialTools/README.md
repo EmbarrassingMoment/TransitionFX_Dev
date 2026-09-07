@@ -31,6 +31,22 @@ usage = unreal.DevMaterialTools.create_named_reroute_usage(mat, decl, 200, 0)
 unreal.DevMaterialTools.get_named_reroute_usage_display_name(usage)
 ```
 
+## Widget Blueprint ヘルパー (DevBlueprintTools)
+
+`UWidgetTree` は Python から見えないため、ウィジェットの生成とルート設定だけ C++ で肩代わりする。
+生成後の `UWidget` は通常の UMG API (`add_child_to_canvas`, スロットの setter, `set_text` ...) で組める。
+
+```python
+wbp = tools.create_asset("WBP_X", "/Game/Widget", unreal.WidgetBlueprint, factory)  # factory.parent_class で親を指定
+root = unreal.DevBlueprintTools.construct_widget_in_tree(wbp, unreal.CanvasPanel, "RootCanvas", False)
+unreal.DevBlueprintTools.set_widget_tree_root(wbp, root)
+btn = unreal.DevBlueprintTools.construct_widget_in_tree(wbp, unreal.Button, "PlayButton", True)  # True = bIsVariable (BindWidget 用)
+root.add_child_to_canvas(btn)
+unreal.BlueprintEditorLibrary.compile_blueprint(wbp)
+```
+
+利用例: `Tools/build_widget_layer_sample.py`（`WBP_WidgetLayerSample` + `L_WidgetLayerSample` の生成）。
+
 ## メモ
 
 - `IsDeclarationValid()` はエンジン側に `ENGINE_API` が付いておらずプロジェクトモジュールからリンク不可。
