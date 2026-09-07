@@ -16,6 +16,7 @@ This is an Unreal Engine 5.5 plugin project. There are no CLI build scripts — 
 **Testing:** No automated test suite. Test manually using:
 - The `L_ShowCase` level (39 presets: 29 of the 30 PostProcess effects — only `DA_LinearWipe` is not referenced — plus the 9 `DA_Widget_*` presets. The preset list lives in the level Blueprint's `PostProcess` variable — a soft-object array, kept in alphabetical order; `Plugins/DevMaterialTools/Tools/register_widget_presets.py` appends missing widget presets headlessly)
 - The in-editor **Transition Preview Panel** (real-time playback with easing/duration controls)
+- The `L_WidgetLayerSample` level (widget-layer verification: the right half of the screen is an opaque UMG panel and `WBP_WidgetLayerSample` plays each `DA_Widget_*` preset or its PostProcess counterpart, so the coverage difference is obvious. Logic is C++ in the sample project module — `Source/TransitionFX_Dev/WidgetLayerSampleWidget.*` and `WidgetLayerSampleActor.*` — and both assets are regenerated headlessly by `Plugins/DevMaterialTools/Tools/build_widget_layer_sample.py`; see `docs/WIDGET_LAYER_SAMPLE.md`)
 
 ## Architecture
 
