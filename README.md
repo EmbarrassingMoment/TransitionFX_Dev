@@ -237,6 +237,7 @@ The PostProcess path cannot cover UMG/Slate widgets drawn above the viewport. Fo
 *   **Widget ZOrder:** Presets expose `WidgetZOrder` (default `10000`). Raise it if your own widgets use a higher Z-order.
 *   **Not available on the widget layer:** effects that resample the scene (**Pixelate**) cannot be reproduced by an overlay. The remaining effects are planned for future releases.
 *   The widget-layer materials live in `Materials/Widget/` and share the SDF logic and the `Progress` / `Invert` / `FadeColor` parameters of their PostProcess counterparts.
+*   **See the difference:** the sample project's `L_WidgetLayerSample` level puts an opaque UMG panel on the right half of the screen and lets you play each `DA_Widget_*` preset next to its PostProcess counterpart (`docs/WIDGET_LAYER_SAMPLE.md`).
 
 ## Transition Timing & Easing
 Control how the transition progresses over time using the `EasingType` property in your Transition Preset.
