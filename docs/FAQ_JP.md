@@ -32,6 +32,10 @@ TransitionFX プラグインに関するよくある質問をまとめていま�
 
 既定の `PostProcessTransitionEffect` ではそれが正常な挙動です。PostProcess は Slate より前に処理されるため、ビューポートの上に描画される UI は覆われません。ウィジェットレイヤー版プリセット（`DA_Widget_Fade`、`DA_Widget_Iris`、`DA_Widget_LinearWipe`、`DA_Widget_Dissolve`、`DA_Widget_RadialWipe`、`DA_Widget_CheckerBoard`、`DA_Widget_Blinds`、`DA_Widget_TextureMask`、`DA_Widget_FadeToBlack`）を使ってください。これらは `WidgetTransitionEffect` で同じマテリアルを UI の上のフルスクリーンオーバーレイに描画します。それでも自作ウィジェットが手前に出る場合は、プリセットの `WidgetZOrder`（既定 `10000`）を上げてください。シーンを再サンプリングするエフェクト（Pixelate）にはウィジェットレイヤー版がないため、その場合は `OnTransitionStarted` で UI を非表示にしてください。
 
+### Q: ウィジェットレイヤー版マテリアル（`MI_Widget_*`）が Transition Preview Panel に表示されません。
+
+既知の制限です。エディタのプレビューツールは PostProcess ボリューム経由でマテリアルを描画し、`Materials/Instances/` にある PostProcess ドメインのインスタンスだけを一覧するため、UI ドメインの `MI_Widget_*` はプレビューできません。ウィジェットレイヤー版プリセットの確認は PIE で行ってください。`L_ShowCase` サンプルレベルにはすべての `DA_Widget_*` プリセットが登録されており、`L_WidgetLayerSample` では PostProcess 版との覆い方の違いを並べて確認できます。
+
 ### Q: マテリアルインスタンスが見つからないというエラーが出ます。
 
 以下の原因が考えられます：
