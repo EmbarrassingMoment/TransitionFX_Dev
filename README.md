@@ -148,6 +148,10 @@ The `Invert` flag flips which area of the screen is covered — it is **not** th
 
 For complex effects like "Fade to Black → Iris Open → Dissolve In", create a `TransitionSequence` data asset.
 
+![Sequence sample: Fade (Forward) followed by Hexagon (Reverse)](docs/images/sequence_fade_hexagon.gif)
+
+*The bundled `DA_SequenceSamples` asset: `DA_Fade` Forward, then `DA_Hexagon` Reverse, played back-to-back with one `Play Sequence And Wait` call.*
+
 ### Creating a Sequence
 1. Right-click in Content Browser > `Miscellaneous` > `Data Asset` > `TransitionSequence`.
 2. Add entries to the `Entries` array. Each entry specifies:
@@ -238,6 +242,10 @@ The PostProcess path cannot cover UMG/Slate widgets drawn above the viewport. Fo
 *   **Not available on the widget layer:** effects that resample the scene (**Pixelate**) cannot be reproduced by an overlay. The remaining effects are planned for future releases.
 *   The widget-layer materials live in `Materials/Widget/` and share the SDF logic and the `Progress` / `Invert` / `FadeColor` parameters of their PostProcess counterparts.
 *   **See the difference:** the sample project's `L_WidgetLayerSample` level puts an opaque UMG panel on the right half of the screen and lets you play each `DA_Widget_*` preset next to its PostProcess counterpart (`docs/WIDGET_LAYER_SAMPLE.md`).
+
+| PostProcess (`DA_Iris`) — the UMG panel stays visible | Widget layer (`DA_Widget_Iris`) — the UMG panel is covered too |
+| :--- | :--- |
+| ![PostProcess Iris over UMG](docs/images/widget_layer_postprocess_iris.gif) | ![Widget-layer Iris over UMG](docs/images/widget_layer_widget_iris.gif) |
 
 ## Transition Timing & Easing
 Control how the transition progresses over time using the `EasingType` property in your Transition Preset.

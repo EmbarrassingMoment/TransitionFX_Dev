@@ -155,6 +155,10 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 「フェード → アイリスオープン → ディゾルブイン」のような複合的な演出は、`TransitionSequence` データアセットで実現できます。
 
+![シーケンスのサンプル: Fade (Forward) → Hexagon (Reverse)](docs/images/sequence_fade_hexagon.gif)
+
+*同梱の `DA_SequenceSamples`: `DA_Fade` を Forward、続けて `DA_Hexagon` を Reverse で再生。`Play Sequence And Wait` 1 回の呼び出しで連続再生されます。*
+
 ### シーケンスの作成
 1. Content Browser を右クリック > `Miscellaneous` > `Data Asset` > `TransitionSequence` を選択します。
 2. `Entries` 配列にエントリを追加します。各エントリは以下を指定できます：
@@ -245,6 +249,10 @@ PostProcess 経路ではビューポートの上に描画される UMG/Slate ウ
 *   **ウィジェットレイヤーで利用できないエフェクト:** シーンを再サンプリングするエフェクト（**Pixelate**）はオーバーレイでは再現できません。それ以外のエフェクトのウィジェットレイヤー版は今後のリリースで追加予定です。
 *   ウィジェットレイヤー版のマテリアルは `Materials/Widget/` にあり、SDF ロジックと `Progress` / `Invert` / `FadeColor` パラメータは PostProcess 版と共通です。
 *   **違いを確認する:** サンプルプロジェクトの `L_WidgetLayerSample` レベルは画面右半分に不透明な UMG パネルを置き、各 `DA_Widget_*` プリセットと PostProcess 版を並べて再生できます（`docs/WIDGET_LAYER_SAMPLE.md`）。
+
+| PostProcess 版（`DA_Iris`）— UMG パネルは見えたまま | ウィジェットレイヤー版（`DA_Widget_Iris`）— UMG パネルごと覆われる |
+| :--- | :--- |
+| ![PostProcess Iris over UMG](docs/images/widget_layer_postprocess_iris.gif) | ![Widget-layer Iris over UMG](docs/images/widget_layer_widget_iris.gif) |
 
 ## Transition Timing & Easing (イージングとタイミング)
 Transition Presetの`EasingType`プロパティを使用して、トランジションが時間とともにどのように進行するかを制御します。
