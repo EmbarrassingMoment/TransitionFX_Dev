@@ -155,6 +155,10 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 「フェード → アイリスオープン → ディゾルブイン」のような複合的な演出は、`TransitionSequence` データアセットで実現できます。
 
+![シーケンスのサンプル: Fade (Forward) → Hexagon (Reverse)](docs/images/sequence_fade_hexagon.gif)
+
+*同梱の `DA_SequenceSamples`: `DA_Fade` を Forward、続けて `DA_Hexagon` を Reverse で再生。`Play Sequence And Wait` 1 回の呼び出しで連続再生されます。*
+
 ### シーケンスの作成
 1. Content Browser を右クリック > `Miscellaneous` > `Data Asset` > `TransitionSequence` を選択します。
 2. `Entries` 配列にエントリを追加します。各エントリは以下を指定できます：
@@ -210,7 +214,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | **Polka Dots** | 拡大する円（ハーフトーンパターン）の波が画面を覆います。ポップでモダンな外観。 | ![Polka Dots](docs/images/effect_polka_dots.gif) |
 | **Blinds** | スタイリッシュなストライプ/ベネチアンブラインド効果。ストライプが拡大・結合して画面を覆います。 | ![Blinds](docs/images/effect_blinds.gif) |
 | **Slice** | 画面が短冊（ストリップ）状に分割され、交互に反対方向へスライドしながら画面外へ抜けていくトランジション。分割数、方向、エッジの柔らかさ、タイミングのずれを調整可能。 | ![Slice](docs/images/effect_slice.gif) |
-| **Stripe Cascade** | 画面がストライプ状に分割され、1本ずつ遅延を伴って順番にワイプが流れていくトランジション。分割数、方向（4方向）、ストライプ間の遅延、エッジの柔らかさを調整可能。 | — |
+| **Stripe Cascade** | 画面がストライプ状に分割され、1本ずつ遅延を伴って順番にワイプが流れていくトランジション。分割数、方向（4方向）、ストライプ間の遅延、エッジの柔らかさを調整可能。 | ![Stripe Cascade](docs/images/effect_stripe_cascade.gif) |
 | **Spiral** | 中央に渦巻く催眠的なスパイラル効果。回転スピンと開始角度を調整可能。 | ![Spiral](docs/images/effect_spiral.gif) |
 | **Random Tiles** | プロシージャルノイズを使用して、グリッドタイルがランダムな順序で現れる確率的なトランジション。 | ![Random Tiles](docs/images/effect_random_tiles.gif) |
 | **Dissolve** | プロシージャルノイズを使用し、画面が霧や砂のように溶けていく王道のトランジション。最小限のマージン設定によりリニアなアニメーションを実現。 | ![Dissolve](docs/images/effect_dissolve.gif) |
@@ -246,6 +250,10 @@ PostProcess 経路ではビューポートの上に描画される UMG/Slate ウ
 *   **Transition Preview Panel では表示されません:** エディタのプレビューツールは PostProcess ボリューム経由で描画し、`MI_Transition_*` のみを一覧するため、`MI_Widget_*` はプレビューできません。ウィジェットレイヤー版プリセットの確認は PIE（`L_ShowCase` または `L_WidgetLayerSample`）で行ってください。
 *   ウィジェットレイヤー版のマテリアルは `Materials/Widget/` にあり、SDF ロジックと `Progress` / `Invert` / `FadeColor` パラメータは PostProcess 版と共通です。
 *   **違いを確認する:** サンプルプロジェクトの `L_WidgetLayerSample` レベルは画面右半分に不透明な UMG パネルを置き、各 `DA_Widget_*` プリセットと PostProcess 版を並べて再生できます（`docs/WIDGET_LAYER_SAMPLE.md`）。
+
+| PostProcess 版（`DA_Iris`）— UMG パネルは見えたまま | ウィジェットレイヤー版（`DA_Widget_Iris`）— UMG パネルごと覆われる |
+| :--- | :--- |
+| ![PostProcess Iris over UMG](docs/images/widget_layer_postprocess_iris.gif) | ![Widget-layer Iris over UMG](docs/images/widget_layer_widget_iris.gif) |
 
 ## Transition Timing & Easing (イージングとタイミング)
 Transition Presetの`EasingType`プロパティを使用して、トランジションが時間とともにどのように進行するかを制御します。
