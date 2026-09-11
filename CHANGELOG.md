@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - README (EN/JA): new *Widget-Layer Variants* section, Quick Start and Limitations updated for the widget path, roadmap item marked as shipped.
+- README (EN/JA): added preview GIFs — Stripe Cascade in the Built-in Effects table, a `DA_SequenceSamples` playback GIF in the Sequence section, and a side-by-side PostProcess vs widget-layer Iris comparison in the Widget-Layer Variants section.
 
 ## [1.4.0] - 2026-09-02
 
