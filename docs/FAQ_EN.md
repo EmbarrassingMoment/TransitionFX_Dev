@@ -32,6 +32,10 @@ Set `bTickWhenPaused` to `true` in your `TransitionPreset`. By default, this is 
 
 That is the expected behavior of the default `PostProcessTransitionEffect`: PostProcess runs before Slate, so UI drawn above the viewport is never covered. Use one of the widget-layer presets (`DA_Widget_Fade`, `DA_Widget_Iris`, `DA_Widget_LinearWipe`, `DA_Widget_Dissolve`, `DA_Widget_RadialWipe`, `DA_Widget_CheckerBoard`, `DA_Widget_Blinds`, `DA_Widget_TextureMask`, `DA_Widget_FadeToBlack`) — they use `WidgetTransitionEffect`, which renders the same material on a full-screen overlay above your UI. If your own widgets still appear on top, raise the preset's `WidgetZOrder` (default `10000`). Effects that resample the scene (Pixelate) have no widget-layer variant; for those, hide the UI from `OnTransitionStarted` instead.
 
+### Q: The widget-layer materials (`MI_Widget_*`) do not appear in the Transition Preview Panel.
+
+This is a known limitation. The editor preview tool renders materials through a PostProcess volume and only lists the PostProcess-domain instances in `Materials/Instances/`, so the UI-domain `MI_Widget_*` materials cannot be previewed there. Verify widget-layer presets in PIE instead: the `L_ShowCase` sample level includes all `DA_Widget_*` presets, and `L_WidgetLayerSample` shows the coverage difference against the PostProcess path side by side.
+
 ### Q: I get an error about a missing Material Instance.
 
 This typically occurs when:

@@ -247,6 +247,7 @@ PostProcess 経路ではビューポートの上に描画される UMG/Slate ウ
 
 *   **Widget ZOrder:** プリセットの `WidgetZOrder`（既定 `10000`）で重ね順を指定できます。自作ウィジェットがこれより大きい Z-order を使う場合は値を上げてください。
 *   **ウィジェットレイヤーで利用できないエフェクト:** シーンを再サンプリングするエフェクト（**Pixelate**）はオーバーレイでは再現できません。それ以外のエフェクトのウィジェットレイヤー版は今後のリリースで追加予定です。
+*   **Transition Preview Panel では表示されません:** エディタのプレビューツールは PostProcess ボリューム経由で描画し、`MI_Transition_*` のみを一覧するため、`MI_Widget_*` はプレビューできません。ウィジェットレイヤー版プリセットの確認は PIE（`L_ShowCase` または `L_WidgetLayerSample`）で行ってください。
 *   ウィジェットレイヤー版のマテリアルは `Materials/Widget/` にあり、SDF ロジックと `Progress` / `Invert` / `FadeColor` パラメータは PostProcess 版と共通です。
 *   **違いを確認する:** サンプルプロジェクトの `L_WidgetLayerSample` レベルは画面右半分に不透明な UMG パネルを置き、各 `DA_Widget_*` プリセットと PostProcess 版を並べて再生できます（`docs/WIDGET_LAYER_SAMPLE.md`）。
 
