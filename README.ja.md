@@ -45,6 +45,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 ## Features
 *   **UE 5.5+ Native:** 最新のUnreal Engine向けです。
 *   **Procedural Rendering:** テクスチャレスなSDFベースのレンダリングにより、あらゆる解像度で劣化せず、アスペクト比の歪みを自動的に補正します。
+*   **2 つの描画経路:** PostProcess（既定）に加え、UMG/Slate UI ごと覆えるフルスクリーンのウィジェットレイヤー版を用意。プリセットで切り替えるだけで Blueprint API は共通です。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照。
 *   **Design-First Workflow:**
     *   **Data Asset Driven:** トランジションパターン、持続時間、カーブを再利用可能な「プリセット」として管理します。
     *   **Auto Input Blocking:** トランジション中のプレイヤー入力ブロックを自動的に処理します。
@@ -100,8 +101,8 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 <!-- IMAGE: quickstart_create_data_asset.png - Content Browser で Data Asset を作成する手順のスクリーンショット -->
 
-*   **Effect Class:** `PostProcessTransitionEffect`を選択します。
-*   **Transition Material:** `M_Transition_Fade`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。
+*   **Effect Class:** `PostProcessTransitionEffect`を選択します（UMG/Slate UI も覆いたい場合は `WidgetTransitionEffect`。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照）。
+*   **Transition Material:** `M_Transition_Fade`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。ウィジェットレイヤー版のプリセットでは対応する `MI_Widget_*` インスタンスを使用します。
 *   **Default Duration:** 秒単位で時間を設定します（例：`1.0`）。
 *   **Progress Curve:** (任意) トランジションのイージングを制御するためのフロートカーブを設定します。
 *   **bAutoBlockInput:** トランジション中のプレイヤー入力を自動的に無効にするには `True` に設定します。
@@ -153,6 +154,10 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 ## トランジションシーケンス
 
 「フェード → アイリスオープン → ディゾルブイン」のような複合的な演出は、`TransitionSequence` データアセットで実現できます。
+
+![シーケンスのサンプル: Fade (Forward) → Hexagon (Reverse)](docs/images/sequence_fade_hexagon.gif)
+
+*同梱の `DA_SequenceSamples`: `DA_Fade` を Forward、続けて `DA_Hexagon` を Reverse で再生。`Play Sequence And Wait` 1 回の呼び出しで連続再生されます。*
 
 ### シーケンスの作成
 1. Content Browser を右クリック > `Miscellaneous` > `Data Asset` > `TransitionSequence` を選択します。
@@ -209,7 +214,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | **Polka Dots** | 拡大する円（ハーフトーンパターン）の波が画面を覆います。ポップでモダンな外観。 | ![Polka Dots](docs/images/effect_polka_dots.gif) |
 | **Blinds** | スタイリッシュなストライプ/ベネチアンブラインド効果。ストライプが拡大・結合して画面を覆います。 | ![Blinds](docs/images/effect_blinds.gif) |
 | **Slice** | 画面が短冊（ストリップ）状に分割され、交互に反対方向へスライドしながら画面外へ抜けていくトランジション。分割数、方向、エッジの柔らかさ、タイミングのずれを調整可能。 | ![Slice](docs/images/effect_slice.gif) |
-| **Stripe Cascade** | 画面がストライプ状に分割され、1本ずつ遅延を伴って順番にワイプが流れていくトランジション。分割数、方向（4方向）、ストライプ間の遅延、エッジの柔らかさを調整可能。 | — |
+| **Stripe Cascade** | 画面がストライプ状に分割され、1本ずつ遅延を伴って順番にワイプが流れていくトランジション。分割数、方向（4方向）、ストライプ間の遅延、エッジの柔らかさを調整可能。 | ![Stripe Cascade](docs/images/effect_stripe_cascade.gif) |
 | **Spiral** | 中央に渦巻く催眠的なスパイラル効果。回転スピンと開始角度を調整可能。 | ![Spiral](docs/images/effect_spiral.gif) |
 | **Random Tiles** | プロシージャルノイズを使用して、グリッドタイルがランダムな順序で現れる確率的なトランジション。 | ![Random Tiles](docs/images/effect_random_tiles.gif) |
 | **Dissolve** | プロシージャルノイズを使用し、画面が霧や砂のように溶けていく王道のトランジション。最小限のマージン設定によりリニアなアニメーションを実現。 | ![Dissolve](docs/images/effect_dissolve.gif) |
@@ -224,6 +229,31 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 > **Texture Mask（テクスチャマスク）のヒント:**
 > マスクテクスチャをインポートする際は、正確な値を読み取るために **sRGB** のチェックを外し（sRGBオフ）、Compression Settings（圧縮設定）を **Masks (no sRGB)** または **Grayscale** に設定してください。
+
+### ウィジェットレイヤー版
+
+PostProcess 経路ではビューポートの上に描画される UMG/Slate ウィジェットを覆えません。利用頻度の高いエフェクトには**ウィジェットレイヤー版**を同梱しています。同じ SDF マテリアルをフルスクリーンの Slate オーバーレイ（`WidgetTransitionEffect`）に描画するため、UI ごとトランジションで覆えます。`DA_*` の代わりに `DA_Widget_*` プリセットを選ぶだけで、Blueprint API は共通です。
+
+| エフェクト | ウィジェットレイヤー版プリセット | マテリアルインスタンス |
+| :--- | :--- | :--- |
+| Fade | `DA_Widget_Fade`、`DA_Widget_FadeToBlack` | `MI_Widget_Fade` |
+| Iris | `DA_Widget_Iris` | `MI_Widget_Iris` |
+| Linear Wipe | `DA_Widget_LinearWipe` | `MI_Widget_LinearWipe` |
+| Dissolve | `DA_Widget_Dissolve` | `MI_Widget_Dissolve` |
+| Radial Wipe | `DA_Widget_RadialWipe` | `MI_Widget_RadialWipe` |
+| Checkerboard | `DA_Widget_CheckerBoard` | `MI_Widget_Checkerboard` |
+| Blinds | `DA_Widget_Blinds` | `MI_Widget_Blinds` |
+| Texture Mask | `DA_Widget_TextureMask` | `MI_Widget_TextureMask` |
+
+*   **Widget ZOrder:** プリセットの `WidgetZOrder`（既定 `10000`）で重ね順を指定できます。自作ウィジェットがこれより大きい Z-order を使う場合は値を上げてください。
+*   **ウィジェットレイヤーで利用できないエフェクト:** シーンを再サンプリングするエフェクト（**Pixelate**）はオーバーレイでは再現できません。それ以外のエフェクトのウィジェットレイヤー版は今後のリリースで追加予定です。
+*   **Transition Preview Panel では表示されません:** エディタのプレビューツールは PostProcess ボリューム経由で描画し、`MI_Transition_*` のみを一覧するため、`MI_Widget_*` はプレビューできません。ウィジェットレイヤー版プリセットの確認は PIE（`L_ShowCase` または `L_WidgetLayerSample`）で行ってください。
+*   ウィジェットレイヤー版のマテリアルは `Materials/Widget/` にあり、SDF ロジックと `Progress` / `Invert` / `FadeColor` パラメータは PostProcess 版と共通です。
+*   **違いを確認する:** サンプルプロジェクトの `L_WidgetLayerSample` レベルは画面右半分に不透明な UMG パネルを置き、各 `DA_Widget_*` プリセットと PostProcess 版を並べて再生できます（`docs/WIDGET_LAYER_SAMPLE.md`）。
+
+| PostProcess 版（`DA_Iris`）— UMG パネルは見えたまま | ウィジェットレイヤー版（`DA_Widget_Iris`）— UMG パネルごと覆われる |
+| :--- | :--- |
+| ![PostProcess Iris over UMG](docs/images/widget_layer_postprocess_iris.gif) | ![Widget-layer Iris over UMG](docs/images/widget_layer_widget_iris.gif) |
 
 ## Transition Timing & Easing (イージングとタイミング)
 Transition Presetの`EasingType`プロパティを使用して、トランジションが時間とともにどのように進行するかを制御します。
@@ -315,10 +345,10 @@ MaxPoolSizePerEffectClass=3
 ## 制約事項・注意点
 
 *   **同時再生は 1 つのみ:** トランジションは一度に 1 つだけ再生できます。新しいトランジションを開始すると、現在アクティブなトランジションが置き換えられます。
-*   **PostProcess ベースの描画:** トランジションは PostProcess エフェクトとして描画されます。これにより：
+*   **PostProcess ベースの描画（既定の経路）:** `PostProcessTransitionEffect` はトランジションを PostProcess エフェクトとして描画します。これにより：
     *   エフェクトはビューポート全体の上に描画されます（ビューポートに描画されるデバッグ UI を含む）。
     *   ビューポートの上に描画される UMG/Slate ウィジェットはトランジションで**覆われません**。
-    *   トランジション中に UI を非表示にする必要がある場合は、`OnTransitionStarted` デリゲートを使用してウィジェットの Visibility を手動で設定してください。
+    *   UI ごと覆う必要がある場合は `DA_Widget_*` プリセット（`WidgetTransitionEffect`）を使うか、`OnTransitionStarted` デリゲートでウィジェットの Visibility を手動で設定してください。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照。
 *   **マルチプレイヤー:** TransitionFX は**各クライアントでローカルに動作**します。サブシステムは GameInstance ごとに実行されるため、本質的にクライアントサイドの処理です。レプリケーションやサーバーサイドのトランジション制御は組み込まれていません。
 *   **パッケージング:** プラグインウィンドウで有効になっていれば、パッケージビルドに自動的に含まれます。プラグイン参照を手動で管理している場合は、`.uproject` ファイルの `Plugins` セクションに `TransitionFX` が含まれていることを確認してください。
 
@@ -331,7 +361,7 @@ MaxPoolSizePerEffectClass=3
 
 ### 機能拡張
 - [x] **プリセットごとのトランジションカラー** `High` — プリセットにデフォルトカラーを設定可能にし、毎回パラメータオーバーライドを渡さずにフェード先の色（白など）を指定できるようにする
-- [ ] **UMG ウィジェットレイヤートランジション** `High` — フルスクリーン UMG ウィジェットを使用した代替レンダリングパスにより、Slate/UMG UI レイヤーもトランジションで覆えるようにする
+- [x] **UMG ウィジェットレイヤートランジション** `High` — フルスクリーン Slate オーバーレイ（`WidgetTransitionEffect`）による代替レンダリングパスで、Slate/UMG UI レイヤーもトランジションで覆えるようにする。まず 8 エフェクトで提供し、残りのエフェクトのウィジェットレイヤー版は今後追加予定
 - [ ] **原点オーバーライド** `Medium` — Iris、Diamond、Tiles などの中心ベースのトランジションを、任意のスクリーン座標から展開できるようにする
 - [x] **トランジションチェイン / シーケンス** `Medium` — DataAsset ベースでプリセットを連続再生し、任意でループも可能
 - [x] **OnTransitionProgress デリゲート** `Medium` — 毎ティックの進捗値をブロードキャストするデリゲートにより、`GetCurrentProgress()` のポーリングを不要にする。`AddProgressThreshold` による閾値コールバックも追加済み。

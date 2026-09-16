@@ -9,6 +9,9 @@
 #include "Engine/World.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/Widget.h"
+#include "WidgetBlueprint.h"
 
 namespace
 {
@@ -156,4 +159,40 @@ bool UDevBlueprintTools::SetSoftObjectArrayProperty(UObject* Object, FName Prope
 
 	Object->MarkPackageDirty();
 	return true;
+}
+
+UWidget* UDevBlueprintTools::ConstructWidgetInTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UWidget> WidgetClass, FName WidgetName, bool bIsVariable)
+{
+	if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !WidgetClass)
+	{
+		return nullptr;
+	}
+
+	WidgetBlueprint->Modify();
+	WidgetBlueprint->WidgetTree->Modify();
+	UWidget* Widget = WidgetBlueprint->WidgetTree->ConstructWidget<UWidget>(WidgetClass, WidgetName);
+	if (Widget)
+	{
+		Widget->bIsVariable = bIsVariable;
+	}
+	return Widget;
+}
+
+bool UDevBlueprintTools::SetWidgetTreeRoot(UWidgetBlueprint* WidgetBlueprint, UWidget* RootWidget)
+{
+	if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !RootWidget)
+	{
+		return false;
+	}
+
+	WidgetBlueprint->Modify();
+	WidgetBlueprint->WidgetTree->Modify();
+	WidgetBlueprint->WidgetTree->RootWidget = RootWidget;
+	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(WidgetBlueprint);
+	return true;
+}
+
+UWidget* UDevBlueprintTools::GetWidgetTreeRoot(UWidgetBlueprint* WidgetBlueprint)
+{
+	return (WidgetBlueprint && WidgetBlueprint->WidgetTree) ? WidgetBlueprint->WidgetTree->RootWidget : nullptr;
 }

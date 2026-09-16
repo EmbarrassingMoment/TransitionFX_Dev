@@ -8,6 +8,8 @@ The TransitionFX Preview Tool is a tool for directly previewing the 30 types of 
 - **Ideal for capturing GIFs** -- Designed to be used with external capture tools like ScreenToGif with a fixed-size viewport.
 - **Playback control** -- Supports play, reverse, loop, speed adjustment, and manual scrubbing.
 
+> **Limitation: PostProcess materials only.** The preview viewport renders the selected material through a PostProcess volume, so it supports the `MI_Transition_*` (PostProcess domain) materials only. The widget-layer variants (`Materials/Widget/MI_Widget_*`, UI domain) used by the `DA_Widget_*` presets are not listed and cannot be previewed here. Verify them in PIE with the `L_ShowCase` or `L_WidgetLayerSample` sample level instead.
+
 ---
 
 ## 2. How to Open the Tool
@@ -30,12 +32,12 @@ The panel consists of the following sections from top to bottom.
 
 | Control | Description |
 |---|---|
-| **Effect Dropdown** | Selects the transition effect included in the plugin. All material instances in `/TransitionFX/Materials/Instances/` are automatically listed. |
+| **Effect Dropdown** | Selects the transition effect included in the plugin. All material instances in `/TransitionFX/Materials/Instances/` are automatically listed. Widget-layer instances in `/TransitionFX/Materials/Widget/Instances/` (`MI_Widget_*`) are not listed (see the limitation in section 1). |
 | **Invert Checkbox** | Inverts the transition mask. For example, switches an effect where the "screen is covered in black" to the direction "returning from black". |
 
 ### 3.2 Preview Viewport
 
-The transition effect is drawn as a post-process material on a white background. The size can be changed with the **Size** dropdown at the bottom.
+The transition effect is drawn as a post-process material on a white background. The size can be changed with the **Size** dropdown at the bottom. Because the viewport is PostProcess-based, UI-domain materials (`MI_Widget_*`) would not render even if assigned.
 
 ### 3.3 Progress Slider
 
@@ -103,6 +105,7 @@ The transition material must work as a **Post Process Material**.
 
 - Set the material's **Material Domain** to `Post Process`.
 - Set the material's **Blendable Location** to `After Tonemapping`.
+- UI-domain materials (the `M_Widget_*` / `MI_Widget_*` widget-layer variants) cannot be previewed with this tool.
 
 ### 5.2 Required Parameters
 

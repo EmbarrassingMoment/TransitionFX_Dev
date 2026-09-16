@@ -545,6 +545,8 @@ Set Visibility (HUD Widget)
 └─ Visibility: Hidden
 ```
 
+> **Tip:** If you only need the transition to cover the HUD, you can skip this pattern and use a widget-layer preset (`DA_Widget_*`, `WidgetTransitionEffect`) instead — the overlay is drawn above UMG/Slate UI. See *Widget-Layer Variants* in the README.
+
 **OnTransitionCompleted: Switching the level's state after a fade-out is complete**
 
 This is equivalent to the `Completed` pin of `Play Transition And Wait` (Mode: Forward), but using a delegate allows you to separate the caller from the processing.

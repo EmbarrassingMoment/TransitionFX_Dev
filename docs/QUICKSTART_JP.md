@@ -545,6 +545,8 @@ Set Visibility (HUD Widget)
 └─ Visibility: Hidden
 ```
 
+> **Tip:** HUD をトランジションで覆いたいだけなら、このパターンの代わりにウィジェットレイヤー版プリセット（`DA_Widget_*`、`WidgetTransitionEffect`）を使えます。オーバーレイは UMG/Slate UI の上に描画されます。README の「ウィジェットレイヤー版」を参照してください。
+
 **OnTransitionCompleted：フェードアウト完了後にレベルの状態を切り替える**
 
 `Play Transition And Wait`（Mode: Forward）の `Completed` ピンと同等ですが、デリゲートを使うことで呼び出し元と処理を分離できます。

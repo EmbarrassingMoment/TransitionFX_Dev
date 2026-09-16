@@ -8,7 +8,7 @@ TransitionFX プラグインに含まれる全トランジションエフェク�
 - **ウィジェット**: `Content/Widget/WBP_ShowCase.uasset`
 
 ShowCase レベルを PIE (Play In Editor) で実行すると、画面下部に操作パネルが表示される。
-ボタン操作で全 30 種のトランジションプリセットを切り替え・再生できる。
+ボタン操作で 39 種のトランジションプリセット（PostProcess 版 30 種 + ウィジェットレイヤー版 9 種）を切り替え・再生できる。
 
 ## 操作方法
 
@@ -62,6 +62,17 @@ TVSwitchOff, WavyCurtain, Wind, Pixelate, Split, SlidingDoor, Fan, Slice, Dissol
 TextureMask, StripeCascade, FadeToBlack
 
 > **Note:** `DA_LinearWipe` はプラグインに含まれるが、現在の ShowCase レベルからは参照されていない（唯一の未収録エフェクト）。
+
+## ウィジェットレイヤー版プリセット (9 種)
+
+`WidgetTransitionEffect` を使う `DA_Widget_*` プリセットもリストに含まれ、`DA_WavyCurtain` と `DA_Wind` の間にアルファベット順で並ぶ（一覧の 30〜38 番目）。
+
+Widget_Blinds, Widget_CheckerBoard, Widget_Dissolve, Widget_Fade, Widget_FadeToBlack, Widget_Iris,
+Widget_LinearWipe, Widget_RadialWipe, Widget_TextureMask
+
+これらは操作パネル（UMG）ごと画面を覆うので、再生中はパネルが見えなくなるのが正しい挙動。
+追加・更新は `Plugins/DevMaterialTools/Tools/build_widget_material.py`（アセット生成）と
+`register_widget_presets.py`（レベル登録）をエディタを閉じた状態でヘッドレス実行する。
 
 ## 注意事項
 

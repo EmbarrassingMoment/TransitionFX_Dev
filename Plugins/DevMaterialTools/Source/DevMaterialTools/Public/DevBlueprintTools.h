@@ -5,6 +5,8 @@
 #include "DevBlueprintTools.generated.h"
 
 class UBlueprint;
+class UWidget;
+class UWidgetBlueprint;
 
 /**
  * Local-only helpers for Python-driven Blueprint graph inspection/editing.
@@ -43,4 +45,21 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "DevBlueprintTools")
 	static bool SetSoftObjectArrayProperty(UObject* Object, FName PropertyName, const TArray<TSoftObjectPtr<UObject>>& Values);
+
+	/**
+	 * Constructs a widget inside the Widget Blueprint's WidgetTree (UWidgetTree is not
+	 * reachable from Python). The returned UWidget can be configured and parented from
+	 * Python through the regular UMG API (PanelWidget.add_child, slot setters, ...).
+	 * bIsVariable=true makes it a named member so BindWidget properties can resolve it.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "DevBlueprintTools")
+	static UWidget* ConstructWidgetInTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UWidget> WidgetClass, FName WidgetName, bool bIsVariable = false);
+
+	/** Makes the widget the root of the Widget Blueprint's tree and marks the Blueprint structurally modified. */
+	UFUNCTION(BlueprintCallable, Category = "DevBlueprintTools")
+	static bool SetWidgetTreeRoot(UWidgetBlueprint* WidgetBlueprint, UWidget* RootWidget);
+
+	/** Returns the current root widget of the Widget Blueprint's tree (nullptr when empty). */
+	UFUNCTION(BlueprintCallable, Category = "DevBlueprintTools")
+	static UWidget* GetWidgetTreeRoot(UWidgetBlueprint* WidgetBlueprint);
 };
