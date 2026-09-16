@@ -140,7 +140,7 @@ void UWidgetLayerSampleWidget::Play(const TArray<TSoftObjectPtr<UTransitionPrese
 
 	bIsPlaying = true;
 	Manager->StartTransition(Preset, ETransitionMode::Forward, 1.0f, /*bInvert=*/false, /*bHoldAtMax=*/true);
-	SetStatus(FString::Printf(TEXT("Playing %s (%s): Forward -> Hold %.1fs -> Reverse"),
+	SetStatus(FString::Printf(TEXT("Playing %s (%s): FadeOut (Forward) -> Hold %.1fs -> FadeIn (Forward, Invert)"),
 		*Preset->GetName(), *LayerLabel, HoldDuration));
 }
 
@@ -151,14 +151,18 @@ void UWidgetLayerSampleWidget::HandleTransitionHoldStarted()
 		return;
 	}
 
+	// Fade in by flipping the mask and replaying forward (0 -> 1) instead of rewinding
+	// the progress (Reverse). This is the same FadeOut -> FadeIn pattern the runtime uses
+	// for OpenLevelWithTransition, so the sample exercises the Invert path of the widget
+	// materials as well. bAutoComplete=true lets the fade-in finish and auto-stop.
 	TWeakObjectPtr<UWidgetLayerSampleWidget> WeakThis(this);
-	auto Reverse = [WeakThis]()
+	auto FadeIn = [WeakThis]()
 	{
 		if (UWidgetLayerSampleWidget* Self = WeakThis.Get())
 		{
 			if (UTransitionManagerSubsystem* Manager = Self->GetTransitionManager())
 			{
-				Manager->ReverseTransition(/*bAutoStop=*/true);
+				Manager->InvertTransition(/*bAutoComplete=*/true);
 			}
 		}
 	};
@@ -166,10 +170,10 @@ void UWidgetLayerSampleWidget::HandleTransitionHoldStarted()
 	UWorld* World = GetWorld();
 	if (HoldDuration <= 0.0f || !World)
 	{
-		Reverse();
+		FadeIn();
 		return;
 	}
-	World->GetTimerManager().SetTimer(HoldTimerHandle, FTimerDelegate::CreateLambda(Reverse), HoldDuration, false);
+	World->GetTimerManager().SetTimer(HoldTimerHandle, FTimerDelegate::CreateLambda(FadeIn), HoldDuration, false);
 }
 
 void UWidgetLayerSampleWidget::HandleTransitionCompleted()

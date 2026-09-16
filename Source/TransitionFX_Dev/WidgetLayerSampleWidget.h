@@ -14,8 +14,9 @@ class UTransitionManagerSubsystem;
  * L_WidgetLayerSample verification level.
  *
  * The panel cycles through the widget-layer presets (DA_Widget_*) and plays either
- * the selected widget-layer preset or its PostProcess counterpart with the same
- * Forward -> Hold -> Reverse flow as WBP_ShowCase. Comparing the two makes the
+ * the selected widget-layer preset or its PostProcess counterpart as
+ * FadeOut (Forward) -> Hold -> FadeIn (Forward with the mask inverted), i.e. the same
+ * flow OpenLevelWithTransition uses. Comparing the two makes the
  * difference visible: a PostProcess transition leaves this UMG panel untouched,
  * a widget-layer transition covers it together with the rest of the screen.
  *
@@ -36,7 +37,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX|Sample")
 	TArray<TSoftObjectPtr<UTransitionPreset>> PostProcessPresets;
 
-	/** Seconds to stay fully covered before the transition is reversed. */
+	/** Seconds to stay fully covered before the inverted fade-in starts. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX|Sample", meta = (ClampMin = "0.0"))
 	float HoldDuration = 0.3f;
 

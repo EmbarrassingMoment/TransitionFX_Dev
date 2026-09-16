@@ -20,8 +20,10 @@ PIE で実行すると、画面の **右半分が不透明な UMG パネル**、
 | **Play PostProcess** | 左半分（3D ビュー）だけがトランジションで覆われ、右の UMG パネルと操作バーはそのまま見える |
 | **Play Widget Layer** | UMG パネル・操作バー・3D ビューを含む **画面全体** が覆われる |
 
-どちらも `StartTransition(Forward, bHoldAtMax=true)` → `OnTransitionHoldStarted` → `HoldDuration`(0.3s) 待機 →
-`ReverseTransition(bAutoStop=true)` → `OnTransitionCompleted` の流れで再生する（`WBP_ShowCase` と同じ）。
+どちらも `StartTransition(Forward, bHoldAtMax=true)`（FadeOut） → `OnTransitionHoldStarted` → `HoldDuration`(0.3s) 待機 →
+`InvertTransition(bAutoComplete=true)`（マスクを反転して Forward 0→1 で FadeIn） → `OnTransitionCompleted` の流れで再生する。
+`ReverseTransition` で Progress を 1→0 に巻き戻すのではなく、`OpenLevelWithTransition` と同じ
+「Forward のまま Invert で FadeIn」パターンなので、`M_Widget_*` の `Invert` 経路もあわせて検証できる。
 
 ## 操作方法
 
