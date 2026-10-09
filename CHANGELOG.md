@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- README (EN/JA) aligned with the shipped plugin and sample project: Version badge updated to 1.5.0; platform support stated as Win64 only (both modules use `PlatformAllowList`); the PostProcess pipeline requirement scoped to PostProcess presets; sample project requirements updated to UE 5.8 (the plugin itself still supports 5.5+); manual installation now points to `Plugins/TransitionFX` in the Releases ZIP and notes that it is source-only; the easing table shows editor display names alongside enum values and the `Progress Curve` slot name is corrected; `Priority` documented as PostProcess-only; Slice listed as unavailable on the widget layer alongside Pixelate.
+- README (EN/JA) gaps filled: Documentation index, a level-transition step in Quick Start, `bOverrideTransitionColor` / `TransitionColor` in the preset properties, the dedicated `Transition Preset` / `Transition Sequence` Content Browser entries, a complete table of the Blueprint-callable API (including `ReleaseHold`, `InvertTransition`, `ForceClear` and the `TransitionFX.ForceClear` console command), sequence limitations (`bHoldAtMax` unavailable, ignored during a pending level transition), both sample levels, and a Support & Contributing section.
+- Roadmap moved from the READMEs to `docs/ROADMAP_EN.md` / `docs/ROADMAP_JP.md`, split into Planned and Shipped (with the release each item shipped in). The READMEs keep a short summary and a link.
+- README (JA): section headings unified into Japanese, and the Sponsor badge and sample-video link that only the English README had were added.
+- `CLAUDE.md` setup steps updated to the sample project's UE 5.8 requirement.
+
+### Fixed
+
+- README and Quick Start Guide (EN/JA): the `AsyncLoadTransitionPresets` C++ example used `CreateLambda`, which does not exist on the dynamic `FTransitionPreloadCompleteDelegate`, so it did not compile. It now binds a `UFUNCTION` with `BindDynamic`.
+- README: the `PreloadTransitionPresets` note no longer claims dummy materials are rendered for a frame; it describes the temporary dynamic material instance the function actually creates.
+
+### Removed
+
+- Unused preview GIFs `docs/images/effect_heart_iris.gif` and `docs/images/effect_zoom_wipe.gif`, whose effects were removed from the plugin earlier.
+
 ## [1.5.0] - 2026-09-16
 
 ### Added
