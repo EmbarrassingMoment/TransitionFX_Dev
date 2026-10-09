@@ -51,8 +51,8 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 
 *   **Engine Version:** Unreal Engine **5.5** or later. Earlier versions (5.3, 5.4) are not officially supported.
 *   **Project Type:** Works with both **C++ and Blueprint-only** projects. No C++ coding is required for standard use.
-*   **Rendering:** Requires a PostProcess-capable rendering pipeline (Deferred or Forward with PostProcess enabled).
-*   **Platforms:** Windows (DX12 SM6). Console and mobile platforms have not been officially tested — SDF-based effects are GPU-bound, so performance on low-end devices may vary.
+*   **Rendering:** PostProcess presets (`PostProcessTransitionEffect`) require a PostProcess-capable rendering pipeline (Deferred, or Forward with PostProcess enabled). Widget-layer presets (`WidgetTransitionEffect`) draw through Slate instead.
+*   **Platforms:** Win64 only (DirectX 12 / SM6). Both plugin modules are restricted to Win64 by `PlatformAllowList` in `TransitionFX.uplugin`, so the plugin is not built for Mac, Linux, consoles, or mobile. SDF-based effects are GPU-bound, so performance on low-end GPUs may vary.
 
 ## Sample Project
 
@@ -61,13 +61,15 @@ It includes the full plugin source and a showcase level demonstrating 29 of the 
 
 ▶ [Watch the sample video on YouTube](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
 
-**Requirements:** Unreal Engine 5.5, Windows, DirectX 12 / SM6, Visual Studio 2022 (Game Development with C++ workload)
+**Requirements:** Unreal Engine 5.8, Windows, DirectX 12 / SM6, Visual Studio 2022 (Game Development with C++ workload)
+
+> **Note:** The sample project targets UE 5.8 because its build targets use `BuildSettingsVersion.V7`, which requires UE 5.7 or newer. The plugin itself supports UE 5.5 and later.
 
 1. Download `TransitionFX_SampleProject_vX.X.X.zip` from the Releases page.
 2. Extract the zip to a folder (avoid paths with spaces or non-ASCII characters).
 3. Right-click `TransitionFX_Dev.uproject` and select **"Generate Visual Studio project files"**.
 4. Open `TransitionFX_Dev.uproject`. When prompted to rebuild missing modules, click **Yes**.
-5. Once the editor opens, press **Play** in the `L_ShowCase` level to explore all effects.
+5. The editor opens the `L_ShowCase` level by default. Press **Play** to explore the effects.
 
 > **Note:** The first launch will compile shaders, which may take several minutes.
 
@@ -80,9 +82,11 @@ It includes the full plugin source and a showcase level demonstrating 29 of the 
 4. Enable `TransitionFX` in the editor plugins window.
 
 ### Option B: Manual Installation
-1. Download the plugin from the release page.
-2. Place the `TransitionFX` folder into your project's `Plugins` directory.
+1. Download `TransitionFX_SampleProject_vX.X.X.zip` from the [Releases page](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases), or clone this repository.
+2. Copy the `Plugins/TransitionFX` folder into your project's `Plugins` directory (create `Plugins` if it does not exist).
 3. Enable `TransitionFX` in the editor plugins window.
+
+> **Note:** The Releases ZIP contains the plugin as source code only, without prebuilt binaries. It must be compiled for your engine, which requires Visual Studio 2022 with the Game Development with C++ workload. For a prebuilt plugin, use Option A.
 
 ![Plugins window with TransitionFX enabled](docs/images/install_enable_plugin.png)
 
@@ -97,10 +101,10 @@ Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
 *   **Effect Class:** Select `PostProcessTransitionEffect` (or `WidgetTransitionEffect` to also cover UMG/Slate UI — see [Widget-Layer Variants](#widget-layer-variants)).
 *   **Transition Material:** Select `M_Transition_Fade` (or `M_Transition_Iris`, `M_Transition_Diamond`, etc.). Widget-layer presets use the matching `MI_Widget_*` instance instead.
 *   **Default Duration:** Set duration in seconds (e.g., `1.0`).
-*   **Progress Curve:** (Optional) Set a float curve to control the ease-in/out of the transition.
+*   **Easing Type / Progress Curve:** Choose an easing function (default: `Linear`). The `Progress Curve` slot appears only when `Easing Type` is `Custom Curve`; assign your own Float Curve there. See [Transition Timing & Easing](#transition-timing--easing).
 *   **bAutoBlockInput:** Set to `True` to automatically disable player input during the transition.
 *   **bTickWhenPaused:** Set to `True` to allow the transition to play even when the game is paused.
-*   **Priority:** Set the rendering priority (default: 1000).
+*   **Priority:** PostProcess volume priority (default: `1000`). Used only by `PostProcessTransitionEffect`; widget-layer presets use `WidgetZOrder` instead.
 *   **Audio:** (Optional) Assign a Sound asset to play. Includes Volume and Pitch controls.
 
 ![Screenshot of the TransitionPreset detail panel showing all properties](docs/images/quickstart_preset_settings.png)
@@ -239,7 +243,7 @@ The PostProcess path cannot cover UMG/Slate widgets drawn above the viewport. Fo
 | Texture Mask | `DA_Widget_TextureMask` | `MI_Widget_TextureMask` |
 
 *   **Widget ZOrder:** Presets expose `WidgetZOrder` (default `10000`). Raise it if your own widgets use a higher Z-order.
-*   **Not available on the widget layer:** effects that resample the scene (**Pixelate**) cannot be reproduced by an overlay. The remaining effects are planned for future releases.
+*   **Not available on the widget layer:** **Pixelate** and **Slice**. Pixelate resamples the scene, which an overlay cannot reproduce. Slice's material blends the scene in the reverse order from the other effects, which the widget-layer conversion does not support. Widget-layer variants of the remaining effects are planned for future releases.
 *   **Not shown in the Transition Preview Panel:** the editor preview tool renders materials through a PostProcess volume and only lists `MI_Transition_*`, so `MI_Widget_*` materials cannot be previewed there. Check widget-layer presets in PIE (`L_ShowCase` or `L_WidgetLayerSample`) instead.
 *   The widget-layer materials live in `Materials/Widget/` and share the SDF logic and the `Progress` / `Invert` / `FadeColor` parameters of their PostProcess counterparts.
 *   **See the difference:** the sample project's `L_WidgetLayerSample` level puts an opaque UMG panel on the right half of the screen and lets you play each `DA_Widget_*` preset next to its PostProcess counterpart (`docs/WIDGET_LAYER_SAMPLE.md`).
@@ -249,27 +253,27 @@ The PostProcess path cannot cover UMG/Slate widgets drawn above the viewport. Fo
 | ![PostProcess Iris over UMG](docs/images/widget_layer_postprocess_iris.gif) | ![Widget-layer Iris over UMG](docs/images/widget_layer_widget_iris.gif) |
 
 ## Transition Timing & Easing
-Control how the transition progresses over time using the `EasingType` property in your Transition Preset.
+Control how the transition progresses over time using the `Easing Type` (`EasingType`) property in your Transition Preset. Names below are shown as they appear in the editor, with the C++ enum value in parentheses.
 
 > All previews below use the **Iris** effect to isolate the difference in easing behavior.
 
 | Easing Type | Description | Preview |
 | :--- | :--- | :--- |
 | **Linear** | Constant speed (Default). Good for simple fades. | ![Linear](docs/images/easing_linear.gif) |
-| **EaseInSine** | Starts slow, accelerates smoothly. | ![EaseInSine](docs/images/easing_ease_in_sine.gif) |
-| **EaseOutSine** | Starts fast, decelerates smoothly. | ![EaseOutSine](docs/images/easing_ease_out_sine.gif) |
-| **EaseInOutSine** | Smooth acceleration at start and deceleration at end. | ![EaseInOutSine](docs/images/easing_ease_in_out_sine.gif) |
-| **EaseInCubic** | Starts slow with stronger acceleration. | ![EaseInCubic](docs/images/easing_ease_in_cubic.gif) |
-| **EaseOutCubic** | Starts fast with stronger deceleration. | ![EaseOutCubic](docs/images/easing_ease_out_cubic.gif) |
-| **EaseInOutCubic** | Pronounced ease at both ends. | ![EaseInOutCubic](docs/images/easing_ease_in_out_cubic.gif) |
-| **EaseInExpo** | Near-still start, exponential acceleration. | ![EaseInExpo](docs/images/easing_ease_in_expo.gif) |
-| **EaseOutExpo** | Fast start, exponential deceleration. | ![EaseOutExpo](docs/images/easing_ease_out_expo.gif) |
-| **EaseInOutExpo** | Dramatic ease at both ends. | ![EaseInOutExpo](docs/images/easing_ease_in_out_expo.gif) |
-| **EaseOutElastic** | Elastic overshoot at the end of the transition. | ![EaseOutElastic](docs/images/easing_ease_out_elastic.gif) |
-| **EaseOutBounce** | Bouncing effect at the end of the transition. | ![EaseOutBounce](docs/images/easing_ease_out_bounce.gif) |
-| **Custom** | Allows you to supply your own `FloatCurve` asset. | — |
+| **Sine In** (`EaseInSine`) | Starts slow, accelerates smoothly. | ![EaseInSine](docs/images/easing_ease_in_sine.gif) |
+| **Sine Out** (`EaseOutSine`) | Starts fast, decelerates smoothly. | ![EaseOutSine](docs/images/easing_ease_out_sine.gif) |
+| **Sine In/Out** (`EaseInOutSine`) | Smooth acceleration at start and deceleration at end. | ![EaseInOutSine](docs/images/easing_ease_in_out_sine.gif) |
+| **Cubic In** (`EaseInCubic`) | Starts slow with stronger acceleration. | ![EaseInCubic](docs/images/easing_ease_in_cubic.gif) |
+| **Cubic Out** (`EaseOutCubic`) | Starts fast with stronger deceleration. | ![EaseOutCubic](docs/images/easing_ease_out_cubic.gif) |
+| **Cubic In/Out** (`EaseInOutCubic`) | Pronounced ease at both ends. | ![EaseInOutCubic](docs/images/easing_ease_in_out_cubic.gif) |
+| **Expo In** (`EaseInExpo`) | Near-still start, exponential acceleration. | ![EaseInExpo](docs/images/easing_ease_in_expo.gif) |
+| **Expo Out** (`EaseOutExpo`) | Fast start, exponential deceleration. | ![EaseOutExpo](docs/images/easing_ease_out_expo.gif) |
+| **Expo In/Out** (`EaseInOutExpo`) | Dramatic ease at both ends. | ![EaseInOutExpo](docs/images/easing_ease_in_out_expo.gif) |
+| **Elastic Out** (`EaseOutElastic`) | Elastic overshoot at the end of the transition. | ![EaseOutElastic](docs/images/easing_ease_out_elastic.gif) |
+| **Bounce Out** (`EaseOutBounce`) | Bouncing effect at the end of the transition. | ![EaseOutBounce](docs/images/easing_ease_out_bounce.gif) |
+| **Custom Curve** (`Custom`) | Uses your own Float Curve asset assigned to `Progress Curve`. | — |
 
-*Note: The `Transition Curve` slot will only appear when `Custom` is selected.*
+*Note: The `Progress Curve` slot only appears when `Custom Curve` is selected.*
 
 See [easings.net](https://easings.net/) for visualization of these curves.
 
@@ -292,7 +296,7 @@ Pass an array of your most commonly used Transition Presets to this function.
 TArray<UTransitionPreset*> MyPresets = { FadePreset, WipePreset };
 TransitionSubsystem->PreloadTransitionPresets(MyPresets);
 ```
-*This creates dummy materials for a single frame to ensure the GPU is ready.*
+*Each unique material gets one temporary dynamic material instance, which is discarded immediately and never stored.*
 
 **API Reference:**
 *   **Function:** `TransitionManagerSubsystem->PreloadTransitionPresets(TArray<UTransitionPreset*> Presets)`
@@ -309,14 +313,18 @@ It loads the assets in the background, then automatically runs the shader warmup
 **Blueprint Usage:**
 Pass an array of Soft Object References. Connect your logic (e.g., Open Level) to the 'On Complete' delegate pin.
 
+`FTransitionPreloadCompleteDelegate` is a dynamic delegate, so bind it to a `UFUNCTION` with `BindDynamic` (`CreateLambda` is not available for dynamic delegates).
+
 ```cpp
 // C++ Example
+// In your class declaration:
+//   UFUNCTION() void HandleTransitionsReady();
+
 TArray<TSoftObjectPtr<UTransitionPreset>> SoftPresets = { ... };
 
-TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadCompleteDelegate::CreateLambda([]()
-{
-    UE_LOG(LogTransitionFX, Log, TEXT("Assets loaded and shaders ready!"));
-}));
+FTransitionPreloadCompleteDelegate OnComplete;
+OnComplete.BindDynamic(this, &UMyGameInstance::HandleTransitionsReady);
+TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, OnComplete);
 ```
 
 **API Reference:**
@@ -343,7 +351,7 @@ MaxPoolSizePerEffectClass=3
     *   UMG/Slate widgets rendered above the viewport are **not** covered by the transition.
     *   Use a `DA_Widget_*` preset (`WidgetTransitionEffect`) when the transition must cover UI, or use the `OnTransitionStarted` delegate to manually set widget visibility. See [Widget-Layer Variants](#widget-layer-variants).
 *   **Multiplayer:** TransitionFX operates **locally on each client**. The subsystem runs per GameInstance, so it is inherently client-side. There is no built-in replication or server-side transition control.
-*   **Packaging:** The plugin is included in packaged builds automatically when enabled in the Plugins window. Ensure `TransitionFX` is listed in your `.uproject` file under `Plugins` if you manage plugin references manually.
+*   **Packaging:** The plugin is included in packaged Win64 builds automatically when enabled in the Plugins window. Ensure `TransitionFX` is listed in your `.uproject` file under `Plugins` if you manage plugin references manually.
 
 ## Roadmap
 
@@ -354,7 +362,7 @@ MaxPoolSizePerEffectClass=3
 
 ### Feature Extensions
 - [x] **Transition Color per Preset** `High` — Expose a default transition color property on presets (e.g., fade-to-white) without requiring parameter overrides at every call
-- [x] **UMG Widget-Layer Transitions** `High` — An alternative rendering path using a full-screen Slate overlay (`WidgetTransitionEffect`), allowing the transition to cover Slate/UMG UI layers. Shipped for 8 effects first; widget-layer variants of the remaining effects are planned
+- [x] **UMG Widget-Layer Transitions** `High` — An alternative rendering path using a full-screen Slate overlay (`WidgetTransitionEffect`), allowing the transition to cover Slate/UMG UI layers. Shipped for 8 effects first; widget-layer variants of the remaining effects (except Pixelate and Slice) are planned
 - [ ] **Origin Point Override** `Medium` — Allow center-based transitions (Iris, Diamond, Tiles, etc.) to expand from a custom screen-space coordinate
 - [x] **Transition Chaining / Sequencing** `Medium` — A DataAsset-based sequence of presets played back-to-back with optional looping
 - [x] **OnTransitionProgress Delegate** `Medium` — A delegate that broadcasts progress each tick, removing the need to poll `GetCurrentProgress()`. Also includes threshold-based callbacks via `AddProgressThreshold`.
@@ -372,7 +380,8 @@ MaxPoolSizePerEffectClass=3
 - [ ] **Video Tutorial: Getting Started** `Medium` — Installation, preset creation, and first transition walkthrough
 - [ ] **Video Tutorial: Level Transition Workflow** `Medium` — Demonstrating `OpenLevelWithTransition` and the hold-at-max loading screen pattern
 - [ ] **Custom Effect Authoring Guide** `Medium` — Step-by-step guide for creating new SDF materials and wiring them via `ITransitionEffect`
-- [ ] **Example Project / Sample Maps** `Medium` — Downloadable sample with pre-configured presets and Blueprint examples for common patterns
+- [x] **Sample Project** `Medium` — Downloadable sample project on the Releases page, with the `L_ShowCase` and `L_WidgetLayerSample` levels
+- [ ] **Common-Pattern Blueprint Examples** `Medium` — Pre-configured Blueprint examples for common patterns (pause menu, level select, cutscene transitions)
 
 ## Custom Effects
 
