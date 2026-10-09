@@ -148,15 +148,17 @@ Loading Screen BeginPlay
     └─ On Complete → Transition to the main game (Open Level, etc.)
 ```
 
+`FTransitionPreloadCompleteDelegate` is a dynamic delegate, so bind it to a `UFUNCTION` with `BindDynamic` (`CreateLambda` is not available for dynamic delegates).
+
 ```cpp
+// In your class declaration:
+//   UFUNCTION() void HandleTransitionsReady();  // Shaders are ready → Proceed to main game
+
 TArray<TSoftObjectPtr<UTransitionPreset>> SoftPresets = { SoftFadePreset, SoftIrisPreset };
 
-TransitionSystem->AsyncLoadTransitionPresets(SoftPresets,
-    FTransitionPreloadCompleteDelegate::CreateLambda([]()
-    {
-        // Shaders are ready → Proceed to main game
-    })
-);
+FTransitionPreloadCompleteDelegate OnComplete;
+OnComplete.BindDynamic(this, &UMyGameInstance::HandleTransitionsReady);
+TransitionSystem->AsyncLoadTransitionPresets(SoftPresets, OnComplete);
 ```
 
 ### What is Handled Automatically (No Action Required)
