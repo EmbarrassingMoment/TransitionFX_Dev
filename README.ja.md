@@ -6,14 +6,15 @@
 
 [![Available on Fab](https://img.shields.io/badge/Fab-Available-0096FF?style=flat&logo=epicgames&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.5%2B-black?style=flat&logo=unrealengine&logoColor=white)](https://www.unrealengine.com/)
-[![Version](https://img.shields.io/badge/Version-1.0-brightgreen?style=flat)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.5.0-brightgreen?style=flat)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Win64-blue?style=flat&logo=windows&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Blueprint](https://img.shields.io/badge/Blueprint-Ready-9B59B6?style=flat&logo=unrealengine&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
+[![Sponsor](https://img.shields.io/badge/Sponsor-EmbarrassingMoment-ff69b4?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/EmbarrassingMoment)
 
 > English version is available here → [README.md](README.md)
 
-## Description
+## 概要
 TransitionFXは、Unreal Engine 5向けの軽量かつ高度なプロシージャル画面遷移システムです。
 テクスチャを使用せず、SDF（Signed Distance Field）計算に基づいた高品質なトランジションを描画し、ブループリントからたった1つのノードで実装可能です。
 
@@ -42,7 +43,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 マネージャーは **GameInstance Subsystem** として動作するため、レベルをまたいでも状態が維持されます。フェードアウト→レベル遷移→フェードインという一連のシーケンスはプラグインが自動で管理します。入力ブロックやエフェクトのプール管理も自動で行われるため、既存のゲームに組み込んでも他のコードと干渉しにくい設計にしました。
 
-## Features
+## 主な機能
 *   **UE 5.5+ Native:** 最新のUnreal Engine向けです。
 *   **Procedural Rendering:** テクスチャレスなSDFベースのレンダリングにより、あらゆる解像度で劣化せず、アスペクト比の歪みを自動的に補正します。
 *   **2 つの描画経路:** PostProcess（既定）に加え、UMG/Slate UI ごと覆えるフルスクリーンのウィジェットレイヤー版を用意。プリセットで切り替えるだけで Blueprint API は共通です。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照。
@@ -54,31 +55,41 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
     *   **Forward / Reverse:** トランジションモードを使用して、単一のプリセットで「フェードアウト」と「フェードイン」を制御します。
     *   **Speed Control:** `SetPlaySpeed`による動的な再生速度調整が可能です。
 *   **Audio Integration:** 効果音（SFX）をトランジションと同期させます。システムがオーディオのライフサイクルを管理し、開始時に再生し、トランジションがキャンセルされた場合は自動的に停止します。
-*   **Event System:** `OnTransitionStarted`、`OnTransitionCompleted`、`OnTransitionHoldStarted`デリゲートを使用して、正確なゲームプレイロジックのタイミングを取得できます。
+*   **Event System:** `OnTransitionStarted`、`OnTransitionCompleted`、`OnTransitionHoldStarted`デリゲートを使用して、正確なゲームプレイロジックのタイミングを取得できます。進捗に応じた処理には `OnTransitionProgressChanged` と `OnProgressThresholdReached` も使えます。
 *   **Blueprint Support:** クリーンで簡単なスクリプティングのためのLatent Actionノード（`PlayTransitionAndWait`）が含まれています。
+*   **Sequence Playback:** `TransitionSequence` データアセットで複数のトランジションを連結できます。エントリごとの再生時間の上書き、ステップ間のディレイ、ループに対応しています。
+*   **Level Transitions:** `Open Level With Transition` で、フェードアウト → レベルのオープン → 新しいレベルでのフェードインを自動で行います。
+*   **Editor Preview Tool:** PIE なしでエディタ上で PostProcess 版トランジションをプレビューできます。再生・逆再生・ループ・速度変更・スクラブと、GIF キャプチャに対応しています。[Preview Tool Manual](docs/TransitionFX_PreviewTool_Manual.md)（英語）を参照。
 
 ## 動作環境・プラットフォームサポート
 
 *   **エンジンバージョン:** Unreal Engine **5.5** 以降。それ以前のバージョン（5.3、5.4）は公式にはサポートされていません。
 *   **プロジェクトタイプ:** **C++ プロジェクト・Blueprint-only プロジェクトの両方**で動作します。通常の使用に C++ は不要です。
-*   **レンダリング:** PostProcess 対応のレンダリングパイプライン（Deferred または PostProcess 有効の Forward）が必要です。
-*   **プラットフォーム:** Windows）。コンソールおよびモバイルプラットフォームは公式にはテストされていません。SDF ベースのエフェクトは GPU 負荷が中心のため、低スペック環境でのパフォーマンスは変動する可能性があります。
+*   **レンダリング:** PostProcess 版プリセット（`PostProcessTransitionEffect`）には PostProcess 対応のレンダリングパイプライン（Deferred、または PostProcess 有効の Forward）が必要です。ウィジェットレイヤー版プリセット（`WidgetTransitionEffect`）は Slate 経由で描画します。
+*   **プラットフォーム:** Win64 のみ（DirectX 12 / SM6）。`TransitionFX.uplugin` の `PlatformAllowList` で両モジュールとも Win64 に限定しているため、Mac・Linux・コンソール・モバイル向けにはビルドされません。SDF ベースのエフェクトは GPU 負荷が中心のため、低スペックな GPU ではパフォーマンスが変動する可能性があります。
 
 ## サンプルプロジェクト
 
-30種の組み込みエフェクトのうち29種を確認できるサンプルプロジェクトを [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から入手できます。
+すぐに試せるサンプルプロジェクトを [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から入手できます。プラグインのソース一式と、次の 2 つのサンプルレベルが含まれています。
 
-**動作環境:** Unreal Engine 5.5、Windows、DX12 SM6、Visual Studio 2022（C++ によるゲーム開発ワークロード）
+*   **`L_ShowCase`:** 30 種の組み込みエフェクトのうち 29 種と、ウィジェットレイヤー版プリセット 9 種を再生できます。詳しくは [ShowCase Level](docs/SHOWCASE_LEVEL.md) を参照してください。
+*   **`L_WidgetLayerSample`:** 画面の半分を不透明な UMG パネルで覆い、ウィジェットレイヤー版プリセットと PostProcess 版を比較できます。詳しくは [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) を参照してください。
+
+▶ [YouTube でサンプル動画を見る](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
+
+**動作環境:** Unreal Engine 5.8、Windows、DX12 SM6、Visual Studio 2022（C++ によるゲーム開発ワークロード）
+
+> **注意:** サンプルプロジェクトのビルドターゲットは UE 5.7 以降が必要な `BuildSettingsVersion.V7` を使用しているため、UE 5.8 向けに設定されています。プラグイン本体は UE 5.5 以降に対応しています。
 
 1. Releases ページから `TransitionFX_SampleProject_vX.X.X.zip` をダウンロードします。
 2. zip を任意のフォルダに展開します（スペースや非 ASCII 文字を含むパスは避けてください）。
 3. `TransitionFX_Dev.uproject` を右クリックし、**「Visual Studio プロジェクトファイルを生成」** を選択します。
 4. `TransitionFX_Dev.uproject` を開きます。モジュールの再ビルドを促すダイアログが表示されたら **Yes** をクリックしてください。
-5. エディタが起動したら `L_ShowCase` レベルで **Play** を押すと、全エフェクトをインタラクティブに確認できます。
+5. エディタは既定で `L_ShowCase` レベルを開きます。**Play** を押すとエフェクトをインタラクティブに確認できます。
 
 > **注意:** 初回起動時はシェーダーコンパイルに数分かかる場合があります。
 
-## Installation
+## インストール
 
 ### 方法 A: Fab からインストール（推奨）
 1. [Fab](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a) からプラグインを取得します。
@@ -87,32 +98,35 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 4. エディタのプラグインウィンドウで `TransitionFX` を有効にします。
 
 ### 方法 B: 手動インストール
-1. リリースページからプラグインをダウンロードします。
-2. `TransitionFX` フォルダをプロジェクトの `Plugins` ディレクトリに配置します。
+1. [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から `TransitionFX_SampleProject_vX.X.X.zip` をダウンロードするか、このリポジトリをクローンします。
+2. `Plugins/TransitionFX` フォルダをプロジェクトの `Plugins` ディレクトリにコピーします（`Plugins` が無い場合は作成してください）。
 3. エディタのプラグインウィンドウで `TransitionFX` を有効にします。
+
+> **注意:** Releases の ZIP にはプラグインがソースコードのみで含まれ、ビルド済みバイナリは含まれません。お使いのエンジン向けにコンパイルする必要があるため、Visual Studio 2022（C++ によるゲーム開発ワークロード）が必要です。ビルド済みのプラグインを使う場合は方法 A を利用してください。
 
 ![Plugins ウィンドウで TransitionFX を有効化](docs/images/install_enable_plugin.png)
 
-## Quick Start
+## クイックスタート
 
-### 1. Create a Preset
-コンテンツブラウザで右クリック > `Miscellaneous` (その他) > `Data Asset`。
-`TransitionPreset`クラスを選択し、名前を付けます（例：`DA_FadeBlack`）。
+### 1. プリセットの作成
+コンテンツブラウザで右クリック > `Miscellaneous` (その他) > `Transition Preset` を選択し、名前を付けます（例：`DA_FadeBlack`）。
+`Miscellaneous` > `Data Asset` を選び、クラス選択ダイアログで `Transition Preset` を選んで作成することもできます。
 
-<!-- IMAGE: quickstart_create_data_asset.png - Content Browser で Data Asset を作成する手順のスクリーンショット -->
+![Data Asset のクラス選択ダイアログで Transition Preset を選択](docs/images/quickstart_create_data_asset.png)
 
 *   **Effect Class:** `PostProcessTransitionEffect`を選択します（UMG/Slate UI も覆いたい場合は `WidgetTransitionEffect`。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照）。
 *   **Transition Material:** `M_Transition_Fade`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。ウィジェットレイヤー版のプリセットでは対応する `MI_Widget_*` インスタンスを使用します。
+*   **bOverrideTransitionColor / TransitionColor:** (任意) 有効にすると、呼び出しごとにパラメータオーバーライドを渡さなくても、このプリセット固有のトランジションカラー（白へのフェードなど）を設定できます。色はマテリアルの `FadeColor` パラメータに適用され、呼び出し側の `Override Params` で色を指定した場合はそちらが優先されます。
 *   **Default Duration:** 秒単位で時間を設定します（例：`1.0`）。
-*   **Progress Curve:** (任意) トランジションのイージングを制御するためのフロートカーブを設定します。
+*   **Easing Type / Progress Curve:** イージング関数を選択します（デフォルト：`Linear`）。`Progress Curve` スロットは `Easing Type` が `Custom Curve` のときだけ表示され、独自のフロートカーブを指定できます。[イージングとタイミング](#イージングとタイミング)を参照。
 *   **bAutoBlockInput:** トランジション中のプレイヤー入力を自動的に無効にするには `True` に設定します。
 *   **bTickWhenPaused:** ゲームが一時停止中でもトランジションを再生するには `True` に設定します。
-*   **Priority:** レンダリングの優先順位を設定します（デフォルト：1000）。
+*   **Priority:** PostProcess ボリュームの優先度です（デフォルト：`1000`）。`PostProcessTransitionEffect` でのみ使用され、ウィジェットレイヤー版プリセットでは代わりに `WidgetZOrder` を使用します。
 *   **Audio:** (任意) 再生するサウンドアセットを割り当てます。ボリュームとピッチの制御が含まれます。
 
 ![TransitionPreset の設定パネル（プロパティ一覧）のスクリーンショット](docs/images/quickstart_preset_settings.png)
 
-### 2. Call from Blueprint
+### 2. ブループリントから呼び出す
 レベルブループリントまたはGameInstanceで`Play Transition And Wait`ノードを使用します。
 
 ![Play Transition And Wait ノード](docs/images/quickstart_bp_play_node.png)
@@ -128,7 +142,16 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 *   **Random Play (ランダム再生):**
     `Play Random Transition And Wait` ノードを使用すると、プリセットの配列からランダムにトランジションを再生できます。
 
-### 3. Events
+### 3. トランジション付きでレベルを切り替える
+`Open Level With Transition` ノードを使うと、フェードアウト → レベルのオープン → 新しいレベルでのフェードインまでを自動で行います。Latent 版の `Open Level With Transition And Wait` ノードも同じ処理を行い、フェードアウトが完了して `OpenLevel` が呼ばれた直後に `Completed` が発火します。新しいレベルのロード完了は待ちません。
+
+![Open Level With Transition And Wait ノード](docs/images/quickstart_open_level_bp.png)
+
+*   **レベル遷移:**
+    `Open Level With Transition And Wait` (Level Name: `MainLevel`, Preset: `DA_FadeBlack`, Duration: `1.0`)
+    *（Duration はフェードアウトとフェードインの両方に適用されます）*
+
+### 4. イベント
 `TransitionManagerSubsystem`内の以下のイベントにバインドできます：
 *   **OnTransitionStarted:** トランジション開始時に発火します。
 *   **OnTransitionCompleted:** トランジション終了時に発火します。
@@ -138,7 +161,20 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 > ロード画面パターン・デバッグ・イベント活用など詳細な手順については [クイックスタートガイド](docs/QUICKSTART_JP.md) を参照してください。
 
-## Transition Modes: Forward / Reverse / Invert
+## ドキュメント
+
+| ドキュメント | 内容 |
+| :--- | :--- |
+| [クイックスタートガイド](docs/QUICKSTART_JP.md)（[English](docs/QUICKSTART_EN.md)） | セットアップ手順、ロード画面パターン、デバッグ、イベントの活用 |
+| [API リファレンス](docs/API_Reference_JP.md)（[English](docs/API_Reference_EN.md)） | Blueprint ノードと C++ 関数の詳細 |
+| [FAQ](docs/FAQ_JP.md)（[English](docs/FAQ_EN.md)） | トラブルシューティングとよくある質問 |
+| [Preview Tool Manual](docs/TransitionFX_PreviewTool_Manual.md) | エディタのプレビューツール、GIF キャプチャ、新しいトランジションマテリアルの追加方法（英語のみ） |
+| [ShowCase Level](docs/SHOWCASE_LEVEL.md) | `L_ShowCase` サンプルレベルの操作方法と収録プリセット |
+| [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) | ウィジェットレイヤー版と PostProcess 版を比較する `L_WidgetLayerSample` レベル |
+| [ロードマップ](docs/ROADMAP_JP.md)（[English](docs/ROADMAP_EN.md)） | 優先度別の予定機能と提供済みの項目 |
+| [CHANGELOG](CHANGELOG.md) | リリース履歴（英語のみ） |
+
+## トランジションモード: Forward / Reverse / Invert
 
 `Invert` フラグは画面のどの領域を覆うかを反転させます。これは再生方向を逆にする `Reverse` モードとは **別の設定** です。
 
@@ -160,7 +196,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 *同梱の `DA_SequenceSamples`: `DA_Fade` を Forward、続けて `DA_Hexagon` を Reverse で再生。`Play Sequence And Wait` 1 回の呼び出しで連続再生されます。*
 
 ### シーケンスの作成
-1. Content Browser を右クリック > `Miscellaneous` > `Data Asset` > `TransitionSequence` を選択します。
+1. Content Browser を右クリック > `Miscellaneous` > `Transition Sequence` を選択します。
 2. `Entries` 配列にエントリを追加します。各エントリは以下を指定できます：
     - **Preset** — 再生するトランジションのプリセット
     - **Mode** — Forward / Reverse
@@ -181,18 +217,46 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 - シーケンス内にレベル遷移は含められません。レベル遷移は `OpenLevelWithTransition` を単独で使用してください。
 - 同時に再生できるシーケンスは 1 つだけ。新しいシーケンスを開始すると、直前のものは停止します。
 - シーケンス再生中に `StartTransition` や `OpenLevelWithTransition` を呼び出すと、シーケンスはキャンセルされます。
+- シーケンス内では `bHoldAtMax` を使えず、各エントリは最後まで再生されます。ロード画面には `bHoldAtMax` を指定した `StartTransition` を使用してください。
+- レベル遷移の待機中は `PlaySequence` は無視されます。
 
-## API Reference
-`TransitionManagerSubsystem`は、高度な制御のためにいくつかの呼び出し可能な関数を提供します：
+## API リファレンス
+以下の表は Blueprint から呼び出せる API の一覧です。ピンの詳細や C++ のシグネチャは [API リファレンス](docs/API_Reference_JP.md) を参照してください。
 
-*   **StopTransition():** 現在のトランジションを即座に停止します。
-*   **ReverseTransition(bool bAutoStop):** 再生方向を反転します（例：フェードアウトからフェードインへ）。
-*   **SetPlaySpeed(float NewSpeed):** 再生速度の乗数を動的に変更します。
-*   **GetCurrentProgress():** 現在の進捗状況（0.0〜1.0）を返します。
-*   **IsTransitionPlaying():** トランジションが現在アクティブな場合にTrueを返します。
-*   **IsCurrentTransitionFinished():** トランジションが終了状態に達している場合にTrueを返します（ポーリングに便利です）。
+### Blueprint ノード
 
-## Built-in Effects
+| ノード | 説明 |
+| :--- | :--- |
+| **Play Transition And Wait** | プリセットを再生し、完了後に `Completed` から処理を続けます。 |
+| **Play Transition And Wait With Duration** | 上と同じですが、再生速度の代わりに秒数で再生時間を指定します。 |
+| **Play Random Transition And Wait** | プリセットの配列からランダムに選んで再生します。 |
+| **Play Sequence And Wait** | `TransitionSequence` をループも含めて最後まで再生してから続行します。 |
+| **Open Level With Transition** | フェードアウト、レベルのオープン、新しいレベルでのフェードインを自動で行います。 |
+| **Open Level With Transition And Wait** | 上の Latent 版です。フェードアウトが完了して `OpenLevel` が呼ばれた直後に `Completed` が発火します。 |
+| **Quick Fade To Black / Quick Fade From Black** | 同梱の `DA_FadeToBlack` プリセットで黒フェードを行います。完了は待たず、プリセットの準備も不要です。 |
+| **Is Any Transition Playing** | トランジションが再生中なら true を返します。 |
+| **Apply Easing** | アルファ値に `ETransitionEasing` のカーブを適用する Pure な数学ノードです。 |
+
+### サブシステム関数（`TransitionManagerSubsystem`）
+
+| 関数 | 説明 |
+| :--- | :--- |
+| **StartTransition(Preset, Mode, PlaySpeed, bInvert, bHoldAtMax, OverrideParams)** | 完了を待たずにトランジションを開始します。`bHoldAtMax` を指定すると画面を覆った状態で保持でき、ロード中などに使えます。 |
+| **ReleaseHold()** | 最大進行度で保持中のトランジションを完了させます。 |
+| **StopTransition()** | 現在のトランジションを即座に停止します。 |
+| **ReverseTransition(bool bAutoStop)** | 再生方向を反転します（例：フェードアウトからフェードインへ）。 |
+| **InvertTransition(bool bAutoComplete)** | マスクを反転してトランジションを順方向に再生し直します。`bAutoComplete = false` の場合は最大進行度で保持します。 |
+| **SetPlaySpeed(float PlaySpeed)** | 再生速度の乗数を動的に変更します。 |
+| **ForceClear()** | トランジションの状態をすべてクリアし、プレイヤー入力を復帰させます。コンソールコマンド `TransitionFX.ForceClear` でも実行できます。 |
+| **GetCurrentProgress()** | 現在の進捗状況（0.0〜1.0）を返します。 |
+| **IsTransitionPlaying()** | トランジションが現在アクティブな場合に true を返します。 |
+| **IsCurrentTransitionFinished()** | トランジションが終了状態に達している場合に true を返します（ポーリングに便利です）。 |
+| **AddProgressThreshold(float Threshold) / ClearProgressThresholds()** | `OnProgressThresholdReached` を 1 回発火させる進捗値を登録・クリアします。閾値は新しいトランジションの開始時にリセットされます。 |
+| **OpenLevelWithTransition / PrepareAutoReverseTransition** | レベル遷移用です。`PrepareAutoReverseTransition` は次のレベルロード時のフェードインを準備するだけで、トランジションは開始しません。 |
+| **PlaySequence / StopSequence / IsSequencePlaying / GetCurrentSequenceStep** | シーケンス再生。[トランジションシーケンス](#トランジションシーケンス)を参照。 |
+| **PreloadTransitionPresets / AsyncLoadTransitionPresets** | シェーダーのウォームアップ。[パフォーマンス最適化](#パフォーマンス最適化)を参照。 |
+
+## 組み込みエフェクト
 
 | Effect Name | Description | Preview |
 | :--- | :--- | :--- |
@@ -246,41 +310,41 @@ PostProcess 経路ではビューポートの上に描画される UMG/Slate ウ
 | Texture Mask | `DA_Widget_TextureMask` | `MI_Widget_TextureMask` |
 
 *   **Widget ZOrder:** プリセットの `WidgetZOrder`（既定 `10000`）で重ね順を指定できます。自作ウィジェットがこれより大きい Z-order を使う場合は値を上げてください。
-*   **ウィジェットレイヤーで利用できないエフェクト:** シーンを再サンプリングするエフェクト（**Pixelate**）はオーバーレイでは再現できません。それ以外のエフェクトのウィジェットレイヤー版は今後のリリースで追加予定です。
+*   **ウィジェットレイヤーで利用できないエフェクト:** **Pixelate** と **Slice**。Pixelate はシーンを再サンプリングするため、オーバーレイでは再現できません。Slice のマテリアルは他のエフェクトとシーンの合成順が逆で、ウィジェットレイヤーへの変換が対応していません。それ以外のエフェクトのウィジェットレイヤー版は今後のリリースで追加予定です。
 *   **Transition Preview Panel では表示されません:** エディタのプレビューツールは PostProcess ボリューム経由で描画し、`MI_Transition_*` のみを一覧するため、`MI_Widget_*` はプレビューできません。ウィジェットレイヤー版プリセットの確認は PIE（`L_ShowCase` または `L_WidgetLayerSample`）で行ってください。
 *   ウィジェットレイヤー版のマテリアルは `Materials/Widget/` にあり、SDF ロジックと `Progress` / `Invert` / `FadeColor` パラメータは PostProcess 版と共通です。
-*   **違いを確認する:** サンプルプロジェクトの `L_WidgetLayerSample` レベルは画面右半分に不透明な UMG パネルを置き、各 `DA_Widget_*` プリセットと PostProcess 版を並べて再生できます（`docs/WIDGET_LAYER_SAMPLE.md`）。
+*   **違いを確認する:** サンプルプロジェクトの `L_WidgetLayerSample` レベルは画面右半分に不透明な UMG パネルを置き、各 `DA_Widget_*` プリセットと PostProcess 版を並べて再生できます。詳しくは [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) を参照してください。
 
 | PostProcess 版（`DA_Iris`）— UMG パネルは見えたまま | ウィジェットレイヤー版（`DA_Widget_Iris`）— UMG パネルごと覆われる |
 | :--- | :--- |
 | ![PostProcess Iris over UMG](docs/images/widget_layer_postprocess_iris.gif) | ![Widget-layer Iris over UMG](docs/images/widget_layer_widget_iris.gif) |
 
-## Transition Timing & Easing (イージングとタイミング)
-Transition Presetの`EasingType`プロパティを使用して、トランジションが時間とともにどのように進行するかを制御します。
+## イージングとタイミング
+Transition Presetの`Easing Type`（`EasingType`）プロパティを使用して、トランジションが時間とともにどのように進行するかを制御します。下表の名前はエディタ上の表示名で、括弧内は C++ の列挙値です。
 
 > 以下のプレビューはすべて **Iris** エフェクトを使用して、イージングの違いを分かりやすく表示しています。
 
 | Easing Type | Description | Preview |
 | :--- | :--- | :--- |
 | **Linear** | 一定速度（デフォルト）。単純なフェードに適しています。 | ![Linear](docs/images/easing_linear.gif) |
-| **EaseInSine** | ゆっくり開始し、滑らかに加速します。 | ![EaseInSine](docs/images/easing_ease_in_sine.gif) |
-| **EaseOutSine** | 速く開始し、滑らかに減速します。 | ![EaseOutSine](docs/images/easing_ease_out_sine.gif) |
-| **EaseInOutSine** | 開始と終了で滑らかに加減速します。 | ![EaseInOutSine](docs/images/easing_ease_in_out_sine.gif) |
-| **EaseInCubic** | ゆっくり開始し、強く加速します。 | ![EaseInCubic](docs/images/easing_ease_in_cubic.gif) |
-| **EaseOutCubic** | 速く開始し、強く減速します。 | ![EaseOutCubic](docs/images/easing_ease_out_cubic.gif) |
-| **EaseInOutCubic** | 両端で顕著なイージング。 | ![EaseInOutCubic](docs/images/easing_ease_in_out_cubic.gif) |
-| **EaseInExpo** | ほぼ静止から開始し、指数的に加速します。 | ![EaseInExpo](docs/images/easing_ease_in_expo.gif) |
-| **EaseOutExpo** | 速く開始し、指数的に減速します。 | ![EaseOutExpo](docs/images/easing_ease_out_expo.gif) |
-| **EaseInOutExpo** | 両端でドラマチックなイージング。 | ![EaseInOutExpo](docs/images/easing_ease_in_out_expo.gif) |
-| **EaseOutElastic** | トランジション終了時にエラスティック（弾性）オーバーシュート。 | ![EaseOutElastic](docs/images/easing_ease_out_elastic.gif) |
-| **EaseOutBounce** | トランジション終了時にバウンス効果。 | ![EaseOutBounce](docs/images/easing_ease_out_bounce.gif) |
-| **Custom** | 独自の `FloatCurve` アセットを指定できます。 | — |
+| **Sine In** (`EaseInSine`) | ゆっくり開始し、滑らかに加速します。 | ![EaseInSine](docs/images/easing_ease_in_sine.gif) |
+| **Sine Out** (`EaseOutSine`) | 速く開始し、滑らかに減速します。 | ![EaseOutSine](docs/images/easing_ease_out_sine.gif) |
+| **Sine In/Out** (`EaseInOutSine`) | 開始と終了で滑らかに加減速します。 | ![EaseInOutSine](docs/images/easing_ease_in_out_sine.gif) |
+| **Cubic In** (`EaseInCubic`) | ゆっくり開始し、強く加速します。 | ![EaseInCubic](docs/images/easing_ease_in_cubic.gif) |
+| **Cubic Out** (`EaseOutCubic`) | 速く開始し、強く減速します。 | ![EaseOutCubic](docs/images/easing_ease_out_cubic.gif) |
+| **Cubic In/Out** (`EaseInOutCubic`) | 両端で顕著なイージング。 | ![EaseInOutCubic](docs/images/easing_ease_in_out_cubic.gif) |
+| **Expo In** (`EaseInExpo`) | ほぼ静止から開始し、指数的に加速します。 | ![EaseInExpo](docs/images/easing_ease_in_expo.gif) |
+| **Expo Out** (`EaseOutExpo`) | 速く開始し、指数的に減速します。 | ![EaseOutExpo](docs/images/easing_ease_out_expo.gif) |
+| **Expo In/Out** (`EaseInOutExpo`) | 両端でドラマチックなイージング。 | ![EaseInOutExpo](docs/images/easing_ease_in_out_expo.gif) |
+| **Elastic Out** (`EaseOutElastic`) | トランジション終了時にエラスティック（弾性）オーバーシュート。 | ![EaseOutElastic](docs/images/easing_ease_out_elastic.gif) |
+| **Bounce Out** (`EaseOutBounce`) | トランジション終了時にバウンス効果。 | ![EaseOutBounce](docs/images/easing_ease_out_bounce.gif) |
+| **Custom Curve** (`Custom`) | `Progress Curve` に指定した独自のフロートカーブアセットを使用します。 | — |
 
-*注: `Transition Curve` スロットは、`Custom` が選択された場合にのみ表示されます。*
+*注: `Progress Curve` スロットは、`Custom Curve` が選択された場合にのみ表示されます。*
 
 これらのカーブの視覚化については、[easings.net](https://easings.net/) を参照してください。
 
-## Performance Tips (パフォーマンス最適化)
+## パフォーマンス最適化
 
 ### シェーダーのプリロード（ヒッチング回避）
 トランジションが初めて再生される際のフレームドロップ（ヒッチング）を防ぐために、Preload APIを使用してシェーダーを事前コンパイルする機能を用意しました。
@@ -299,7 +363,7 @@ Transition Presetの`EasingType`プロパティを使用して、トランジシ
 TArray<UTransitionPreset*> MyPresets = { FadePreset, WipePreset };
 TransitionSubsystem->PreloadTransitionPresets(MyPresets);
 ```
-*これにより、GPUの準備を整えるために1フレーム分のダミーマテリアルが作成されます。*
+*マテリアルごとに一時的な動的マテリアルインスタンスを 1 つ作成し、保持せずにすぐ破棄します。*
 
 **API リファレンス:**
 *   **関数:** `TransitionManagerSubsystem->PreloadTransitionPresets(TArray<UTransitionPreset*> Presets)`
@@ -316,20 +380,24 @@ TransitionSubsystem->PreloadTransitionPresets(MyPresets);
 **ブループリントでの使用:**
 ソフトオブジェクト参照の配列を渡します。ロジック（例：レベルを開く）を「On Complete」デリゲートピンに接続します。
 
+`FTransitionPreloadCompleteDelegate` はダイナミックデリゲートのため、`BindDynamic` で `UFUNCTION` にバインドしてください（ダイナミックデリゲートでは `CreateLambda` は使えません）。
+
 ```cpp
 // C++ Example
+// クラス宣言側:
+//   UFUNCTION() void HandleTransitionsReady();
+
 TArray<TSoftObjectPtr<UTransitionPreset>> SoftPresets = { ... };
 
-TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, FTransitionPreloadCompleteDelegate::CreateLambda([]()
-{
-    UE_LOG(LogTransitionFX, Log, TEXT("Assets loaded and shaders ready!"));
-}));
+FTransitionPreloadCompleteDelegate OnComplete;
+OnComplete.BindDynamic(this, &UMyGameInstance::HandleTransitionsReady);
+TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, OnComplete);
 ```
 
 **API リファレンス:**
 *   **関数:** `AsyncLoadTransitionPresets(TArray<TSoftObjectPtr<UTransitionPreset>> Presets, FTransitionPreloadCompleteDelegate OnComplete)`
 
-## プロジェクト設定 (Project Settings)
+## プロジェクト設定
 
 プラグイン全体のオプションは **編集 > プロジェクト設定 > プラグイン > TransitionFX**（`UTransitionFXSettings`）から変更できます。設定値は `Config/DefaultGame.ini` に保存されるため、ini ファイルを直接編集することも可能です:
 
@@ -350,36 +418,17 @@ MaxPoolSizePerEffectClass=3
     *   ビューポートの上に描画される UMG/Slate ウィジェットはトランジションで**覆われません**。
     *   UI ごと覆う必要がある場合は `DA_Widget_*` プリセット（`WidgetTransitionEffect`）を使うか、`OnTransitionStarted` デリゲートでウィジェットの Visibility を手動で設定してください。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照。
 *   **マルチプレイヤー:** TransitionFX は**各クライアントでローカルに動作**します。サブシステムは GameInstance ごとに実行されるため、本質的にクライアントサイドの処理です。レプリケーションやサーバーサイドのトランジション制御は組み込まれていません。
-*   **パッケージング:** プラグインウィンドウで有効になっていれば、パッケージビルドに自動的に含まれます。プラグイン参照を手動で管理している場合は、`.uproject` ファイルの `Plugins` セクションに `TransitionFX` が含まれていることを確認してください。
+*   **パッケージング:** プラグインウィンドウで有効になっていれば、Win64 のパッケージビルドに自動的に含まれます。プラグイン参照を手動で管理している場合は、`.uproject` ファイルの `Plugins` セクションに `TransitionFX` が含まれていることを確認してください。
 
 ## ロードマップ
 
-> 今後のリリースで予定している機能です。コミュニティのフィードバックに応じて優先度は変更される場合があります。
+予定している機能と優先度、提供済みの項目は [ロードマップ](docs/ROADMAP_JP.md) にまとめています。現在の優先度 High の項目は次のとおりです。
 
-### 新エフェクト
-- [ ] 新しいトランジションエフェクトを追加予定 — 具体的なエフェクトはユーザーフィードバックやクリエイティブな検討を踏まえて決定
+*   **残りのエフェクトのウィジェットレイヤー版**（Pixelate と Slice を除く）
+*   **エディタでのプリセットバリデーション**
+*   **マテリアルパラメータリファレンス**
 
-### 機能拡張
-- [x] **プリセットごとのトランジションカラー** `High` — プリセットにデフォルトカラーを設定可能にし、毎回パラメータオーバーライドを渡さずにフェード先の色（白など）を指定できるようにする
-- [x] **UMG ウィジェットレイヤートランジション** `High` — フルスクリーン Slate オーバーレイ（`WidgetTransitionEffect`）による代替レンダリングパスで、Slate/UMG UI レイヤーもトランジションで覆えるようにする。まず 8 エフェクトで提供し、残りのエフェクトのウィジェットレイヤー版は今後追加予定
-- [ ] **原点オーバーライド** `Medium` — Iris、Diamond、Tiles などの中心ベースのトランジションを、任意のスクリーン座標から展開できるようにする
-- [x] **トランジションチェイン / シーケンス** `Medium` — DataAsset ベースでプリセットを連続再生し、任意でループも可能
-- [x] **OnTransitionProgress デリゲート** `Medium` — 毎ティックの進捗値をブロードキャストするデリゲートにより、`GetCurrentProgress()` のポーリングを不要にする。`AddProgressThreshold` による閾値コールバックも追加済み。
-- [ ] **複数トランジションの同時再生** `Low` — マルチスロットマネージャーによる複数の独立したトランジションのレイヤリングをサポート
-
-### 改善・最適化
-- [ ] **エディタでのプリセットバリデーション** `High` — マテリアル未設定や必須パラメータ `Progress` の欠落を警告する
-- [ ] **エディタプリセットサムネイル** `Medium` — コンテンツブラウザで TransitionPreset アセットの静的サムネイルを自動生成し、一目で識別しやすくする
-- [ ] **ブループリントプリセットピッカーウィジェット** `Medium` — ミニプレビュー付きのビジュアルドロップダウンで利用可能なプリセットを表示
-- [x] **プールサイズの設定** `Low` — エフェクトプールの上限（従来は 3 にハードコード）を **プロジェクト設定 > プラグイン > TransitionFX** の `MaxPoolSizePerEffectClass` で公開
-- [ ] **シェーダー複雑度ティア** `Low` — パフォーマンスに敏感なプラットフォーム向けの簡略化されたマテリアルバリアント
-
-### ドキュメント・チュートリアル
-- [ ] **マテリアルパラメータリファレンス** `High` — 全ビルトインマテリアルの調整可能なパラメータを一覧にした専用ドキュメント
-- [ ] **動画チュートリアル: はじめに** `Medium` — インストール、プリセット作成、最初のトランジション再生のウォークスルー
-- [ ] **動画チュートリアル: レベル遷移ワークフロー** `Medium` — `OpenLevelWithTransition` と HoldAtMax ローディング画面パターンのデモ
-- [ ] **カスタムエフェクト作成ガイド** `Medium` — 新しい SDF マテリアルの作成と `ITransitionEffect` での組み込みのステップバイステップガイド
-- [ ] **サンプルプロジェクト / サンプルマップ** `Medium` — 事前設定済みプリセットと一般的なパターン（ポーズメニュー、レベルセレクト、カットシーン遷移）のブループリント例を含むダウンロード可能なサンプル
+コミュニティのフィードバックに応じて優先度は変更される場合があります。機能要望は [GitHub Issues](https://github.com/EmbarrassingMoment/TransitionFX_Dev/issues/new/choose) で受け付けています。
 
 ## カスタムエフェクト
 
@@ -399,5 +448,10 @@ TransitionFX では、`ITransitionEffect` インターフェースを実装す�
 
 よくある質問とトラブルシューティングについては [FAQ](docs/FAQ_JP.md) を参照してください。
 
-## License
+## サポート・コントリビュート
+
+*   **バグ報告・機能要望:** [GitHub Issues](https://github.com/EmbarrassingMoment/TransitionFX_Dev/issues/new/choose) で **Bug Report** または **Feature Request** テンプレートを使って Issue を作成してください。
+*   **プルリクエスト:** 現在は受け付けていません。代わりに Issue を作成してください。報告に含める内容は [CONTRIBUTING.md](CONTRIBUTING.md)（英語）を参照してください。
+
+## ライセンス
 MIT License

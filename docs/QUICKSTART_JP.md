@@ -148,15 +148,17 @@ void UMyGameInstance::Init()
     └─ On Complete → ゲーム本編へ遷移（Open Level など）
 ```
 
+`FTransitionPreloadCompleteDelegate` はダイナミックデリゲートのため、`BindDynamic` で `UFUNCTION` にバインドしてください（ダイナミックデリゲートでは `CreateLambda` は使えません）。
+
 ```cpp
+// クラス宣言側:
+//   UFUNCTION() void HandleTransitionsReady();  // シェーダー準備完了 → ゲーム本編へ
+
 TArray<TSoftObjectPtr<UTransitionPreset>> SoftPresets = { SoftFadePreset, SoftIrisPreset };
 
-TransitionSystem->AsyncLoadTransitionPresets(SoftPresets,
-    FTransitionPreloadCompleteDelegate::CreateLambda([]()
-    {
-        // シェーダー準備完了 → ゲーム本編へ
-    })
-);
+FTransitionPreloadCompleteDelegate OnComplete;
+OnComplete.BindDynamic(this, &UMyGameInstance::HandleTransitionsReady);
+TransitionSystem->AsyncLoadTransitionPresets(SoftPresets, OnComplete);
 ```
 
 ### 自動で行われること（対応不要）
