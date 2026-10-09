@@ -43,9 +43,11 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
     *   **Forward / Reverse:** Control "Fade Out" and "Fade In" with a single preset using Transition Modes.
     *   **Speed Control:** Dynamic playback speed adjustment via `SetPlaySpeed`.
 *   **Audio Integration:** Synchronize Sound Effects (SFX) with your transitions. The system manages the audio lifecycle, ensuring sounds play on start and stop automatically if the transition is cancelled.
-*   **Event System:** Access `OnTransitionStarted`, `OnTransitionCompleted`, and `OnTransitionHoldStarted` delegates for precise gameplay logic timing.
+*   **Event System:** Access `OnTransitionStarted`, `OnTransitionCompleted`, and `OnTransitionHoldStarted` delegates for precise gameplay logic timing, plus `OnTransitionProgressChanged` and `OnProgressThresholdReached` for progress-driven logic.
 *   **Blueprint Support:** Includes a Latent Action node (`PlayTransitionAndWait`) for clean and easy scripting.
 *   **Sequence Playback:** Chain multiple transitions together using a `TransitionSequence` data asset, with per-entry duration overrides, inter-step delays, and optional looping.
+*   **Level Transitions:** `Open Level With Transition` fades out, opens the level, and fades back in on the new level automatically.
+*   **Editor Preview Tool:** Preview PostProcess transitions in the editor without PIE, with play, reverse, loop, speed, and scrubbing controls plus built-in GIF capture. See the [Preview Tool Manual](docs/TransitionFX_PreviewTool_Manual.md).
 
 ## Requirements & Platform Support
 
@@ -57,7 +59,10 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 ## Sample Project
 
 A ready-to-use sample project is available on the [Releases page](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases).
-It includes the full plugin source and a showcase level demonstrating 29 of the 30 built-in transition effects.
+It includes the full plugin source and two sample levels:
+
+*   **`L_ShowCase`:** Plays 29 of the 30 built-in effects and the 9 widget-layer presets. See [ShowCase Level](docs/SHOWCASE_LEVEL.md) (Japanese).
+*   **`L_WidgetLayerSample`:** Covers half the screen with an opaque UMG panel so you can compare widget-layer presets with their PostProcess counterparts. See [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) (Japanese).
 
 ▶ [Watch the sample video on YouTube](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
 
@@ -93,13 +98,14 @@ It includes the full plugin source and a showcase level demonstrating 29 of the 
 ## Quick Start
 
 ### 1. Create a Preset
-Right-click in Content Browser > `Miscellaneous` > `Data Asset`.
-Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
+Right-click in Content Browser > `Miscellaneous` > `Transition Preset`, and name it (e.g., `DA_FadeBlack`).
+You can also choose `Miscellaneous` > `Data Asset` and pick the `Transition Preset` class:
 
-<!-- IMAGE: quickstart_create_data_asset.png - Screenshot of Content Browser showing Data Asset creation flow -->
+![Pick Class For Data Asset Instance dialog with Transition Preset](docs/images/quickstart_create_data_asset.png)
 
 *   **Effect Class:** Select `PostProcessTransitionEffect` (or `WidgetTransitionEffect` to also cover UMG/Slate UI — see [Widget-Layer Variants](#widget-layer-variants)).
 *   **Transition Material:** Select `M_Transition_Fade` (or `M_Transition_Iris`, `M_Transition_Diamond`, etc.). Widget-layer presets use the matching `MI_Widget_*` instance instead.
+*   **bOverrideTransitionColor / TransitionColor:** (Optional) Enable to give this preset its own transition color, such as fade-to-white, without passing an override on every call. The color is applied to the material's `FadeColor` parameter, and a color passed in `Override Params` at the call site still takes precedence.
 *   **Default Duration:** Set duration in seconds (e.g., `1.0`).
 *   **Easing Type / Progress Curve:** Choose an easing function (default: `Linear`). The `Progress Curve` slot appears only when `Easing Type` is `Custom Curve`; assign your own Float Curve there. See [Transition Timing & Easing](#transition-timing--easing).
 *   **bAutoBlockInput:** Set to `True` to automatically disable player input during the transition.
@@ -125,7 +131,16 @@ Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.
 *   **Random Play:**
     Use the `Play Random Transition And Wait` node to play a random transition from an array of presets.
 
-### 3. Events
+### 3. Change Levels with a Transition
+Use the `Open Level With Transition` node to fade out, open a level, and fade back in on the new level automatically. The latent `Open Level With Transition And Wait` node does the same and fires `Completed` once the fade-out finishes and `OpenLevel` is called. It does not wait for the new level to finish loading.
+
+![Open Level With Transition And Wait node](docs/images/quickstart_open_level_bp.png)
+
+*   **Change Level:**
+    `Open Level With Transition And Wait` (Level Name: `MainLevel`, Preset: `DA_FadeBlack`, Duration: `1.0`)
+    *(Duration applies to both the fade-out and the fade-in)*
+
+### 4. Events
 You can bind to the following events in the `TransitionManagerSubsystem`:
 *   **OnTransitionStarted:** Fired when the transition begins.
 *   **OnTransitionCompleted:** Fired when the transition finishes.
@@ -134,6 +149,18 @@ You can bind to the following events in the `TransitionManagerSubsystem`:
 *   **OnProgressThresholdReached:** Fires once when progress crosses a value registered via `AddProgressThreshold`.
 
 > For a detailed guide including loading screen patterns, debug tips, and event usage, see the [Quick Start Guide](docs/QUICKSTART_EN.md).
+
+## Documentation
+
+| Document | Contents |
+| :--- | :--- |
+| [Quick Start Guide](docs/QUICKSTART_EN.md) ([日本語](docs/QUICKSTART_JP.md)) | Step-by-step setup, loading-screen pattern, debugging, and events |
+| [API Reference](docs/API_Reference_EN.md) ([日本語](docs/API_Reference_JP.md)) | Details of every Blueprint node and C++ function |
+| [FAQ](docs/FAQ_EN.md) ([日本語](docs/FAQ_JP.md)) | Troubleshooting and common questions |
+| [Preview Tool Manual](docs/TransitionFX_PreviewTool_Manual.md) | Editor preview tool, GIF capture, and adding new transition materials |
+| [ShowCase Level](docs/SHOWCASE_LEVEL.md) | Controls and preset list of the `L_ShowCase` sample level (Japanese only) |
+| [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) | The `L_WidgetLayerSample` level for comparing widget-layer and PostProcess presets (Japanese only) |
+| [Changelog](CHANGELOG.md) | Release history |
 
 ## Transition Modes: Forward / Reverse / Invert
 
@@ -157,7 +184,7 @@ For complex effects like "Fade to Black → Iris Open → Dissolve In", create a
 *The bundled `DA_SequenceSamples` asset: `DA_Fade` Forward, then `DA_Hexagon` Reverse, played back-to-back with one `Play Sequence And Wait` call.*
 
 ### Creating a Sequence
-1. Right-click in Content Browser > `Miscellaneous` > `Data Asset` > `TransitionSequence`.
+1. Right-click in Content Browser > `Miscellaneous` > `Transition Sequence`.
 2. Add entries to the `Entries` array. Each entry specifies:
     - **Preset** — which transition to play
     - **Mode** — Forward / Reverse
@@ -178,16 +205,44 @@ Use the `Play Sequence And Wait` latent node, or call `PlaySequence` on the subs
 - Sequences cannot contain level transitions. Use `OpenLevelWithTransition` separately.
 - Only one sequence can play at a time; starting a new one stops the previous.
 - Calling `StartTransition` or `OpenLevelWithTransition` while a sequence is playing cancels the sequence.
+- `bHoldAtMax` is not available inside a sequence; every entry plays to completion. Use `StartTransition` with `bHoldAtMax` for loading screens.
+- `PlaySequence` is ignored while a level transition is pending.
 
 ## API Reference
-The `TransitionManagerSubsystem` provides several callable functions for advanced control:
+The tables below list the Blueprint-callable API. For pin details and C++ signatures, see the full [API Reference](docs/API_Reference_EN.md).
 
-*   **StopTransition():** Instantly stops the current transition.
-*   **ReverseTransition(bool bAutoStop):** Reverses the playback direction (e.g., from Fade Out to Fade In).
-*   **SetPlaySpeed(float NewSpeed):** Changes the playback speed multiplier dynamically.
-*   **GetCurrentProgress():** Returns the current progress (0.0 to 1.0).
-*   **IsTransitionPlaying():** Returns true if a transition is currently active.
-*   **IsCurrentTransitionFinished():** Returns true if the transition has reached its end state (useful for polling).
+### Blueprint Nodes
+
+| Node | Description |
+| :--- | :--- |
+| **Play Transition And Wait** | Plays a preset and continues from `Completed` when it finishes. |
+| **Play Transition And Wait With Duration** | Same as above, but takes a duration in seconds instead of a play speed. |
+| **Play Random Transition And Wait** | Plays a randomly chosen preset from an array. |
+| **Play Sequence And Wait** | Plays a `TransitionSequence`, including all loops, and then continues. |
+| **Open Level With Transition** | Fades out, opens the level, and fades back in on the new level automatically. |
+| **Open Level With Transition And Wait** | Latent version of the above. `Completed` fires right after the fade-out finishes and `OpenLevel` is called. |
+| **Quick Fade To Black / Quick Fade From Black** | Fire-and-forget black fade using the bundled `DA_FadeToBlack` preset. No preset setup is needed. |
+| **Is Any Transition Playing** | Returns true if a transition is active. |
+| **Apply Easing** | Pure math node that applies an `ETransitionEasing` curve to an alpha value. |
+
+### Subsystem Functions (`TransitionManagerSubsystem`)
+
+| Function | Description |
+| :--- | :--- |
+| **StartTransition(Preset, Mode, PlaySpeed, bInvert, bHoldAtMax, OverrideParams)** | Starts a transition without waiting. Set `bHoldAtMax` to keep the screen covered, for example while loading. |
+| **ReleaseHold()** | Lets a transition held at max progress complete. |
+| **StopTransition()** | Instantly stops the current transition. |
+| **ReverseTransition(bool bAutoStop)** | Reverses the playback direction (e.g., from Fade Out to Fade In). |
+| **InvertTransition(bool bAutoComplete)** | Flips the mask and replays the transition forward. With `bAutoComplete = false` it holds at max progress. |
+| **SetPlaySpeed(float PlaySpeed)** | Changes the playback speed multiplier dynamically. |
+| **ForceClear()** | Clears all transition state and restores player input. Also available as the console command `TransitionFX.ForceClear`. |
+| **GetCurrentProgress()** | Returns the current progress (0.0 to 1.0). |
+| **IsTransitionPlaying()** | Returns true if a transition is currently active. |
+| **IsCurrentTransitionFinished()** | Returns true if the transition has reached its end state (useful for polling). |
+| **AddProgressThreshold(float Threshold) / ClearProgressThresholds()** | Registers or clears progress values that fire `OnProgressThresholdReached` once. Thresholds reset when a new transition starts. |
+| **OpenLevelWithTransition / PrepareAutoReverseTransition** | Level transitions. `PrepareAutoReverseTransition` only arms the fade-in for the next level load; it does not start a transition. |
+| **PlaySequence / StopSequence / IsSequencePlaying / GetCurrentSequenceStep** | Sequence playback. See [Transition Sequences](#transition-sequences). |
+| **PreloadTransitionPresets / AsyncLoadTransitionPresets** | Shader warmup. See [Performance Tips](#performance-tips). |
 
 ## Built-in Effects
 
@@ -246,7 +301,7 @@ The PostProcess path cannot cover UMG/Slate widgets drawn above the viewport. Fo
 *   **Not available on the widget layer:** **Pixelate** and **Slice**. Pixelate resamples the scene, which an overlay cannot reproduce. Slice's material blends the scene in the reverse order from the other effects, which the widget-layer conversion does not support. Widget-layer variants of the remaining effects are planned for future releases.
 *   **Not shown in the Transition Preview Panel:** the editor preview tool renders materials through a PostProcess volume and only lists `MI_Transition_*`, so `MI_Widget_*` materials cannot be previewed there. Check widget-layer presets in PIE (`L_ShowCase` or `L_WidgetLayerSample`) instead.
 *   The widget-layer materials live in `Materials/Widget/` and share the SDF logic and the `Progress` / `Invert` / `FadeColor` parameters of their PostProcess counterparts.
-*   **See the difference:** the sample project's `L_WidgetLayerSample` level puts an opaque UMG panel on the right half of the screen and lets you play each `DA_Widget_*` preset next to its PostProcess counterpart (`docs/WIDGET_LAYER_SAMPLE.md`).
+*   **See the difference:** the sample project's `L_WidgetLayerSample` level puts an opaque UMG panel on the right half of the screen and lets you play each `DA_Widget_*` preset next to its PostProcess counterpart. See [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) (Japanese).
 
 | PostProcess (`DA_Iris`) — the UMG panel stays visible | Widget layer (`DA_Widget_Iris`) — the UMG panel is covered too |
 | :--- | :--- |
@@ -400,6 +455,11 @@ See [`ITransitionEffect.h`](Plugins/TransitionFX/Source/TransitionFX/Public/ITra
 No. TransitionFX relies on runtime features that UEFN restricts, including dynamic PostProcessVolume spawning via `SpawnActor`, `UMaterialInstanceDynamic` creation and parameter manipulation, GameInstance Subsystems, and C++ plugin loading. These are fundamental architectural dependencies, not minor incompatibilities, so a simple build flag or conditional compilation cannot resolve them. If Epic Games expands UEFN's runtime capabilities in the future, we will re-evaluate support.
 
 For common questions and troubleshooting, see the [FAQ](docs/FAQ_EN.md).
+
+## Support & Contributing
+
+*   **Bug reports and feature requests:** Open an issue on [GitHub Issues](https://github.com/EmbarrassingMoment/TransitionFX_Dev/issues/new/choose) using the **Bug Report** or **Feature Request** template.
+*   **Pull requests:** Not accepted at this time. Please open an issue instead. See [CONTRIBUTING.md](CONTRIBUTING.md) for what to include in a report.
 
 ## License
 MIT License
