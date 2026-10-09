@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build & Setup
 
-This is an Unreal Engine 5.5 plugin project. There are no CLI build scripts — all compilation happens through the UE editor or Visual Studio 2022.
+This is an Unreal Engine plugin project: the `TransitionFX` plugin targets UE 5.5+, while this sample/dev project is set up for UE 5.8 (its targets use `BuildSettingsVersion.V7`, which requires UE 5.7+). There are no CLI build scripts — all compilation happens through the UE editor or Visual Studio 2022.
 
 **Setup steps:**
 1. Right-click `TransitionFX_Dev.uproject` → **Generate Visual Studio project files**
-2. Open `TransitionFX_Dev.uproject` in UE 5.5; click **Yes** to rebuild missing modules
+2. Open `TransitionFX_Dev.uproject` in UE 5.8; click **Yes** to rebuild missing modules
 3. First launch compiles shaders (several minutes)
 
-**Requirements:** Visual Studio 2022 (C++ Game Development workload), UE 5.5+, Windows with DX12/SM6 GPU.
+**Requirements:** Visual Studio 2022 (C++ Game Development workload), UE 5.8 for this project (the plugin itself supports UE 5.5+), Windows with DX12/SM6 GPU.
 
 **Testing:** No automated test suite. Test manually using:
 - The `L_ShowCase` level (39 presets: 29 of the 30 PostProcess effects — only `DA_LinearWipe` is not referenced — plus the 9 `DA_Widget_*` presets. The preset list lives in the level Blueprint's `PostProcess` variable — a soft-object array, kept in alphabetical order; `Plugins/DevMaterialTools/Tools/register_widget_presets.py` appends missing widget presets headlessly)
