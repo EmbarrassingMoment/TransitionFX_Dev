@@ -14,7 +14,7 @@
 
 > English version is available here → [README.md](README.md)
 
-## Description
+## 概要
 TransitionFXは、Unreal Engine 5向けの軽量かつ高度なプロシージャル画面遷移システムです。
 テクスチャを使用せず、SDF（Signed Distance Field）計算に基づいた高品質なトランジションを描画し、ブループリントからたった1つのノードで実装可能です。
 
@@ -43,7 +43,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 マネージャーは **GameInstance Subsystem** として動作するため、レベルをまたいでも状態が維持されます。フェードアウト→レベル遷移→フェードインという一連のシーケンスはプラグインが自動で管理します。入力ブロックやエフェクトのプール管理も自動で行われるため、既存のゲームに組み込んでも他のコードと干渉しにくい設計にしました。
 
-## Features
+## 主な機能
 *   **UE 5.5+ Native:** 最新のUnreal Engine向けです。
 *   **Procedural Rendering:** テクスチャレスなSDFベースのレンダリングにより、あらゆる解像度で劣化せず、アスペクト比の歪みを自動的に補正します。
 *   **2 つの描画経路:** PostProcess（既定）に加え、UMG/Slate UI ごと覆えるフルスクリーンのウィジェットレイヤー版を用意。プリセットで切り替えるだけで Blueprint API は共通です。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照。
@@ -75,6 +75,8 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 *   **`L_ShowCase`:** 30 種の組み込みエフェクトのうち 29 種と、ウィジェットレイヤー版プリセット 9 種を再生できます。詳しくは [ShowCase Level](docs/SHOWCASE_LEVEL.md) を参照してください。
 *   **`L_WidgetLayerSample`:** 画面の半分を不透明な UMG パネルで覆い、ウィジェットレイヤー版プリセットと PostProcess 版を比較できます。詳しくは [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) を参照してください。
 
+▶ [YouTube でサンプル動画を見る](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
+
 **動作環境:** Unreal Engine 5.8、Windows、DX12 SM6、Visual Studio 2022（C++ によるゲーム開発ワークロード）
 
 > **注意:** サンプルプロジェクトのビルドターゲットは UE 5.7 以降が必要な `BuildSettingsVersion.V7` を使用しているため、UE 5.8 向けに設定されています。プラグイン本体は UE 5.5 以降に対応しています。
@@ -87,7 +89,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 > **注意:** 初回起動時はシェーダーコンパイルに数分かかる場合があります。
 
-## Installation
+## インストール
 
 ### 方法 A: Fab からインストール（推奨）
 1. [Fab](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a) からプラグインを取得します。
@@ -104,9 +106,9 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 ![Plugins ウィンドウで TransitionFX を有効化](docs/images/install_enable_plugin.png)
 
-## Quick Start
+## クイックスタート
 
-### 1. Create a Preset
+### 1. プリセットの作成
 コンテンツブラウザで右クリック > `Miscellaneous` (その他) > `Transition Preset` を選択し、名前を付けます（例：`DA_FadeBlack`）。
 `Miscellaneous` > `Data Asset` を選び、クラス選択ダイアログで `Transition Preset` を選んで作成することもできます。
 
@@ -116,7 +118,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 *   **Transition Material:** `M_Transition_Fade`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。ウィジェットレイヤー版のプリセットでは対応する `MI_Widget_*` インスタンスを使用します。
 *   **bOverrideTransitionColor / TransitionColor:** (任意) 有効にすると、呼び出しごとにパラメータオーバーライドを渡さなくても、このプリセット固有のトランジションカラー（白へのフェードなど）を設定できます。色はマテリアルの `FadeColor` パラメータに適用され、呼び出し側の `Override Params` で色を指定した場合はそちらが優先されます。
 *   **Default Duration:** 秒単位で時間を設定します（例：`1.0`）。
-*   **Easing Type / Progress Curve:** イージング関数を選択します（デフォルト：`Linear`）。`Progress Curve` スロットは `Easing Type` が `Custom Curve` のときだけ表示され、独自のフロートカーブを指定できます。[イージングとタイミング](#transition-timing--easing-イージングとタイミング)を参照。
+*   **Easing Type / Progress Curve:** イージング関数を選択します（デフォルト：`Linear`）。`Progress Curve` スロットは `Easing Type` が `Custom Curve` のときだけ表示され、独自のフロートカーブを指定できます。[イージングとタイミング](#イージングとタイミング)を参照。
 *   **bAutoBlockInput:** トランジション中のプレイヤー入力を自動的に無効にするには `True` に設定します。
 *   **bTickWhenPaused:** ゲームが一時停止中でもトランジションを再生するには `True` に設定します。
 *   **Priority:** PostProcess ボリュームの優先度です（デフォルト：`1000`）。`PostProcessTransitionEffect` でのみ使用され、ウィジェットレイヤー版プリセットでは代わりに `WidgetZOrder` を使用します。
@@ -124,7 +126,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 ![TransitionPreset の設定パネル（プロパティ一覧）のスクリーンショット](docs/images/quickstart_preset_settings.png)
 
-### 2. Call from Blueprint
+### 2. ブループリントから呼び出す
 レベルブループリントまたはGameInstanceで`Play Transition And Wait`ノードを使用します。
 
 ![Play Transition And Wait ノード](docs/images/quickstart_bp_play_node.png)
@@ -140,7 +142,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 *   **Random Play (ランダム再生):**
     `Play Random Transition And Wait` ノードを使用すると、プリセットの配列からランダムにトランジションを再生できます。
 
-### 3. Change Levels with a Transition
+### 3. トランジション付きでレベルを切り替える
 `Open Level With Transition` ノードを使うと、フェードアウト → レベルのオープン → 新しいレベルでのフェードインまでを自動で行います。Latent 版の `Open Level With Transition And Wait` ノードも同じ処理を行い、フェードアウトが完了して `OpenLevel` が呼ばれた直後に `Completed` が発火します。新しいレベルのロード完了は待ちません。
 
 ![Open Level With Transition And Wait ノード](docs/images/quickstart_open_level_bp.png)
@@ -149,7 +151,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
     `Open Level With Transition And Wait` (Level Name: `MainLevel`, Preset: `DA_FadeBlack`, Duration: `1.0`)
     *（Duration はフェードアウトとフェードインの両方に適用されます）*
 
-### 4. Events
+### 4. イベント
 `TransitionManagerSubsystem`内の以下のイベントにバインドできます：
 *   **OnTransitionStarted:** トランジション開始時に発火します。
 *   **OnTransitionCompleted:** トランジション終了時に発火します。
@@ -169,9 +171,10 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | [Preview Tool Manual](docs/TransitionFX_PreviewTool_Manual.md) | エディタのプレビューツール、GIF キャプチャ、新しいトランジションマテリアルの追加方法（英語のみ） |
 | [ShowCase Level](docs/SHOWCASE_LEVEL.md) | `L_ShowCase` サンプルレベルの操作方法と収録プリセット |
 | [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) | ウィジェットレイヤー版と PostProcess 版を比較する `L_WidgetLayerSample` レベル |
+| [ロードマップ](docs/ROADMAP_JP.md)（[English](docs/ROADMAP_EN.md)） | 優先度別の予定機能と提供済みの項目 |
 | [CHANGELOG](CHANGELOG.md) | リリース履歴（英語のみ） |
 
-## Transition Modes: Forward / Reverse / Invert
+## トランジションモード: Forward / Reverse / Invert
 
 `Invert` フラグは画面のどの領域を覆うかを反転させます。これは再生方向を逆にする `Reverse` モードとは **別の設定** です。
 
@@ -217,7 +220,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 - シーケンス内では `bHoldAtMax` を使えず、各エントリは最後まで再生されます。ロード画面には `bHoldAtMax` を指定した `StartTransition` を使用してください。
 - レベル遷移の待機中は `PlaySequence` は無視されます。
 
-## API Reference
+## API リファレンス
 以下の表は Blueprint から呼び出せる API の一覧です。ピンの詳細や C++ のシグネチャは [API リファレンス](docs/API_Reference_JP.md) を参照してください。
 
 ### Blueprint ノード
@@ -251,9 +254,9 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | **AddProgressThreshold(float Threshold) / ClearProgressThresholds()** | `OnProgressThresholdReached` を 1 回発火させる進捗値を登録・クリアします。閾値は新しいトランジションの開始時にリセットされます。 |
 | **OpenLevelWithTransition / PrepareAutoReverseTransition** | レベル遷移用です。`PrepareAutoReverseTransition` は次のレベルロード時のフェードインを準備するだけで、トランジションは開始しません。 |
 | **PlaySequence / StopSequence / IsSequencePlaying / GetCurrentSequenceStep** | シーケンス再生。[トランジションシーケンス](#トランジションシーケンス)を参照。 |
-| **PreloadTransitionPresets / AsyncLoadTransitionPresets** | シェーダーのウォームアップ。[Performance Tips](#performance-tips-パフォーマンス最適化)を参照。 |
+| **PreloadTransitionPresets / AsyncLoadTransitionPresets** | シェーダーのウォームアップ。[パフォーマンス最適化](#パフォーマンス最適化)を参照。 |
 
-## Built-in Effects
+## 組み込みエフェクト
 
 | Effect Name | Description | Preview |
 | :--- | :--- | :--- |
@@ -316,7 +319,7 @@ PostProcess 経路ではビューポートの上に描画される UMG/Slate ウ
 | :--- | :--- |
 | ![PostProcess Iris over UMG](docs/images/widget_layer_postprocess_iris.gif) | ![Widget-layer Iris over UMG](docs/images/widget_layer_widget_iris.gif) |
 
-## Transition Timing & Easing (イージングとタイミング)
+## イージングとタイミング
 Transition Presetの`Easing Type`（`EasingType`）プロパティを使用して、トランジションが時間とともにどのように進行するかを制御します。下表の名前はエディタ上の表示名で、括弧内は C++ の列挙値です。
 
 > 以下のプレビューはすべて **Iris** エフェクトを使用して、イージングの違いを分かりやすく表示しています。
@@ -341,7 +344,7 @@ Transition Presetの`Easing Type`（`EasingType`）プロパティを使用し�
 
 これらのカーブの視覚化については、[easings.net](https://easings.net/) を参照してください。
 
-## Performance Tips (パフォーマンス最適化)
+## パフォーマンス最適化
 
 ### シェーダーのプリロード（ヒッチング回避）
 トランジションが初めて再生される際のフレームドロップ（ヒッチング）を防ぐために、Preload APIを使用してシェーダーを事前コンパイルする機能を用意しました。
@@ -394,7 +397,7 @@ TransitionSubsystem->AsyncLoadTransitionPresets(SoftPresets, OnComplete);
 **API リファレンス:**
 *   **関数:** `AsyncLoadTransitionPresets(TArray<TSoftObjectPtr<UTransitionPreset>> Presets, FTransitionPreloadCompleteDelegate OnComplete)`
 
-## プロジェクト設定 (Project Settings)
+## プロジェクト設定
 
 プラグイン全体のオプションは **編集 > プロジェクト設定 > プラグイン > TransitionFX**（`UTransitionFXSettings`）から変更できます。設定値は `Config/DefaultGame.ini` に保存されるため、ini ファイルを直接編集することも可能です:
 
@@ -419,33 +422,13 @@ MaxPoolSizePerEffectClass=3
 
 ## ロードマップ
 
-> 今後のリリースで予定している機能です。コミュニティのフィードバックに応じて優先度は変更される場合があります。
+予定している機能と優先度、提供済みの項目は [ロードマップ](docs/ROADMAP_JP.md) にまとめています。現在の優先度 High の項目は次のとおりです。
 
-### 新エフェクト
-- [ ] 新しいトランジションエフェクトを追加予定 — 具体的なエフェクトはユーザーフィードバックやクリエイティブな検討を踏まえて決定
+*   **残りのエフェクトのウィジェットレイヤー版**（Pixelate と Slice を除く）
+*   **エディタでのプリセットバリデーション**
+*   **マテリアルパラメータリファレンス**
 
-### 機能拡張
-- [x] **プリセットごとのトランジションカラー** `High` — プリセットにデフォルトカラーを設定可能にし、毎回パラメータオーバーライドを渡さずにフェード先の色（白など）を指定できるようにする
-- [x] **UMG ウィジェットレイヤートランジション** `High` — フルスクリーン Slate オーバーレイ（`WidgetTransitionEffect`）による代替レンダリングパスで、Slate/UMG UI レイヤーもトランジションで覆えるようにする。まず 8 エフェクトで提供し、残りのエフェクト（Pixelate と Slice を除く）のウィジェットレイヤー版は今後追加予定
-- [ ] **原点オーバーライド** `Medium` — Iris、Diamond、Tiles などの中心ベースのトランジションを、任意のスクリーン座標から展開できるようにする
-- [x] **トランジションチェイン / シーケンス** `Medium` — DataAsset ベースでプリセットを連続再生し、任意でループも可能
-- [x] **OnTransitionProgress デリゲート** `Medium` — 毎ティックの進捗値をブロードキャストするデリゲートにより、`GetCurrentProgress()` のポーリングを不要にする。`AddProgressThreshold` による閾値コールバックも追加済み。
-- [ ] **複数トランジションの同時再生** `Low` — マルチスロットマネージャーによる複数の独立したトランジションのレイヤリングをサポート
-
-### 改善・最適化
-- [ ] **エディタでのプリセットバリデーション** `High` — マテリアル未設定や必須パラメータ `Progress` の欠落を警告する
-- [ ] **エディタプリセットサムネイル** `Medium` — コンテンツブラウザで TransitionPreset アセットの静的サムネイルを自動生成し、一目で識別しやすくする
-- [ ] **ブループリントプリセットピッカーウィジェット** `Medium` — ミニプレビュー付きのビジュアルドロップダウンで利用可能なプリセットを表示
-- [x] **プールサイズの設定** `Low` — エフェクトプールの上限（従来は 3 にハードコード）を **プロジェクト設定 > プラグイン > TransitionFX** の `MaxPoolSizePerEffectClass` で公開
-- [ ] **シェーダー複雑度ティア** `Low` — パフォーマンスに敏感なプラットフォーム向けの簡略化されたマテリアルバリアント
-
-### ドキュメント・チュートリアル
-- [ ] **マテリアルパラメータリファレンス** `High` — 全ビルトインマテリアルの調整可能なパラメータを一覧にした専用ドキュメント
-- [ ] **動画チュートリアル: はじめに** `Medium` — インストール、プリセット作成、最初のトランジション再生のウォークスルー
-- [ ] **動画チュートリアル: レベル遷移ワークフロー** `Medium` — `OpenLevelWithTransition` と HoldAtMax ローディング画面パターンのデモ
-- [ ] **カスタムエフェクト作成ガイド** `Medium` — 新しい SDF マテリアルの作成と `ITransitionEffect` での組み込みのステップバイステップガイド
-- [x] **サンプルプロジェクト** `Medium` — `L_ShowCase` と `L_WidgetLayerSample` レベルを含むサンプルプロジェクトを Releases ページで配布
-- [ ] **一般的なパターンのブループリント例** `Medium` — 一般的なパターン（ポーズメニュー、レベルセレクト、カットシーン遷移）の設定済みブループリント例
+コミュニティのフィードバックに応じて優先度は変更される場合があります。機能要望は [GitHub Issues](https://github.com/EmbarrassingMoment/TransitionFX_Dev/issues/new/choose) で受け付けています。
 
 ## カスタムエフェクト
 
@@ -470,5 +453,5 @@ TransitionFX では、`ITransitionEffect` インターフェースを実装す�
 *   **バグ報告・機能要望:** [GitHub Issues](https://github.com/EmbarrassingMoment/TransitionFX_Dev/issues/new/choose) で **Bug Report** または **Feature Request** テンプレートを使って Issue を作成してください。
 *   **プルリクエスト:** 現在は受け付けていません。代わりに Issue を作成してください。報告に含める内容は [CONTRIBUTING.md](CONTRIBUTING.md)（英語）を参照してください。
 
-## License
+## ライセンス
 MIT License

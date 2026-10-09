@@ -160,6 +160,7 @@ You can bind to the following events in the `TransitionManagerSubsystem`:
 | [Preview Tool Manual](docs/TransitionFX_PreviewTool_Manual.md) | Editor preview tool, GIF capture, and adding new transition materials |
 | [ShowCase Level](docs/SHOWCASE_LEVEL.md) | Controls and preset list of the `L_ShowCase` sample level (Japanese only) |
 | [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) | The `L_WidgetLayerSample` level for comparing widget-layer and PostProcess presets (Japanese only) |
+| [Roadmap](docs/ROADMAP_EN.md) ([日本語](docs/ROADMAP_JP.md)) | Planned features by priority, and what has already shipped |
 | [Changelog](CHANGELOG.md) | Release history |
 
 ## Transition Modes: Forward / Reverse / Invert
@@ -410,33 +411,13 @@ MaxPoolSizePerEffectClass=3
 
 ## Roadmap
 
-> Planned features for future releases. Priorities may shift based on community feedback.
+Planned features and their priorities are tracked in the [Roadmap](docs/ROADMAP_EN.md), together with what has already shipped. Current high-priority items:
 
-### New Effects
-- [ ] New transition effects are planned — specific effects are to be determined based on user feedback and creative exploration
+*   **Widget-layer variants for the remaining effects** (Pixelate and Slice excluded)
+*   **Preset validation in the editor**
+*   **Material parameter reference**
 
-### Feature Extensions
-- [x] **Transition Color per Preset** `High` — Expose a default transition color property on presets (e.g., fade-to-white) without requiring parameter overrides at every call
-- [x] **UMG Widget-Layer Transitions** `High` — An alternative rendering path using a full-screen Slate overlay (`WidgetTransitionEffect`), allowing the transition to cover Slate/UMG UI layers. Shipped for 8 effects first; widget-layer variants of the remaining effects (except Pixelate and Slice) are planned
-- [ ] **Origin Point Override** `Medium` — Allow center-based transitions (Iris, Diamond, Tiles, etc.) to expand from a custom screen-space coordinate
-- [x] **Transition Chaining / Sequencing** `Medium` — A DataAsset-based sequence of presets played back-to-back with optional looping
-- [x] **OnTransitionProgress Delegate** `Medium` — A delegate that broadcasts progress each tick, removing the need to poll `GetCurrentProgress()`. Also includes threshold-based callbacks via `AddProgressThreshold`.
-- [ ] **Simultaneous Transitions** `Low` — Support for layering multiple independent transitions with a multi-slot manager
-
-### Improvements & Optimization
-- [ ] **Preset Validation in Editor** `High` — Warn if a preset has no material or is missing the required `Progress` parameter
-- [ ] **Editor Preset Thumbnails** `Medium` — Auto-generate static thumbnails for TransitionPreset assets in the Content Browser
-- [ ] **Blueprint Preset Picker Widget** `Medium` — A visual dropdown showing available presets with mini-previews
-- [x] **Configurable Pool Size** `Low` — Expose the effect pool cap (previously hardcoded at 3) via **Project Settings > Plugins > TransitionFX** (`MaxPoolSizePerEffectClass`)
-- [ ] **Shader Complexity Tiers** `Low` — Simplified material variants for performance-sensitive platforms
-
-### Documentation & Tutorials
-- [ ] **Material Parameter Reference** `High` — Dedicated doc listing every built-in material's adjustable parameters
-- [ ] **Video Tutorial: Getting Started** `Medium` — Installation, preset creation, and first transition walkthrough
-- [ ] **Video Tutorial: Level Transition Workflow** `Medium` — Demonstrating `OpenLevelWithTransition` and the hold-at-max loading screen pattern
-- [ ] **Custom Effect Authoring Guide** `Medium` — Step-by-step guide for creating new SDF materials and wiring them via `ITransitionEffect`
-- [x] **Sample Project** `Medium` — Downloadable sample project on the Releases page, with the `L_ShowCase` and `L_WidgetLayerSample` levels
-- [ ] **Common-Pattern Blueprint Examples** `Medium` — Pre-configured Blueprint examples for common patterns (pause menu, level select, cutscene transitions)
+Priorities may shift based on community feedback. Feature requests are welcome on [GitHub Issues](https://github.com/EmbarrassingMoment/TransitionFX_Dev/issues/new/choose).
 
 ## Custom Effects
 
