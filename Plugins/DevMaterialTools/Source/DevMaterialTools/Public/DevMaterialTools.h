@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "SceneTypes.h"
 #include "DevMaterialTools.generated.h"
 
 class UMaterial;
@@ -57,4 +58,26 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "DevMaterialTools")
 	static int32 ClearCommentsInFunction(UMaterialFunction* MaterialFunction);
+
+	/**
+	 * Re-syncs every root input's UseConstant flag with its connection state
+	 * (UseConstant = Expression == nullptr), mirroring
+	 * UMaterialGraphNode_Root::UpdateInputUseConstant, then runs
+	 * PreEditChange/PostEditChange so the material recompiles. Returns the
+	 * number of inputs whose flag changed.
+	 *
+	 * The material editor runs that update on every graph relink and the flag is
+	 * saved, so a pin that was unconnected when the asset was last saved from the
+	 * editor keeps UseConstant = true. ConnectMaterialProperty only sets the
+	 * expression, and FScalarMaterialInput::CompileWithDefault prefers the
+	 * constant, so the new connection is ignored until the flag is cleared.
+	 * UseConstant is a plain bitfield, not a UPROPERTY, so Python cannot reach it.
+	 * Call after connect_material_property on duplicated/edited materials.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "DevMaterialTools")
+	static int32 SyncRootInputUseConstant(UMaterial* Material);
+
+	/** Returns a root input's UseConstant flag (false for inputs without one, e.g. ShadingModel). For verification from Python. */
+	UFUNCTION(BlueprintCallable, Category = "DevMaterialTools")
+	static bool GetRootInputUseConstant(UMaterial* Material, EMaterialProperty Property);
 };
