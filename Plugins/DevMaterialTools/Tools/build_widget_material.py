@@ -12,7 +12,13 @@ PostProcess マスター M_Transition_<Effect> から Widget 版を生成する�
        - Emissive の供給元 = VectorParameter "FadeColor"
   4. Lerp / ComponentMask / SceneTexture を削除  ← ドメイン変更より先 (先に変えると一時的にコンパイル失敗ログが出る)
   5. Domain=UI, BlendMode=Translucent
-  6. FadeColor → EmissiveColor, Alpha 供給元 → Opacity を接続、再コンパイル、保存
+  6. FadeColor → EmissiveColor, Alpha 供給元 → Opacity を接続
+     → DevMaterialTools.sync_root_input_use_constant でルート入力の UseConstant を接続状態に合わせ直す
+     → 再コンパイル、保存
+     複製元の PP マスターはエディタ保存時に Opacity が未接続だったため Opacity.UseConstant=true を持っており、
+     connect_material_property はこれを解除しない。放置すると接続が無視されて定数 1 がコンパイルされ、
+     PIE で不透明なオーバーレイになる (以前はエディタで開いてパラメータを触り保存し直すことで直していた)。
+     UseConstant は UPROPERTY でない bitfield で Python から触れないため C++ ヘルパーで処理する。
   7. MI を作成し、MI_Transition_<Effect> の Scalar/Vector/Texture 上書きをコピーして保存
   8. DA_Widget_<Preset> を作成 (既存なら TransitionMaterial の付け直しのみ)
 
@@ -64,6 +70,7 @@ DA_MIRROR_PROPS = [
 
 lib = unreal.EditorAssetLibrary
 mel = unreal.MaterialEditingLibrary
+dev = unreal.DevMaterialTools
 tools = unreal.AssetToolsHelpers.get_asset_tools()
 
 
@@ -163,6 +170,11 @@ def convert_material(c, effect):
 
     c.check("connect Emissive", mel.connect_material_property(fades[0], "", unreal.MaterialProperty.MP_EMISSIVE_COLOR))
     c.check("connect Opacity", mel.connect_material_property(alpha_src, alpha_out, unreal.MaterialProperty.MP_OPACITY))
+    # 複製元から引き継いだ Opacity.UseConstant=true を外さないと接続が無視される (docstring の手順 6 参照)
+    c.log["use_constant_synced"] = dev.sync_root_input_use_constant(mat)
+    c.check("root UseConstant cleared (Emissive, Opacity)",
+            not dev.get_root_input_use_constant(mat, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+            and not dev.get_root_input_use_constant(mat, unreal.MaterialProperty.MP_OPACITY))
     mel.recompile_material(mat)
     c.check("domain UI", mat.get_editor_property("material_domain") == unreal.MaterialDomain.MD_UI)
     c.check("blend translucent", mat.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_TRANSLUCENT)
