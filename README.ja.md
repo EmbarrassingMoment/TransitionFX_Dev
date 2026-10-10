@@ -244,6 +244,12 @@ PostProcess 経路ではビューポートの上に描画される UMG/Slate ウ
 | Checkerboard | `DA_Widget_CheckerBoard` | `MI_Widget_Checkerboard` |
 | Blinds | `DA_Widget_Blinds` | `MI_Widget_Blinds` |
 | Texture Mask | `DA_Widget_TextureMask` | `MI_Widget_TextureMask` |
+| Diamond | `DA_Widget_Diamond` | `MI_Widget_Diamond` |
+| Sliding Doors | `DA_Widget_SlidingDoor` | `MI_Widget_SlidingDoor` |
+| Corner Wipe | `DA_Widget_CornerWipe` | `MI_Widget_CornerWipe` |
+| Polka Dots | `DA_Widget_PolkaDots` | `MI_Widget_PolkaDots` |
+| Random Tiles | `DA_Widget_RandomTiles` | `MI_Widget_RandomTiles` |
+| Hexagon | `DA_Widget_Hexagon` | `MI_Widget_Hexagon` |
 
 *   **Widget ZOrder:** プリセットの `WidgetZOrder`（既定 `10000`）で重ね順を指定できます。自作ウィジェットがこれより大きい Z-order を使う場合は値を上げてください。
 *   **ウィジェットレイヤーで利用できないエフェクト:** シーンを再サンプリングするエフェクト（**Pixelate**）はオーバーレイでは再現できません。それ以外のエフェクトのウィジェットレイヤー版は今後のリリースで追加予定です。
@@ -361,7 +367,7 @@ MaxPoolSizePerEffectClass=3
 
 ### 機能拡張
 - [x] **プリセットごとのトランジションカラー** `High` — プリセットにデフォルトカラーを設定可能にし、毎回パラメータオーバーライドを渡さずにフェード先の色（白など）を指定できるようにする
-- [x] **UMG ウィジェットレイヤートランジション** `High` — フルスクリーン Slate オーバーレイ（`WidgetTransitionEffect`）による代替レンダリングパスで、Slate/UMG UI レイヤーもトランジションで覆えるようにする。まず 8 エフェクトで提供し、残りのエフェクトのウィジェットレイヤー版は今後追加予定
+- [x] **UMG ウィジェットレイヤートランジション** `High` — フルスクリーン Slate オーバーレイ（`WidgetTransitionEffect`）による代替レンダリングパスで、Slate/UMG UI レイヤーもトランジションで覆えるようにする。現在 14 エフェクトで提供しており、残りのエフェクトのウィジェットレイヤー版は今後追加予定
 - [ ] **原点オーバーライド** `Medium` — Iris、Diamond、Tiles などの中心ベースのトランジションを、任意のスクリーン座標から展開できるようにする
 - [x] **トランジションチェイン / シーケンス** `Medium` — DataAsset ベースでプリセットを連続再生し、任意でループも可能
 - [x] **OnTransitionProgress デリゲート** `Medium` — 毎ティックの進捗値をブロードキャストするデリゲートにより、`GetCurrentProgress()` のポーリングを不要にする。`AddProgressThreshold` による閾値コールバックも追加済み。

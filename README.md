@@ -237,6 +237,12 @@ The PostProcess path cannot cover UMG/Slate widgets drawn above the viewport. Fo
 | Checkerboard | `DA_Widget_CheckerBoard` | `MI_Widget_Checkerboard` |
 | Blinds | `DA_Widget_Blinds` | `MI_Widget_Blinds` |
 | Texture Mask | `DA_Widget_TextureMask` | `MI_Widget_TextureMask` |
+| Diamond | `DA_Widget_Diamond` | `MI_Widget_Diamond` |
+| Sliding Doors | `DA_Widget_SlidingDoor` | `MI_Widget_SlidingDoor` |
+| Corner Wipe | `DA_Widget_CornerWipe` | `MI_Widget_CornerWipe` |
+| Polka Dots | `DA_Widget_PolkaDots` | `MI_Widget_PolkaDots` |
+| Random Tiles | `DA_Widget_RandomTiles` | `MI_Widget_RandomTiles` |
+| Hexagon | `DA_Widget_Hexagon` | `MI_Widget_Hexagon` |
 
 *   **Widget ZOrder:** Presets expose `WidgetZOrder` (default `10000`). Raise it if your own widgets use a higher Z-order.
 *   **Not available on the widget layer:** effects that resample the scene (**Pixelate**) cannot be reproduced by an overlay. The remaining effects are planned for future releases.
@@ -354,7 +360,7 @@ MaxPoolSizePerEffectClass=3
 
 ### Feature Extensions
 - [x] **Transition Color per Preset** `High` — Expose a default transition color property on presets (e.g., fade-to-white) without requiring parameter overrides at every call
-- [x] **UMG Widget-Layer Transitions** `High` — An alternative rendering path using a full-screen Slate overlay (`WidgetTransitionEffect`), allowing the transition to cover Slate/UMG UI layers. Shipped for 8 effects first; widget-layer variants of the remaining effects are planned
+- [x] **UMG Widget-Layer Transitions** `High` — An alternative rendering path using a full-screen Slate overlay (`WidgetTransitionEffect`), allowing the transition to cover Slate/UMG UI layers. Available for 14 effects so far; widget-layer variants of the remaining effects are planned
 - [ ] **Origin Point Override** `Medium` — Allow center-based transitions (Iris, Diamond, Tiles, etc.) to expand from a custom screen-space coordinate
 - [x] **Transition Chaining / Sequencing** `Medium` — A DataAsset-based sequence of presets played back-to-back with optional looping
 - [x] **OnTransitionProgress Delegate** `Medium` — A delegate that broadcasts progress each tick, removing the need to poll `GetCurrentProgress()`. Also includes threshold-based callbacks via `AddProgressThreshold`.
