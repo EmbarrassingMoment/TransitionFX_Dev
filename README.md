@@ -6,7 +6,7 @@
 
 [![Available on Fab](https://img.shields.io/badge/Fab-Available-0096FF?style=flat&logo=epicgames&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.5%2B-black?style=flat&logo=unrealengine&logoColor=white)](https://www.unrealengine.com/)
-[![Version](https://img.shields.io/badge/Version-1.0-brightgreen?style=flat)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.5.0-brightgreen?style=flat)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Win64-blue?style=flat&logo=windows&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Blueprint](https://img.shields.io/badge/Blueprint-Ready-9B59B6?style=flat&logo=unrealengine&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
@@ -46,6 +46,7 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 *   **Event System:** Access `OnTransitionStarted`, `OnTransitionCompleted`, and `OnTransitionHoldStarted` delegates for precise gameplay logic timing.
 *   **Blueprint Support:** Includes a Latent Action node (`PlayTransitionAndWait`) for clean and easy scripting.
 *   **Sequence Playback:** Chain multiple transitions together using a `TransitionSequence` data asset, with per-entry duration overrides, inter-step delays, and optional looping.
+*   **Editor Preview Tool:** Preview every PostProcess effect in the editor without PIE (**Tools > TransitionFX > TransitionFX Preview**) — scrub progress, loop, change speed, and capture a looping GIF with one click. See the [Preview Tool Manual](docs/TransitionFX_PreviewTool_Manual.md).
 
 ## Requirements & Platform Support
 
@@ -57,17 +58,24 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 ## Sample Project
 
 A ready-to-use sample project is available on the [Releases page](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases).
-It includes the full plugin source and a showcase level demonstrating 29 of the 30 built-in transition effects.
+It includes the full plugin source and two sample levels:
+
+*   **`L_ShowCase`** — plays 45 presets: 30 PostProcess presets (29 of the 30 built-in effects plus `DA_FadeToBlack`) and the 15 widget-layer (`DA_Widget_*`) presets.
+*   **`L_WidgetLayerSample`** — an opaque UMG panel covers the right half of the screen, so you can compare each widget-layer preset with its PostProcess counterpart (see [Widget-Layer Variants](#widget-layer-variants)).
+
+The `DA_SequenceSamples` sequence asset is included as well (see [Transition Sequences](#transition-sequences)).
 
 ▶ [Watch the sample video on YouTube](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
 
-**Requirements:** Unreal Engine 5.5, Windows, DirectX 12 / SM6, Visual Studio 2022 (Game Development with C++ workload)
+**Requirements:** Unreal Engine 5.8, Windows, DirectX 12 / SM6, Visual Studio 2022 (Game Development with C++ workload)
+
+> **Note:** The sample project is set up for Unreal Engine 5.8 (its build settings require 5.7 or later). The plugin itself still supports 5.5+ — copy `Plugins/TransitionFX` into your own project to use it with an older engine.
 
 1. Download `TransitionFX_SampleProject_vX.X.X.zip` from the Releases page.
 2. Extract the zip to a folder (avoid paths with spaces or non-ASCII characters).
 3. Right-click `TransitionFX_Dev.uproject` and select **"Generate Visual Studio project files"**.
 4. Open `TransitionFX_Dev.uproject`. When prompted to rebuild missing modules, click **Yes**.
-5. Once the editor opens, press **Play** in the `L_ShowCase` level to explore all effects.
+5. Once the editor opens, press **Play** in the `L_ShowCase` level to explore all effects (or open `L_WidgetLayerSample` to compare the two rendering paths).
 
 > **Note:** The first launch will compile shaders, which may take several minutes.
 
@@ -80,27 +88,32 @@ It includes the full plugin source and a showcase level demonstrating 29 of the 
 4. Enable `TransitionFX` in the editor plugins window.
 
 ### Option B: Manual Installation
-1. Download the plugin from the release page.
-2. Place the `TransitionFX` folder into your project's `Plugins` directory.
+1. Download `TransitionFX_SampleProject_vX.X.X.zip` from the [Releases page](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) and extract it.
+2. Copy its `Plugins/TransitionFX` folder into your project's `Plugins` directory (create the directory if it does not exist).
 3. Enable `TransitionFX` in the editor plugins window.
+
+> **Note:** The release ZIP contains the plugin as source code only (no prebuilt binaries), so the editor compiles it on first launch — Visual Studio 2022 with the C++ game development workload is required, even for Blueprint-only projects.
 
 ![Plugins window with TransitionFX enabled](docs/images/install_enable_plugin.png)
 
 ## Quick Start
 
 ### 1. Create a Preset
-Right-click in Content Browser > `Miscellaneous` > `Data Asset`.
-Select the `TransitionPreset` class and name it (e.g., `DA_FadeBlack`).
+Right-click in Content Browser > `Miscellaneous` > `Transition Preset`, and name it (e.g., `DA_FadeBlack`).
+*(Creating a `Data Asset` and picking the `TransitionPreset` class also works.)*
 
 <!-- IMAGE: quickstart_create_data_asset.png - Screenshot of Content Browser showing Data Asset creation flow -->
 
 *   **Effect Class:** Select `PostProcessTransitionEffect` (or `WidgetTransitionEffect` to also cover UMG/Slate UI — see [Widget-Layer Variants](#widget-layer-variants)).
-*   **Transition Material:** Select `M_Transition_Fade` (or `M_Transition_Iris`, `M_Transition_Diamond`, etc.). Widget-layer presets use the matching `MI_Widget_*` instance instead.
+*   **Transition Material:** Select `MI_Transition_Fade` (or `MI_Transition_Iris`, `MI_Transition_Diamond`, etc. — the bundled presets use these instances of the `M_Transition_*` masters). Widget-layer presets use the matching `MI_Widget_*` instance instead.
+*   **bOverrideTransitionColor / Transition Color:** (Optional) Enable to set the transition color on the preset itself (e.g., fade to white). A color passed via parameter overrides at the call site still takes precedence.
 *   **Default Duration:** Set duration in seconds (e.g., `1.0`).
-*   **Progress Curve:** (Optional) Set a float curve to control the ease-in/out of the transition.
+*   **Easing Type:** Choose how progress accelerates over time (default: `Linear`). See [Transition Timing & Easing](#transition-timing--easing).
+*   **Progress Curve:** (Optional) Your own float curve. Only shown — and only used — when Easing Type is `Custom`.
 *   **bAutoBlockInput:** Set to `True` to automatically disable player input during the transition.
 *   **bTickWhenPaused:** Set to `True` to allow the transition to play even when the game is paused.
-*   **Priority:** Set the rendering priority (default: 1000).
+*   **Priority:** Set the PostProcess rendering priority (default: 1000). Ignored by widget-layer effects.
+*   **Widget ZOrder:** Z-order of the full-screen overlay (default: 10000). Used only by widget-layer effects.
 *   **Audio:** (Optional) Assign a Sound asset to play. Includes Volume and Pitch controls.
 
 ![Screenshot of the TransitionPreset detail panel showing all properties](docs/images/quickstart_preset_settings.png)
@@ -153,7 +166,7 @@ For complex effects like "Fade to Black → Iris Open → Dissolve In", create a
 *The bundled `DA_SequenceSamples` asset: `DA_Fade` Forward, then `DA_Hexagon` Reverse, played back-to-back with one `Play Sequence And Wait` call.*
 
 ### Creating a Sequence
-1. Right-click in Content Browser > `Miscellaneous` > `Data Asset` > `TransitionSequence`.
+1. Right-click in Content Browser > `Miscellaneous` > `Transition Sequence`.
 2. Add entries to the `Entries` array. Each entry specifies:
     - **Preset** — which transition to play
     - **Mode** — Forward / Reverse
@@ -176,14 +189,30 @@ Use the `Play Sequence And Wait` latent node, or call `PlaySequence` on the subs
 - Calling `StartTransition` or `OpenLevelWithTransition` while a sequence is playing cancels the sequence.
 
 ## API Reference
-The `TransitionManagerSubsystem` provides several callable functions for advanced control:
 
+An overview of the main API. For every node's pins and every C++ signature, see the full [API Reference](docs/API_Reference_EN.md).
+
+### Blueprint Nodes
+*   **Play Transition And Wait / Play Random Transition And Wait / Play Transition And Wait With Duration:** Latent nodes that play a preset (or a random one from an array) and continue from the Completed pin.
+*   **Open Level With Transition / Open Level With Transition And Wait:** Fade Out → open the level → Fade In on the new level, handled automatically.
+*   **Play Sequence And Wait:** Plays a `TransitionSequence` (see [Transition Sequences](#transition-sequences)).
+*   **Quick Fade To Black / Quick Fade From Black:** Fire-and-forget fades using the bundled `DA_FadeToBlack` preset.
+*   **Is Any Transition Playing / Apply Easing:** Query and easing math helpers.
+
+### Subsystem Functions
+The `TransitionManagerSubsystem` provides the following functions for advanced control:
+
+*   **StartTransition(Preset, Mode, PlaySpeed, bInvert, bHoldAtMax, OverrideParams):** Starts a transition without waiting. With `bHoldAtMax`, it stays fully covered until `ReleaseHold` is called (loading-screen pattern).
+*   **ReleaseHold():** Releases a transition held at max progress so it can complete.
 *   **StopTransition():** Instantly stops the current transition.
 *   **ReverseTransition(bool bAutoStop):** Reverses the playback direction (e.g., from Fade Out to Fade In).
-*   **SetPlaySpeed(float NewSpeed):** Changes the playback speed multiplier dynamically.
+*   **InvertTransition(bool bAutoComplete):** Toggles the mask inversion and replays the transition forward.
+*   **SetPlaySpeed(float PlaySpeed):** Changes the playback speed multiplier dynamically.
 *   **GetCurrentProgress():** Returns the current progress (0.0 to 1.0).
 *   **IsTransitionPlaying():** Returns true if a transition is currently active.
 *   **IsCurrentTransitionFinished():** Returns true if the transition has reached its end state (useful for polling).
+*   **AddProgressThreshold(float Threshold) / ClearProgressThresholds():** Registers / clears the thresholds that fire `OnProgressThresholdReached`.
+*   **ForceClear():** Immediately clears any transition state and restores input. Also available as the `TransitionFX.ForceClear` console command for recovering from a stuck screen.
 
 ## Built-in Effects
 
@@ -245,10 +274,10 @@ The PostProcess path cannot cover UMG/Slate widgets drawn above the viewport. Fo
 | Hexagon | `DA_Widget_Hexagon` | `MI_Widget_Hexagon` |
 
 *   **Widget ZOrder:** Presets expose `WidgetZOrder` (default `10000`). Raise it if your own widgets use a higher Z-order.
-*   **Not available on the widget layer:** effects that resample the scene (**Pixelate**) cannot be reproduced by an overlay. The remaining effects are planned for future releases.
+*   **Not available on the widget layer:** effects that resample the scene (**Pixelate**) cannot be reproduced by an overlay, and **Slice**, whose material composites the scene differently from the other effects, is not provided either. Widget-layer variants of the remaining effects are planned for future releases.
 *   **Not shown in the Transition Preview Panel:** the editor preview tool renders materials through a PostProcess volume and only lists `MI_Transition_*`, so `MI_Widget_*` materials cannot be previewed there. Check widget-layer presets in PIE (`L_ShowCase` or `L_WidgetLayerSample`) instead.
 *   The widget-layer materials live in `Materials/Widget/` and share the SDF logic and the `Progress` / `Invert` / `FadeColor` parameters of their PostProcess counterparts.
-*   **See the difference:** the sample project's `L_WidgetLayerSample` level puts an opaque UMG panel on the right half of the screen and lets you play each `DA_Widget_*` preset next to its PostProcess counterpart (`docs/WIDGET_LAYER_SAMPLE.md`).
+*   **See the difference:** the sample project's `L_WidgetLayerSample` level puts an opaque UMG panel on the right half of the screen and lets you play each `DA_Widget_*` preset next to its PostProcess counterpart ([docs/WIDGET_LAYER_SAMPLE.md](docs/WIDGET_LAYER_SAMPLE.md), Japanese).
 
 | PostProcess (`DA_Iris`) — the UMG panel stays visible | Widget layer (`DA_Widget_Iris`) — the UMG panel is covered too |
 | :--- | :--- |
@@ -275,7 +304,7 @@ Control how the transition progresses over time using the `EasingType` property 
 | **EaseOutBounce** | Bouncing effect at the end of the transition. | ![EaseOutBounce](docs/images/easing_ease_out_bounce.gif) |
 | **Custom** | Allows you to supply your own `FloatCurve` asset. | — |
 
-*Note: The `Transition Curve` slot will only appear when `Custom` is selected.*
+*Note: The `Progress Curve` slot will only appear when `Custom` is selected.*
 
 See [easings.net](https://easings.net/) for visualization of these curves.
 
@@ -378,7 +407,7 @@ MaxPoolSizePerEffectClass=3
 - [ ] **Video Tutorial: Getting Started** `Medium` — Installation, preset creation, and first transition walkthrough
 - [ ] **Video Tutorial: Level Transition Workflow** `Medium` — Demonstrating `OpenLevelWithTransition` and the hold-at-max loading screen pattern
 - [ ] **Custom Effect Authoring Guide** `Medium` — Step-by-step guide for creating new SDF materials and wiring them via `ITransitionEffect`
-- [ ] **Example Project / Sample Maps** `Medium` — Downloadable sample with pre-configured presets and Blueprint examples for common patterns
+- [ ] **Example Project / Sample Maps** `Medium` — Blueprint examples for common patterns (pause menu, level select, cutscene transitions). The [sample project](#sample-project) already ships the preset showcase, the widget-layer comparison level, and a sequence sample
 
 ## Custom Effects
 

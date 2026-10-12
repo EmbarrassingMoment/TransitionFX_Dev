@@ -20,11 +20,12 @@ First, create this asset.
 
 ### Creation Steps
 
-1. Right-click in the Content Browser → select `Miscellaneous` → `Data Asset`
-2. Select `TransitionPreset` from the class list
-3. Set the asset name (e.g., `DA_FadeToBlack`, `DA_Iris`, etc.)
+1. Right-click in the Content Browser → select `Miscellaneous` → `Transition Preset`
+2. Set the asset name (e.g., `DA_FadeToBlack`, `DA_Iris`, etc.)
 
-<!-- IMAGE: quickstart_create_data_asset.png - Screenshot of Content Browser showing the Data Asset creation flow -->
+> Creating a `Data Asset` and selecting `TransitionPreset` from the class list also works.
+
+<!-- IMAGE: quickstart_create_data_asset.png - Screenshot of Content Browser showing the Transition Preset creation flow -->
 
 ### Settings
 
@@ -32,19 +33,21 @@ First, create this asset.
 
 | Property | Description | Recommended Value |
 | :--- | :--- | :--- |
-| `Effect Class` | The class of the effect to use | `PostProcessTransitionEffect` |
-| `Transition Material` | The material used for the transition | `M_Transition_Fade`, `M_Transition_Iris`, `M_Transition_Diamond`, etc. |
+| `Effect Class` | The class of the effect to use | `PostProcessTransitionEffect` (`WidgetTransitionEffect` to also cover UMG/Slate UI — see [Covering UMG/Slate UI](#when-the-transition-must-cover-umgslate-ui)) |
+| `Transition Material` | The material used for the transition | `MI_Transition_Fade`, `MI_Transition_Iris`, `MI_Transition_Diamond`, etc. (the instances the bundled presets use). Widget-layer presets use the matching `MI_Widget_*` instance |
 | `Default Duration` | The length of the transition (seconds) | `1.0` |
 
 **Behavior Settings**
 
 | Property | Description | Recommended Value |
 | :--- | :--- | :--- |
+| `bOverrideTransitionColor` / `Transition Color` | When enabled, applies `Transition Color` to the material's `FadeColor` (e.g., fade to white) without call-site overrides | Off (black) |
 | `Easing Type` | The easing function applied to the progress | `Linear` (sufficient for a simple fade) |
 | `Progress Curve` | FloatCurve for custom easing (only visible when `Custom` is selected) | Arbitrary |
 | `bAutoBlockInput` | Automatically blocks player input during the transition | `True` recommended |
 | `bTickWhenPaused` | Allows the transition to update even when paused | `True` if used on a pause screen |
-| `Priority` | PostProcess rendering priority | `1000` (default) |
+| `Priority` | PostProcess rendering priority (ignored by widget-layer effects) | `1000` (default) |
+| `Widget ZOrder` | Z-order of the full-screen overlay (widget-layer effects only) | `10000` (default) — raise it if your UI uses a higher Z-order |
 
 **Audio Settings (Optional)**
 
@@ -61,7 +64,7 @@ First, create this asset.
 ```
 DA_FadeToBlack
 ├─ Effect Class        : PostProcessTransitionEffect
-├─ Transition Material : M_Transition_Fade
+├─ Transition Material : MI_Transition_Fade
 ├─ Default Duration    : 1.0
 ├─ Easing Type         : EaseInOutSine
 ├─ bAutoBlockInput     : True
@@ -70,7 +73,7 @@ DA_FadeToBlack
 
 > **Tip**
 > The material requires a scalar parameter named `Progress`.
-> If this parameter does not exist, the transition will not animate (a warning log will be output).
+> If this parameter does not exist, the transition will not animate (an error is logged).
 
 ### Using a Custom Easing Curve
 
@@ -86,7 +89,7 @@ To create a custom easing curve:
 
 To play a sound effect with your transition:
 
-1. In your `TransitionPreset`, under the **Audio**section, assign a `Sound` asset (e.g., a `USoundWave` or `USoundCue`) to `Transition Sound`
+1. In your `TransitionPreset`, under the **Audio** section, assign a `Sound` asset (e.g., a `USoundWave` or `USoundCue`) to `Transition Sound`
 2. Adjust `Sound Volume` and `Sound Pitch` as desired
 3. The sound will automatically play when the transition starts and stop if the transition is cancelled
 
@@ -175,7 +178,7 @@ TransitionSystem->AsyncLoadTransitionPresets(SoftPresets,
 
 ## Step 3: How to Call from BP
 
-The basic usage is simply calling the **`Play Transition And Wait`**node.
+The basic usage is simply calling the **`Play Transition And Wait`** node.
 Both fade-out and fade-in use the same preset, switched via the `Mode` pin.
 
 ### Basic Pattern: Fade Out → Processing → Fade In
@@ -264,7 +267,7 @@ Quick Fade From Black ── Duration: 1.0
 > If an effect other than a black fade is required, please create a dedicated DataAsset and use `Play Transition And Wait`.
 
 > **Warning**
-> `Quick Fade To Black` and `Quick Fade From Black` are **fire-and-forget**functions. They start the transition but **do not wait for completion**. If you need to execute logic after the fade finishes, use `Play Transition And Wait` instead, or bind to the `OnTransitionCompleted` delegate.
+> `Quick Fade To Black` and `Quick Fade From Black` are **fire-and-forget** functions. They start the transition but **do not wait for completion**. If you need to execute logic after the fade finishes, use `Play Transition And Wait` instead, or bind to the `OnTransitionCompleted` delegate.
 
 ### When Dynamically Changing Material Parameters
 
@@ -282,7 +285,11 @@ Play Transition And Wait
 
 ### Changing the Transition Color
 
-By default, transitions fade to black. To change the color (e.g., white), use `Override Params` with the `FadeColor` vector parameter:
+By default, transitions fade to black. There are two ways to change the color (e.g., white).
+
+**Per preset:** enable `bOverrideTransitionColor` on the preset and set `Transition Color`. Every call that uses the preset gets that color — no extra pins to wire.
+
+**Per call:** use `Override Params` with the `FadeColor` vector parameter:
 
 ```
 [Make TransitionParameters]
@@ -293,13 +300,16 @@ Play Transition And Wait
 └─ Override Params: ↑
 ```
 
+> **Tip**
+> If both are set, the `FadeColor` passed via `Override Params` takes precedence over the preset's `Transition Color`.
+
 ### Using a Custom Texture Mask
 
 The `TextureMask` effect lets you drive the transition order from a grayscale texture:
 
 1. Import your mask texture (grayscale, where Black = transition starts, White = transition ends)
-2. **Important:**In the texture import settings, **uncheck sRGB**and set Compression to **Masks (no sRGB)**or **Grayscale**
-3. Create a preset using the `M_Transition_TextureMask` material
+2. **Important:** In the texture import settings, **uncheck sRGB** and set Compression to **Masks (no sRGB)** or **Grayscale**
+3. Use the bundled `DA_TextureMask` preset (or create your own preset with the `MI_Transition_TextureMask` material)
 4. Pass your texture via `Override Params`:
 
 ```
@@ -315,22 +325,41 @@ Play Transition And Wait
 ### Understanding the bInvert Parameter
 
 The `bInvert` pin on `Play Transition And Wait` inverts the transition mask:
-- **`bInvert = false` (default):**The transition progresses normally (e.g., the screen is gradually covered).
-- **`bInvert = true`:**The mask is flipped — areas that would be covered first are now covered last, and vice versa.
+- **`bInvert = false` (default):** The transition progresses normally (e.g., the screen is gradually covered).
+- **`bInvert = true`:** The mask is flipped — areas that would be covered first are now covered last, and vice versa.
 
 This is useful when you want to achieve a "reverse look" without changing the `Mode`. For example, an Iris effect with `bInvert = true` will expand from the edges inward instead of closing from the edges to the center.
 
 > **Tip**
 > `bInvert` and `Mode: Reverse` are different concepts:
 > - `Mode` controls the **direction of progress**(0→1 vs 1→0).
-> - `bInvert` controls the **spatial pattern**of the mask itself.
+> - `bInvert` controls the **spatial pattern** of the mask itself.
 
 ### Editor Preview Tool
 
 You can preview transition effects directly in the editor without entering Play mode.
-Open **Tools > TransitionFX > TransitionFX Preview**to access the preview panel.
+Open **Tools > TransitionFX > TransitionFX Preview** to access the preview panel.
 
 For detailed instructions (playback controls, GIF capture, viewport settings), see the [TransitionFX Preview Tool Manual](TransitionFX_PreviewTool_Manual.md).
+
+> **Note**
+> The preview tool renders through a PostProcess volume, so it lists only the `MI_Transition_*` materials. Widget-layer materials (`MI_Widget_*`) cannot be previewed there — check `DA_Widget_*` presets in PIE instead.
+
+### When the Transition Must Cover UMG/Slate UI
+
+PostProcess presets (`DA_*`) are drawn below UMG/Slate widgets, so your HUD and menus stay visible during the transition. To cover them too, use a **widget-layer preset** (`DA_Widget_*`, effect class `WidgetTransitionEffect`) — the nodes and pins are exactly the same.
+
+```
+Play Transition And Wait
+├─ Preset : DA_Widget_Fade   ← instead of DA_Fade
+└─ Mode   : Forward
+```
+
+Widget-layer variants are available for 14 effects. See [Widget-Layer Variants](../README.md#widget-layer-variants) in the README for the list and limitations.
+
+### Playing Several Transitions in a Row
+
+To chain transitions (e.g., Fade → Hexagon), create a `TransitionSequence` asset (right-click → `Miscellaneous` → `Transition Sequence`) and play it with **`Play Sequence And Wait`**. See [Transition Sequences](../README.md#transition-sequences) in the README for entry settings, looping, and the sequence events.
 
 ---
 
@@ -493,7 +522,7 @@ Force Clear
 
 ## Step 6: Utilizing Events (Delegates)
 
-The `TransitionManagerSubsystem` provides 5 delegates, allowing you to execute game logic corresponding to the timing of transitions.
+The `TransitionManagerSubsystem` provides 5 transition delegates, allowing you to execute game logic corresponding to the timing of transitions. (Sequences have two more, `OnSequenceCompleted` and `OnSequenceStepChanged` — see [Transition Sequences](../README.md#transition-sequences).)
 
 | Delegate | Firing Timing |
 | :--- | :--- |
@@ -545,7 +574,7 @@ Set Visibility (HUD Widget)
 └─ Visibility: Hidden
 ```
 
-> **Tip:** If you only need the transition to cover the HUD, you can skip this pattern and use a widget-layer preset (`DA_Widget_*`, `WidgetTransitionEffect`) instead — the overlay is drawn above UMG/Slate UI. See *Widget-Layer Variants* in the README.
+> **Tip:** If you only need the transition to cover the HUD, you can skip this pattern and use a widget-layer preset (`DA_Widget_*`, `WidgetTransitionEffect`) instead — the overlay is drawn above UMG/Slate UI. See [Widget-Layer Variants](../README.md#widget-layer-variants) in the README.
 
 **OnTransitionCompleted: Switching the level's state after a fade-out is complete**
 
