@@ -30,7 +30,7 @@ Set `bTickWhenPaused` to `true` in your `TransitionPreset`. By default, this is 
 
 ### Q: The transition plays behind my UMG widgets / HUD.
 
-That is the expected behavior of the default `PostProcessTransitionEffect`: PostProcess runs before Slate, so UI drawn above the viewport is never covered. Use one of the widget-layer presets (`DA_Widget_Fade`, `DA_Widget_Iris`, `DA_Widget_LinearWipe`, `DA_Widget_Dissolve`, `DA_Widget_RadialWipe`, `DA_Widget_CheckerBoard`, `DA_Widget_Blinds`, `DA_Widget_TextureMask`, `DA_Widget_FadeToBlack`) — they use `WidgetTransitionEffect`, which renders the same material on a full-screen overlay above your UI. If your own widgets still appear on top, raise the preset's `WidgetZOrder` (default `10000`). Effects that resample the scene (Pixelate) have no widget-layer variant; for those, hide the UI from `OnTransitionStarted` instead.
+That is the expected behavior of the default `PostProcessTransitionEffect`: PostProcess runs before Slate, so UI drawn above the viewport is never covered. Use one of the widget-layer presets (`DA_Widget_*`, available for 14 effects — see [Widget-Layer Variants](../README.md#widget-layer-variants) for the list) — they use `WidgetTransitionEffect`, which renders the same material on a full-screen overlay above your UI. If your own widgets still appear on top, raise the preset's `WidgetZOrder` (default `10000`). Effects without a widget-layer variant (such as Pixelate, which resamples the scene, and Slice) cannot cover UI; for those, hide the UI from `OnTransitionStarted` instead.
 
 ### Q: The widget-layer materials (`MI_Widget_*`) do not appear in the Transition Preview Panel.
 

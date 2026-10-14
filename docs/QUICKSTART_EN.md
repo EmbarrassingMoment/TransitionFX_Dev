@@ -211,6 +211,9 @@ Play Transition And Wait
 [Post-Processing]
 ```
 
+> **Tip**
+> After the Fade Out completes, its effect stays on screen — fully covering it, with input still blocked when `bAutoBlockInput` is on — until the Fade In starts, so nothing behind it is exposed during the processing. The Fade In removes the effect when it finishes. If you decide not to fade back in, call `Stop Transition` to remove the covering effect.
+
 ### When Specifying Playback Time in Seconds
 
 If you want to specify an exact number of seconds instead of `Play Speed`, use **`Play Transition And Wait With Duration`**.
@@ -371,7 +374,7 @@ This is a workflow for when you want to perform **heavy processing that you do n
 
 Normally, a transition completes automatically when progress reaches 1.0, but by setting `bHoldAtMax = true`, you can **pause (hold) it at 1.0 progress (when the screen is completely covered)**. Input remains blocked during the hold.
 
-Once preparations are complete, calling `Release Hold` transitions the Forward transition to the completed state. After that, fade-in is performed by manually calling `Play Transition And Wait` (Mode: Reverse).
+Once preparations are complete, calling `Release Hold` transitions the Forward transition to the completed state; the screen stays covered. After that, fade-in is performed by manually calling `Play Transition And Wait` (Mode: Reverse). Alternatively, call `Reverse Transition` directly while holding — it fades the held effect back in without `Release Hold`.
 
 ### Implementation Workflow
 
@@ -452,6 +455,7 @@ void UMyClass::OnHoldStarted()
 | Symptom | Main Cause |
 | :--- | :--- |
 | Screen remains pitch black and nothing happens | Forgot to call `Release Hold` while `bHoldAtMax = true` |
+| Screen stays black after a Fade Out | A Fade Out (Forward) completed and no Fade In or `Stop Transition` followed — a completed Fade Out intentionally keeps covering the screen |
 | Screen is dark and accepts no input | The transition was interrupted while `bAutoBlockInput = true` |
 | Transition stops halfway and does not proceed | `Stop Transition` was called unintentionally, or `Play Speed` is extremely low |
 

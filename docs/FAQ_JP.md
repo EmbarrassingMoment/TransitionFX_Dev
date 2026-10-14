@@ -30,7 +30,7 @@ TransitionFX プラグインに関するよくある質問をまとめていま�
 
 ### Q: トランジションが UMG ウィジェット / HUD の後ろで再生されます。
 
-既定の `PostProcessTransitionEffect` ではそれが正常な挙動です。PostProcess は Slate より前に処理されるため、ビューポートの上に描画される UI は覆われません。ウィジェットレイヤー版プリセット（`DA_Widget_Fade`、`DA_Widget_Iris`、`DA_Widget_LinearWipe`、`DA_Widget_Dissolve`、`DA_Widget_RadialWipe`、`DA_Widget_CheckerBoard`、`DA_Widget_Blinds`、`DA_Widget_TextureMask`、`DA_Widget_FadeToBlack`）を使ってください。これらは `WidgetTransitionEffect` で同じマテリアルを UI の上のフルスクリーンオーバーレイに描画します。それでも自作ウィジェットが手前に出る場合は、プリセットの `WidgetZOrder`（既定 `10000`）を上げてください。シーンを再サンプリングするエフェクト（Pixelate）にはウィジェットレイヤー版がないため、その場合は `OnTransitionStarted` で UI を非表示にしてください。
+既定の `PostProcessTransitionEffect` ではそれが正常な挙動です。PostProcess は Slate より前に処理されるため、ビューポートの上に描画される UI は覆われません。ウィジェットレイヤー版プリセット（`DA_Widget_*`。14 エフェクトで利用可能で、一覧は README の [ウィジェットレイヤー版](../README.ja.md#ウィジェットレイヤー版) を参照）を使ってください。これらは `WidgetTransitionEffect` で同じマテリアルを UI の上のフルスクリーンオーバーレイに描画します。それでも自作ウィジェットが手前に出る場合は、プリセットの `WidgetZOrder`（既定 `10000`）を上げてください。ウィジェットレイヤー版がないエフェクト（シーンを再サンプリングする Pixelate や Slice など）は UI を覆えないため、その場合は `OnTransitionStarted` で UI を非表示にしてください。
 
 ### Q: ウィジェットレイヤー版マテリアル（`MI_Widget_*`）が Transition Preview Panel に表示されません。
 

@@ -4,10 +4,22 @@
 
 ## 1. はじめに (Introduction)
 
-TransitionFXプラグインは、主に以下の2つのコンポーネントで構成されています。
+TransitionFXプラグインは、主に以下のコンポーネントで構成されています。
 
 *   **UTransitionManagerSubsystem**: 遷移効果の実行、管理、およびティック処理を行うシングルトンサブシステムです。
 *   **UTransitionPreset**: 遷移効果の設定（エフェクトクラス、マテリアル、持続時間、イージングタイプなど）を定義するデータアセットです。`Effect Class` で描画経路を選びます。`PostProcessTransitionEffect`（PostProcess ボリューム、`Priority` で順序付け）か `WidgetTransitionEffect`（UMG/Slate UI も覆うフルスクリーン Slate オーバーレイ、`WidgetZOrder`（既定 10000）で順序付け、`MI_Widget_*` などの UI ドメインマテリアルが必要）です。
+*   **UTransitionSequence**: 複数のプリセットを連続再生するためのデータアセットです（[シーケンスノード](#シーケンスノード-sequence-nodes)を参照）。
+*   **UTransitionBlueprintLibrary**: 後述の Blueprint ノード（レイテントアクション、レベル遷移、クイックフェード、ヘルパー）です。
+*   **UTransitionFXSettings**: **プロジェクト設定 > プラグイン > TransitionFX** のプロジェクト設定です（[オブジェクトプーリング](#オブジェクトプーリング-object-pooling)を参照）。
+
+### エフェクトが消えるタイミング
+
+トランジション完了時の動作は、画面を覆った状態で終わるかどうかで変わります。
+
+*   **覆った状態で終わる** — Invert なしの `Forward`（フェードアウト）、または Invert ありの `Reverse`：`OnTransitionCompleted` が発火し、エフェクトは完全に覆った状態のまま**画面に残ります**。ロードや配置替えの間も背後が見えません。プリセットの `bAutoBlockInput` が有効なら入力もブロックされたままです。エフェクトは、次のトランジションを開始したとき（同じフレーム内で差し替え）、`Reverse Transition` / `Invert Transition` で再開したとき、`Stop Transition` / `Force Clear` を呼んだとき、または別のレベルへ遷移したときに取り除かれます。
+*   **見える状態で終わる** — Invert なしの `Reverse`（フェードイン）、または Invert ありの `Forward`：自動的に停止してクリーンアップされます（エフェクト削除、入力復帰）。
+
+どちらの場合も、完了後は `Is Transition Playing` が false、`Is Current Transition Finished` が true を返します。
 
 ## 2. ブループリントAPI (Blueprint API Reference)
 
@@ -66,7 +78,7 @@ TransitionFXプラグインは、主に以下の2つのコンポーネントで�
 #### Start Transition
 指定されたプリセットで遷移を開始します。Latent Actionノードとは異なり、完了を待機しません。ロード画面ワークフロー向けの `bHoldAtMax` をサポートしています。
 
-Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達した場合）、自動的に停止してクリーンアップされます。Reverse 遷移も完了時に自動停止します。
+完了時、フェードアウト（Invert なしの Forward）は次のトランジション、`Reverse Transition` / `Invert Transition`、または `Stop Transition` まで画面を覆い続けます。フェードイン（Invert なしの Reverse）は自動的に停止してクリーンアップされます。[エフェクトが消えるタイミング](#エフェクトが消えるタイミング)を参照してください。
 
 | ピン名 | タイプ | 説明 |
 | :--- | :--- | :--- |
@@ -78,16 +90,16 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 | **Override Params** | Input | マテリアルパラメータを動的に上書きするための構造体 (`FTransitionParameters`)。 |
 
 #### Stop Transition
-現在再生中の遷移を停止します。
+現在再生中の遷移を停止します。完了したフェードアウトが画面を覆ったまま残っている場合は、そのエフェクトを取り除きます。入力は元に戻り、`OnTransitionCompleted` は発火しません。
 
 #### Force Clear
-すべての遷移状態を強制的にクリアし、入力をリセットします。緊急停止やリセットに使用します。
+すべての遷移状態を強制的にクリアし、入力をリセットします。再生中のシーケンスもキャンセルします。緊急停止やリセットに使用します。
 
 #### Reverse Transition
-現在の遷移の再生方向を反転します（例：フェードアウトからフェードインへ）。`bAutoStop` が true（デフォルト）の場合、リバース完了時に自動的に停止します。
+現在の遷移の再生方向を反転します（例：フェードアウトからフェードインへ）。再生中、最大進行度でのホールド中、そして完了したフェードアウトが画面を覆ったまま残っている間に使えます。見える状態で終わって停止した後は反転する対象がないため、警告を出して何もしません。`bAutoStop` が true（デフォルト）の場合はリバース完了時に自動的に終了処理され、false の場合は進行度 0 のままアクティブに残ります。
 
 #### Invert Transition
-現在の遷移のマスク反転状態をトグルし、反転したマスクで最初から（0→1）再生し直します。`bAutoComplete` が true（デフォルト）の場合は通常どおり完了し、false の場合は最大進行度でホールドします（`Release Hold` で解除）。
+現在の遷移のマスク反転状態をトグルし、反転したマスクで最初から（0→1）再生し直します。`Reverse Transition` と同様に、完了したフェードアウトが画面を覆ったまま残っている状態から呼ぶとフェードインになります。`bAutoComplete` が true（デフォルト）の場合は通常どおり完了し、false の場合は最大進行度でホールドします（`Release Hold` で解除）。
 
 | ピン名 | タイプ | 説明 |
 | :--- | :--- | :--- |
@@ -97,10 +109,10 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 再生速度の乗数を動的に変更します。値は最小 0.01 にクランプされます。
 
 #### Release Hold
-最大進行度でのホールドを解除し、ホールド中の遷移を完了させます。`bHoldAtMax` ワークフローで使用します。
+最大進行度でのホールドを解除し、ホールド中の遷移を完了させます。`bHoldAtMax` ワークフローで使用します。ホールド中のフェードアウトを解除すると完了し（`OnTransitionCompleted` が発火）、画面は覆われたままになります。フェードインさせるには、代わりに `Reverse Transition` / `Invert Transition` を呼ぶか（ホールド中から直接呼べます）、Reverse のトランジションを開始してください。[手動制御とロード画面のワークフロー](#6-手動制御とロード画面のワークフロー-manual-control--loading-screen-workflow)を参照。
 
 #### Add Progress Threshold
-進捗の閾値（0.0〜1.0）を登録します。遷移中にイージング適用済みの進捗がこの値を超えると、`OnProgressThresholdReached` が1回だけブロードキャストされます。閾値は新しい遷移が開始されるたびに自動的にリセットされます。
+進捗の閾値（0.0〜1.0 にクランプ）を登録します。遷移中にイージング適用済みの進捗がこの値を（どちらの方向でも）超えると、`OnProgressThresholdReached` が1回だけブロードキャストされます。登録した閾値は新しい遷移ごとに再び有効になり、`Clear Progress Thresholds` を呼ぶまで登録されたままです。
 
 | ピン名 | タイプ | 説明 |
 | :--- | :--- | :--- |
@@ -112,21 +124,21 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 ### クエリノード (Query Nodes)
 
 #### Get Current Progress
-現在の遷移の進行度（0.0〜1.0）を返します。`TransitionManagerSubsystem` で利用可能です。
+現在の遷移の進行度（0.0〜1.0）を**イージング適用前**の値（時間に比例する値）で返します。`OnTransitionProgressChanged` と進捗閾値はイージング適用後の値を使います。`TransitionManagerSubsystem` で利用可能です。
 
 | ピン名 | タイプ | 説明 |
 | :--- | :--- | :--- |
-| **Return Value** | Output | 現在の遷移の進行度（0.0〜1.0）。 |
+| **Return Value** | Output | イージング適用前の遷移の進行度（0.0〜1.0）。 |
 
 #### Is Transition Playing
-遷移が現在アクティブな場合に true を返します。`TransitionManagerSubsystem` で利用可能です。
+遷移が再生中またはホールド中の場合に true を返します。完了後は、完了したフェードアウトが画面を覆ったまま残っていても false を返します。`TransitionManagerSubsystem` で利用可能です。
 
 | ピン名 | タイプ | 説明 |
 | :--- | :--- | :--- |
 | **Return Value** | Output | 遷移がアクティブな場合 True。 |
 
 #### Is Current Transition Finished
-現在の遷移がホールドフェーズを完了したか、完了している場合に true を返します。ポーリングに便利です。`TransitionManagerSubsystem` で利用可能です。
+現在の遷移が完了した（`OnTransitionCompleted` が発火した）後に true を返します。ホールドした遷移は、ホールドを解除して完了してから true になります。別の遷移が開始されるか、`Reverse Transition` / `Invert Transition` で再開されるまで true のままです。ポーリングに便利です。`TransitionManagerSubsystem` で利用可能です。
 
 | ピン名 | タイプ | 説明 |
 | :--- | :--- | :--- |
@@ -138,7 +150,7 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 
 ![Open Level With Transition ノード](images/api_open_level_node.png)
 
-「フェードアウト → レベルオープン → フェードイン」のシーケンスを処理します。新レベル側のフェードインは `PostLoadMapWithWorld` を通じて自動的に開始されます。
+「フェードアウト → レベルオープン → フェードイン」のシーケンスを処理します。フェードアウトの完了から旧レベルが破棄されるまで画面は覆われたままで、新レベル側のフェードインは `PostLoadMapWithWorld` を通じて自動的に開始されます。`Preset` が null の場合はデフォルトの `DA_FadeToBlack` プリセットを使用します。
 
 *注: 内部的に、自動フェードインは `Reverse` モードではなく `Forward` モード + `bInvert=true` を使用します。視覚的な結果は同等です。*
 
@@ -166,7 +178,9 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 
 ![Quick Fade To Black / Quick Fade From Black ノードの Blueprint スクリーンショット](images/api_quick_fade_node.png)
 
-デフォルトの `DA_FadeToBlack` プリセットを使用して、画面を素早く黒にフェードします。これは遷移の完了を待たない **Fire-and-Forget** 関数です。
+画面を素早く黒にフェードします。画面は `Quick Fade From Black`（または別のトランジション）が実行されるまで黒のままです。これは遷移の完了を待たない **Fire-and-Forget** 関数です。
+
+どちらの Quick Fade ノードも、デフォルトの `DA_FadeToBlack` プリセットからエフェクトクラスとマテリアルだけを借りた一時プリセットで再生します。色は常に黒、イージングは `Linear`、入力はブロックされ、サウンドは再生されません。ほかの設定が必要な場合は、独自のプリセットで `Play Transition And Wait` を使ってください。
 
 | ピン名 | タイプ | 説明 |
 | :--- | :--- | :--- |
@@ -174,7 +188,7 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 | **Duration** | Input | フェードの持続時間（デフォルト: 1.0）。 |
 
 #### Quick Fade From Black
-デフォルトの `DA_FadeToBlack` プリセットを使用して、画面を黒から素早くフェードインします。これは遷移の完了を待たない **Fire-and-Forget** 関数です。
+画面を黒から素早くフェードインします（`Quick Fade To Black` と同じ方法で作った Reverse のフェードです）。これは遷移の完了を待たない **Fire-and-Forget** 関数です。
 
 | ピン名 | タイプ | 説明 |
 | :--- | :--- | :--- |
@@ -221,7 +235,7 @@ Forward 遷移が完了すると（`bHoldAtMax` なしで進行度が 1.0 に達
 
 ### シーケンスノード (Sequence Nodes)
 
-`UTransitionSequence` データアセットを使って複数のトランジションを連続再生します。シーケンスにレベル遷移は含められません。また同時に再生できるシーケンスは 1 つだけで、シーケンス再生中に `StartTransition` や `OpenLevelWithTransition` を呼び出すとシーケンスはキャンセルされます。
+`UTransitionSequence` データアセットを使って複数のトランジションを連続再生します。シーケンスにレベル遷移は含められません。また同時に再生できるシーケンスは 1 つだけで、シーケンス再生中に `StartTransition` や `OpenLevelWithTransition` を呼び出すとシーケンスはキャンセルされます。ステップ間ではシーンを見せずにエフェクトが差し替えられます。シーケンス終了時、最後のステップのエフェクトは通常のルールに従い（[エフェクトが消えるタイミング](#エフェクトが消えるタイミング)を参照）、最後のステップが覆った状態で終わる場合は画面を覆ったまま残ります。
 
 #### Play Sequence And Wait
 トランジションシーケンスを再生し、（ループを含む）全体の完了を待つレイテントアクションです。シーケンスが null または空の場合は警告を出して即座に完了します。
@@ -261,7 +275,7 @@ UTransitionManagerSubsystem* TransitionSystem = GetGameInstance()->GetSubsystem<
 ### 主要関数
 
 #### StartTransition
-遷移を開始します。`Preset` が null またはマテリアルが未設定の場合、`ForceClear` が呼ばれエラーがログ出力されます。`PlaySpeed` は最小 0.01 にクランプされます。Forward・Reverse ともに完了時に自動的に停止してクリーンアップされます。
+遷移を開始します。`Preset` が null またはマテリアルが未設定の場合、`ForceClear` が呼ばれエラーがログ出力されます。`PlaySpeed` は最小 0.01 にクランプされます。見える状態で終わる遷移（Reverse のフェードインなど）は完了時に自動的に停止してクリーンアップされ、覆った状態で終わる遷移（Forward のフェードアウトなど）は次の遷移、`ReverseTransition` / `InvertTransition`、または `StopTransition` までエフェクトを画面に残します（[エフェクトが消えるタイミング](#エフェクトが消えるタイミング)を参照）。
 
 ```cpp
 void StartTransition(
@@ -275,28 +289,28 @@ void StartTransition(
 ```
 
 #### StopTransition
-現在の遷移を停止します。
+現在の遷移を停止します。完了した遷移が画面を覆ったまま残っている場合は、そのエフェクトを取り除きます。入力を元に戻し、`OnTransitionCompleted` はブロードキャストしません。
 
 ```cpp
 void StopTransition();
 ```
 
 #### ReleaseHold
-最大進行度でのホールドを解除し、ホールド中の遷移を完了させます。`bHoldAtMax = true` を指定した `StartTransition` の後に使用します。
+最大進行度でのホールドを解除し、ホールド中の遷移を完了させます。`bHoldAtMax = true` を指定した `StartTransition` の後に使用します。解除されたフェードアウトは完了後も画面を覆い続けます。
 
 ```cpp
 void ReleaseHold();
 ```
 
 #### ReverseTransition
-現在の遷移の再生方向を反転します（例：フェードアウトからフェードインへ）。
+現在の遷移の再生方向を反転します（例：フェードアウトからフェードインへ）。完了したフェードアウトが画面を覆ったまま残っている状態でも使えます。反転する遷移が残っていない場合は警告を出して何もしません。
 
 ```cpp
 void ReverseTransition(bool bAutoStop = true);
 ```
 
 #### InvertTransition
-現在の遷移のマスク反転状態をトグルし、最初から（0→1）再生し直します。`bAutoComplete` が false の場合は最大進行度でホールドします（`ReleaseHold` で解除）。
+現在の遷移のマスク反転状態をトグルし、最初から（0→1）再生し直します。完了したフェードアウトが画面を覆ったまま残っている状態でも使えます。`bAutoComplete` が false の場合は最大進行度でホールドします（`ReleaseHold` で解除）。
 
 ```cpp
 void InvertTransition(bool bAutoComplete = true);
@@ -310,49 +324,49 @@ void SetPlaySpeed(float PlaySpeed = 1.0f);
 ```
 
 #### GetCurrentProgress
-現在の遷移の進行度（0.0〜1.0）を返します。
+現在の遷移の進行度（0.0〜1.0）をイージング適用前の値で返します。
 
 ```cpp
 float GetCurrentProgress() const;
 ```
 
 #### IsTransitionPlaying
-遷移が現在アクティブな場合に true を返します。
+遷移が再生中またはホールド中の場合に true を返します。完了後は、完了したフェードアウトが画面を覆ったまま残っていても false を返します。
 
 ```cpp
 bool IsTransitionPlaying() const;
 ```
 
 #### IsCurrentTransitionFinished
-現在の遷移がホールドフェーズを完了したか、完了している場合に true を返します。ポーリングに便利です。
+現在の遷移が（ホールドがあれば解除された後に）完了した場合に true を返します。ポーリングに便利です。
 
 ```cpp
 bool IsCurrentTransitionFinished() const;
 ```
 
 #### ForceClear
-アクティブな遷移を強制的にクリアし、入力をリセットします。緊急復旧に使用します。
+アクティブな遷移（再生中のシーケンスや、画面を覆ったまま残っているエフェクトを含む）を強制的にクリアし、入力をリセットします。緊急復旧に使用します。
 
 ```cpp
 void ForceClear();
 ```
 
 #### OpenLevelWithTransition
-「フェードアウト → レベルオープン → フェードイン」のシーケンスを処理します。レベル遷移をまたいで状態が維持されます。
+「フェードアウト → レベルオープン → フェードイン」のシーケンスを処理します。レベル遷移をまたいで状態が維持されます。サブシステムの Blueprint ノードとしても呼び出せます。
 
 ```cpp
 void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
 ```
 
 #### PrepareAutoReverseTransition
-次のレベルロード時に自動リバース遷移を行うようサブシステムを準備します。即座に遷移を開始することはありません。
+次のレベルロード時に自動リバース遷移を行うようサブシステムを準備します。即座に遷移を開始することはありません。サブシステムの Blueprint ノードとしても呼び出せます。
 
 ```cpp
 void PrepareAutoReverseTransition(UTransitionPreset* Preset, float Duration = 1.0f);
 ```
 
 #### AddProgressThreshold
-進捗の閾値（0.0〜1.0）を登録します。イージング適用済みの進捗がこの値を超えると、`OnProgressThresholdReached` が1回だけブロードキャストされます。閾値は新しい遷移開始時に自動リセットされます。
+進捗の閾値（0.0〜1.0 にクランプ）を登録します。イージング適用済みの進捗がこの値を超えると、`OnProgressThresholdReached` が1回だけブロードキャストされます。登録した閾値は新しい遷移ごとに再び有効になり、`ClearProgressThresholds` を呼ぶまで登録されたままです。
 
 ```cpp
 void AddProgressThreshold(float Threshold);
@@ -397,7 +411,7 @@ static UTransitionManagerSubsystem* GetTransitionManager(const UObject* WorldCon
 *   **OnTransitionCompleted**: 遷移が完了したときに呼び出されます。
 *   **OnTransitionHoldStarted**: 遷移が最大進行度（1.0）でホールド（一時停止）されたときに呼び出されます（`bHoldAtMax` が true の場合）。
 *   **OnTransitionProgressChanged** `(float Progress)`: 遷移がアクティブな間、毎ティックでイージング適用済みの進捗値（0.0〜1.0）をブロードキャストします。`GetCurrentProgress()` のポーリングが不要になります。
-*   **OnProgressThresholdReached** `(float Threshold)`: `AddProgressThreshold` で登録した閾値をイージング適用済みの進捗が超えた際に1回だけ発火します。閾値は新しい遷移開始時に自動リセットされます。
+*   **OnProgressThresholdReached** `(float Threshold)`: `AddProgressThreshold` で登録した閾値をイージング適用済みの進捗が超えた際に1回だけ発火します。閾値は新しい遷移開始時に自動的に再び有効になります。
 *   **OnSequenceStepChanged** `(int32 StepIndex)`: シーケンスが新しいエントリに進むたび（最初のエントリを含む）にブロードキャストされます。
 *   **OnSequenceCompleted**: シーケンス全体（ループがある場合は全ループ）の完了時にブロードキャストされます。`StopSequence` によるキャンセル時は発火しません。
 
@@ -428,12 +442,15 @@ void PreloadTransitionPresets(const TArray<UTransitionPreset*>& Presets);
 
 ```cpp
 FTransitionParameters Params;
-Params.ScalarParams.Add(FName("Intensity"), 2.0f);
+Params.ScalarParams.Add(FName("SplitCount"), 12.0f);          // 例: Stripe Cascade のパラメータ
 Params.VectorParams.Add(FName("FadeColor"), FLinearColor::Red);
-// TextureParams も同様に設定可能
+// TextureParams も同様に設定可能（例: Texture Mask の "MaskTexture"）
 ```
 
 この構造体は `StartTransition` や各種ブループリントノードに渡すことができます。
+
+*   パラメータ名はマテリアルと一致している必要があります。マテリアルに存在しないパラメータのオーバーライドは無視され、警告がログ出力されます（`LogTransitionFX`）。
+*   オーバーライドを渡さずにプリセットごとの既定色を指定するには、プリセットの `bOverrideTransitionColor` を有効にして `TransitionColor` を設定します。`FTransitionParameters` で渡した `FadeColor` がそれより優先されます。
 
 ## 6. 手動制御とロード画面のワークフロー (Manual Control & Loading Screen Workflow)
 
@@ -445,22 +462,25 @@ TransitionFXは、遷移を自動再生するだけでなく、手動でタイ�
     このパラメータを `true` に設定すると、遷移エフェクトは進行度が **1.0 (画面が完全に覆われた状態)** に達した時点で自動的に一時停止（ホールド）します。この状態では入力はブロックされたままになります。
 
 *   **ReleaseHold**:
-    ホールド状態にある遷移を再開し、完了させるための関数です。これを呼び出すと、遷移はホールド状態から抜け出し、シームレスに終了処理へ移行します。
+    ホールド状態にある遷移を完了させるための関数です。ホールド中のフェードアウトが完了し（`OnTransitionCompleted` が発火）、エフェクトは画面を覆ったまま残ります。これだけではフェードインしません。
+
+*   **ReverseTransition / InvertTransition**:
+    ホールド中（または完了したフェードアウト）からフェードインします。`ReverseTransition` は同じエフェクトを逆再生（1 → 0）し、`InvertTransition` はマスクを反転して順方向に再生し直します。どちらもホールド中に直接呼べるので、先に `ReleaseHold` を呼ぶ必要はありません。
 
 ### 実装ワークフロー例
 
 1.  **遷移を開始 (Start Transition)**
     *   `StartTransition` (またはブループリントノード) を呼び出し、`bHoldAtMax` を `true` に設定します。
-    *   画面がエフェクトで覆われ、進行度が 1.0 で停止します。
+    *   画面がエフェクトで覆われ、進行度が 1.0 で停止します（`OnTransitionHoldStarted` が発火）。
 
 2.  **バックグラウンド処理 (Load Level / Spawn Actors)**
     *   画面が隠れている間に、レベルのロードやアクターのスポーンなど、プレイヤーに見せたくない処理を行います。
 
-3.  **ホールド解除 (Call ReleaseHold)**
-    *   ロード処理が完了したら、`ReleaseHold` 関数を呼び出します。
+3.  **フェードイン (Fade Back In)**
+    *   ロード処理が完了したら、`ReverseTransition`（または `InvertTransition`）を呼び出します。`ReleaseHold` を呼んでから同じフレーム内で Reverse のトランジション（`Mode: Reverse` の `Play Transition And Wait` など）を開始する方法でも構いません。
 
 4.  **遷移完了 (Transition Finishes)**
-    *   エフェクトが再開し、違和感なく遷移が終了します。
+    *   フェードインが完了するとエフェクトが取り除かれ、入力が元に戻ります。
 
 ## 7. デバッグとユーティリティ (Debugging & Utilities)
 

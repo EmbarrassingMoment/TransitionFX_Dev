@@ -211,6 +211,9 @@ Play Transition And Wait
 【完了後の処理】
 ```
 
+> **Tip**
+> フェードアウトが完了した後も、エフェクトはフェードインが始まるまで画面を完全に覆ったまま残ります（`bAutoBlockInput` が有効なら入力もブロックされたまま）。そのため、処理中に背後が見えることはありません。エフェクトはフェードインの完了時に取り除かれます。フェードインしない場合は `Stop Transition` を呼んで、覆っているエフェクトを取り除いてください。
+
 ### 秒数で再生時間を指定したい場合
 
 `Play Speed` ではなく具体的な秒数で指定したい場合は **`Play Transition And Wait With Duration`** を使います。
@@ -371,7 +374,7 @@ Play Transition And Wait
 
 通常の遷移は進行度が 1.0 に達すると自動的に完了しますが、`bHoldAtMax = true` にすることで**進行度 1.0（画面が完全に覆われた状態）で一時停止（ホールド）** させることができます。ホールド中は入力もブロックされたままです。
 
-準備が整ったら `Release Hold` を呼ぶことで Forward 遷移が完了状態に移行します。その後、手動で `Play Transition And Wait`（Mode: Reverse）を呼び出すことでフェードインを行います。
+準備が整ったら `Release Hold` を呼ぶことで Forward 遷移が完了状態に移行します（画面は覆われたままです）。その後、手動で `Play Transition And Wait`（Mode: Reverse）を呼び出すことでフェードインを行います。ホールド中に `Reverse Transition` を直接呼ぶ方法もあり、この場合は `Release Hold` なしでホールド中のエフェクトがそのままフェードインします。
 
 ### 実装ワークフロー
 
@@ -452,6 +455,7 @@ void UMyClass::OnHoldStarted()
 | 症状 | 主な原因 |
 | :--- | :--- |
 | 画面が真っ暗なまま何も起きない | `bHoldAtMax = true` で `Release Hold` を呼び忘れた |
+| フェードアウト後に画面が黒いまま | フェードアウト（Forward）が完了した後にフェードインも `Stop Transition` も呼ばれていない（完了したフェードアウトは意図的に画面を覆い続けます） |
 | 画面が暗転したまま入力を受け付けない | `bAutoBlockInput = true` の状態で遷移が中断された |
 | 遷移が途中で止まって進まない | `Stop Transition` が意図せず呼ばれた、または `Play Speed` が極端に小さい |
 
