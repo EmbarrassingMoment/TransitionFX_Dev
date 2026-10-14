@@ -156,10 +156,11 @@ void UTransitionSequencePlayer::OnSequenceStepFinished()
 }
 
 /**
- * Resets playback state, tears down the final step's effect, and broadcasts
- * OnSequenceCompleted. The subsystem's Tick skips its usual auto-stop while a
- * sequence is playing to prevent background frames between steps, so the final
- * effect is still active here and must be cleaned up explicitly.
+ * Resets playback state, finishes the final step's transition, and broadcasts
+ * OnSequenceCompleted. The subsystem's Tick skips its usual end-of-transition
+ * handling while a sequence is playing to prevent background frames between steps,
+ * so the final effect is still active here and must be finished explicitly: it is
+ * stopped if the last step ends revealed, or kept covering the screen if it ends covered.
  */
 void UTransitionSequencePlayer::FinishSequence()
 {
@@ -177,10 +178,10 @@ void UTransitionSequencePlayer::FinishSequence()
 	CurrentLoopIteration = 0;
 	bIsSequencePlaying = false;
 
-	// Clean up the final step's effect now that the sequence is complete.
+	// Finish the final step's transition now that the sequence is complete.
 	if (Manager->IsTransitionPlaying())
 	{
-		Manager->StopTransition();
+		Manager->FinishCompletedTransition();
 	}
 
 	Manager->OnSequenceCompleted.Broadcast();
