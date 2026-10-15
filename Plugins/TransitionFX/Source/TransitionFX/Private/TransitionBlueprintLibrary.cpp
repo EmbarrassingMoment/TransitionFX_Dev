@@ -16,8 +16,8 @@
 #include "TransitionFX.h"
 
 /**
- * Latent action that polls the transition manager and completes
- * when the current transition finishes or the manager becomes invalid.
+ * Latent action that polls the transition manager and completes when the current
+ * transition finishes, stops without finishing, or the manager becomes invalid.
  */
 class FTransitionLatentAction : public FPendingLatentAction
 {
@@ -41,8 +41,11 @@ public:
 
 		if (Manager.IsValid())
 		{
-			// If we're done (finished hold phase or fully completed), we trigger
-			bFinished = Manager->IsCurrentTransitionFinished();
+			// If we're done (finished hold phase or fully completed), we trigger.
+			// Safety: a transition that is no longer playing without having completed was
+			// stopped (StopTransition / ForceClear) or failed to start, and will never
+			// complete, so stop waiting to avoid hanging the Blueprint.
+			bFinished = Manager->IsCurrentTransitionFinished() || !Manager->IsTransitionPlaying();
 		}
 
 		Response.FinishAndTriggerIf(bFinished, ExecutionFunction.ExecutionFunction, OutputLink, CallbackTarget);
@@ -420,6 +423,16 @@ void UTransitionBlueprintLibrary::OpenLevelWithTransitionAndWait(const UObject* 
 				{
 					UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransitionAndWait: Null Preset provided. Falling back to default fade."));
 					Preset = Manager->GetDefaultFadePreset();
+				}
+
+				// Without a playable preset the fade-out could never start, so open the level
+				// right away. Passing nullptr for Manager finishes the latent action on the first poll.
+				if (!Preset || !Preset->IsPlayable())
+				{
+					UE_LOG(LogTransitionFX, Error, TEXT("OpenLevelWithTransitionAndWait: No playable preset (the default fade preset could not be loaded, or the preset has no TransitionMaterial or EffectClass). Opening '%s' without a transition."), *LevelName.ToString());
+					UGameplayStatics::OpenLevel(WorldContextObject, LevelName);
+					LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FOpenLevelTransitionLatentAction(LatentInfo, nullptr, LevelName, nullptr, Duration, WorldContextObject));
+					return;
 				}
 
 				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FOpenLevelTransitionLatentAction(LatentInfo, Manager, LevelName, Preset, Duration, WorldContextObject));

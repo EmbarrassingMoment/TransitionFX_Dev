@@ -136,7 +136,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 *   **Fade Out (Forward):**
     `Play Transition And Wait` (Preset: `DA_FadeBlack`, Mode: `Forward`, Speed: `1.0`, Invert: `False`)
-    *（完了後、画面は黒のままになります）*
+    *（完了後、次のトランジション（下のフェードインなど）か `Stop Transition` までは画面は黒のままになります）*
 
 *   **Fade In (Reverse):**
     `Play Transition And Wait` (Preset: `DA_FadeBlack`, Mode: `Reverse`, Speed: `1.0`, Invert: `False`)
@@ -214,13 +214,13 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 `TransitionManagerSubsystem`は、高度な制御のために以下の関数を提供します：
 
 *   **StartTransition(Preset, Mode, PlaySpeed, bInvert, bHoldAtMax, OverrideParams):** 完了を待たずにトランジションを開始します。`bHoldAtMax` を有効にすると、`ReleaseHold` を呼ぶまで画面を覆った状態を維持します（ロード画面パターン）。
-*   **ReleaseHold():** 最大進行度でホールドしているトランジションを解放し、完了させます。
-*   **StopTransition():** 現在のトランジションを即座に停止します。
-*   **ReverseTransition(bool bAutoStop):** 再生方向を反転します（例：フェードアウトからフェードインへ）。
+*   **ReleaseHold():** 最大進行度でホールドしているトランジションを解放し、完了させます。ホールドしていたフェードアウトは完了後も画面を覆い続けます。
+*   **StopTransition():** 現在のトランジションを即座に停止します。完了したフェードアウトが画面を覆ったまま残っている場合は、そのエフェクトを取り除きます。
+*   **ReverseTransition(bool bAutoStop):** 再生方向を反転します（例：フェードアウトからフェードインへ）。ホールド中や、完了したフェードアウトからも使えます。
 *   **InvertTransition(bool bAutoComplete):** マスクの反転を切り替え、トランジションを順方向に再生し直します。
 *   **SetPlaySpeed(float PlaySpeed):** 再生速度の乗数を動的に変更します。
-*   **GetCurrentProgress():** 現在の進捗状況（0.0〜1.0）を返します。
-*   **IsTransitionPlaying():** トランジションが現在アクティブな場合にTrueを返します。
+*   **GetCurrentProgress():** 現在の進捗状況（0.0〜1.0）をイージング適用前の値で返します。
+*   **IsTransitionPlaying():** トランジションが再生中またはホールド中の場合にTrueを返します（完了後は、完了したフェードアウトが画面を覆ったまま残っていても False）。
 *   **IsCurrentTransitionFinished():** トランジションが終了状態に達している場合にTrueを返します（ポーリングに便利です）。
 *   **AddProgressThreshold(float Threshold) / ClearProgressThresholds():** `OnProgressThresholdReached` を発火させる閾値を登録／クリアします。
 *   **ForceClear():** トランジションの状態を即座にクリアし、入力を元に戻します。画面が固まった場合の復旧用に、コンソールコマンド `TransitionFX.ForceClear` としても使えます。

@@ -89,7 +89,10 @@ public:
 	/** Cleans up console commands, delegates, and the effect pool. */
 	virtual void Deinitialize() override;
 
-	/** Starts a transition with the given preset. */
+	/**
+	 * Starts a transition with the given preset. A preset without a TransitionMaterial or
+	 * EffectClass is rejected with an error and clears any active transition.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (PlaySpeed = "1.0"))
 	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward, float PlaySpeed = 1.0f, bool bInvert = false, bool bHoldAtMax = false, FTransitionParameters OverrideParams = FTransitionParameters());
 
@@ -109,11 +112,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void InvertTransition(bool bAutoComplete = true);
 
-	/** Stops the current transition. */
+	/**
+	 * Stops the current transition, or removes the effect that a completed transition
+	 * left covering the screen.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void StopTransition();
 
-	/** Returns true if a transition is currently playing. */
+	/**
+	 * Returns true if a transition is currently playing. A completed transition whose
+	 * effect is kept covering the screen does not count as playing.
+	 */
 	UFUNCTION(BlueprintPure, Category = "TransitionFX")
 	bool IsTransitionPlaying() const;
 
@@ -143,6 +152,8 @@ public:
 	/**
 	 * Handles the sequence of "Fade Out -> Open Level -> Fade In".
 	 * Persists state across level transitions.
+	 * A null Preset falls back to the default fade; if no playable preset is available,
+	 * the level is opened without a transition and an error is logged.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
 	void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
@@ -216,8 +227,22 @@ public:
 	FOnSequenceStepChanged OnSequenceStepChanged;
 
 private:
+	friend class UTransitionSequencePlayer;
+
 	/** Stops and releases the current audio component. */
 	void StopAndClearAudio();
+
+	/**
+	 * Ends a transition that has just completed. If it finished with the screen covered,
+	 * the effect is kept on screen (see bIsCoveringScreen); otherwise it is stopped.
+	 */
+	void FinishCompletedTransition();
+
+	/** Returns true if the current transition ends with the screen covered (Forward without Invert, or Reverse with Invert). */
+	bool EndsCoveringScreen() const;
+
+	/** Releases a kept covering effect when the world it was spawned in is torn down (level travel). */
+	void OnWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources);
 
 	/** Cleans up the current effect and returns it to the object pool. */
 	void CleanupAndPoolCurrentEffect();
@@ -267,6 +292,14 @@ private:
 
 	/** Whether the transition is currently holding at max progress. */
 	bool bIsHolding = false;
+
+	/**
+	 * Whether a completed transition's effect is being kept on screen at full coverage.
+	 * The transition no longer ticks, but the effect, preset, input blocking and sound stay
+	 * in place until the next StartTransition, ReverseTransition / InvertTransition,
+	 * StopTransition / ForceClear, or level travel.
+	 */
+	bool bIsCoveringScreen = false;
 
 	/** Current playback speed multiplier. */
 	float CurrentPlaySpeed = 1.0f;

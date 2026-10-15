@@ -125,7 +125,7 @@ Use the `Play Transition And Wait` node in your Level Blueprint or GameInstance.
 
 *   **Fade Out (Forward):**
     `Play Transition And Wait` (Preset: `DA_FadeBlack`, Mode: `Forward`, Speed: `1.0`)
-    *(Screen stays black after completion)*
+    *(The screen stays black after completion — until the next transition, such as the Fade In below, or `Stop Transition`)*
 
 *   **Fade In (Reverse):**
     `Play Transition And Wait` (Preset: `DA_FadeBlack`, Mode: `Reverse`, Speed: `1.0`)
@@ -203,13 +203,13 @@ An overview of the main API. For every node's pins and every C++ signature, see 
 The `TransitionManagerSubsystem` provides the following functions for advanced control:
 
 *   **StartTransition(Preset, Mode, PlaySpeed, bInvert, bHoldAtMax, OverrideParams):** Starts a transition without waiting. With `bHoldAtMax`, it stays fully covered until `ReleaseHold` is called (loading-screen pattern).
-*   **ReleaseHold():** Releases a transition held at max progress so it can complete.
-*   **StopTransition():** Instantly stops the current transition.
-*   **ReverseTransition(bool bAutoStop):** Reverses the playback direction (e.g., from Fade Out to Fade In).
+*   **ReleaseHold():** Releases a transition held at max progress so it can complete. A held Fade Out keeps covering the screen after it completes.
+*   **StopTransition():** Instantly stops the current transition, or removes the effect a completed Fade Out left covering the screen.
+*   **ReverseTransition(bool bAutoStop):** Reverses the playback direction (e.g., from Fade Out to Fade In) — also from a hold or from a completed Fade Out.
 *   **InvertTransition(bool bAutoComplete):** Toggles the mask inversion and replays the transition forward.
 *   **SetPlaySpeed(float PlaySpeed):** Changes the playback speed multiplier dynamically.
-*   **GetCurrentProgress():** Returns the current progress (0.0 to 1.0).
-*   **IsTransitionPlaying():** Returns true if a transition is currently active.
+*   **GetCurrentProgress():** Returns the current progress (0.0 to 1.0) before easing.
+*   **IsTransitionPlaying():** Returns true while a transition is playing or holding (false once it has completed, even if a completed Fade Out still covers the screen).
 *   **IsCurrentTransitionFinished():** Returns true if the transition has reached its end state (useful for polling).
 *   **AddProgressThreshold(float Threshold) / ClearProgressThresholds():** Registers / clears the thresholds that fire `OnProgressThresholdReached`.
 *   **ForceClear():** Immediately clears any transition state and restores input. Also available as the `TransitionFX.ForceClear` console command for recovering from a stuck screen.

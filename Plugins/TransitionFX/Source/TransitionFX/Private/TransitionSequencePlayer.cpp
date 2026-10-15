@@ -27,7 +27,8 @@ void UTransitionSequencePlayer::Play(UTransitionSequence* Sequence)
 
 /**
  * Begins the entry at StepIndex, handles loop wrap-around / completion, and skips
- * null-preset entries with a warning. Skipping advances iteratively — once every
+ * entries whose preset is null or not playable (no TransitionMaterial or EffectClass)
+ * with a warning. Skipping advances iteratively — once every
  * entry has been visited without finding a playable preset, the sequence
  * finishes instead of cycling forever.
  */
@@ -83,6 +84,14 @@ void UTransitionSequencePlayer::StartSequenceStep(int32 StepIndex)
 			continue;
 		}
 
+		// StartTransition would reject this preset and ForceClear, aborting the whole sequence.
+		if (!Entry.Preset->IsPlayable())
+		{
+			UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: Entry %d's preset '%s' has no TransitionMaterial or EffectClass. Skipping."), StepIndex, *Entry.Preset->GetName());
+			StepIndex++;
+			continue;
+		}
+
 		UTransitionManagerSubsystem* Manager = GetManager();
 
 		CurrentSequenceStep = StepIndex;
@@ -103,8 +112,8 @@ void UTransitionSequencePlayer::StartSequenceStep(int32 StepIndex)
 		return;
 	}
 
-	// Every entry was visited and none has a preset — nothing is playable.
-	UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: Sequence '%s' has no playable entries (all presets are null). Finishing."), *CurrentSequence->GetName());
+	// Every entry was visited and none has a playable preset.
+	UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: Sequence '%s' has no playable entries (all presets are null or not playable). Finishing."), *CurrentSequence->GetName());
 	FinishSequence();
 }
 
@@ -156,10 +165,11 @@ void UTransitionSequencePlayer::OnSequenceStepFinished()
 }
 
 /**
- * Resets playback state, tears down the final step's effect, and broadcasts
- * OnSequenceCompleted. The subsystem's Tick skips its usual auto-stop while a
- * sequence is playing to prevent background frames between steps, so the final
- * effect is still active here and must be cleaned up explicitly.
+ * Resets playback state, finishes the final step's transition, and broadcasts
+ * OnSequenceCompleted. The subsystem's Tick skips its usual end-of-transition
+ * handling while a sequence is playing to prevent background frames between steps,
+ * so the final effect is still active here and must be finished explicitly: it is
+ * stopped if the last step ends revealed, or kept covering the screen if it ends covered.
  */
 void UTransitionSequencePlayer::FinishSequence()
 {
@@ -177,10 +187,10 @@ void UTransitionSequencePlayer::FinishSequence()
 	CurrentLoopIteration = 0;
 	bIsSequencePlaying = false;
 
-	// Clean up the final step's effect now that the sequence is complete.
+	// Finish the final step's transition now that the sequence is complete.
 	if (Manager->IsTransitionPlaying())
 	{
-		Manager->StopTransition();
+		Manager->FinishCompletedTransition();
 	}
 
 	Manager->OnSequenceCompleted.Broadcast();
