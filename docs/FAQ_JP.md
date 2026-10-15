@@ -21,7 +21,7 @@ TransitionFX プラグインに関するよくある質問をまとめていま�
 1. **プリセットが設定されていない:** ノードの `Preset` ピンが接続されているか確認してください。`nullptr` が渡された場合、エラーがログに出力され、内部で `ForceClear` が呼ばれます。
 2. **マテリアルが未設定:** `TransitionPreset` データアセットを開き、`Transition Material` が設定されていることを確認してください。マテリアルが設定されていない場合、トランジションは描画されません。
 3. **マテリアルに `Progress` パラメータがない:** すべてのトランジションマテリアルには `Progress` というスカラーパラメータが必要です。存在しない場合、エフェクトはアニメーションしません（警告がログに出力されます）。
-4. **Effect Class が未設定:** `Effect Class` が `PostProcessTransitionEffect` または `WidgetTransitionEffect`（またはカスタムエフェクトクラス）に設定されていることを確認してください。`WidgetTransitionEffect` には UI ドメインのマテリアル（`MI_Widget_*`）が必要で、PostProcess 用マテリアルはウィジェットレイヤーでは描画されません。
+4. **Effect Class が未設定:** `Effect Class` が `PostProcessTransitionEffect` または `WidgetTransitionEffect`（またはカスタムエフェクトクラス）に設定されていることを確認してください。未設定の場合、遷移は開始されず、プリセット名を含むエラーがログ出力されます。`WidgetTransitionEffect` には UI ドメインのマテリアル（`MI_Widget_*`）が必要で、PostProcess 用マテリアルはウィジェットレイヤーでは描画されません。
 5. **PostProcess 設定の競合:** プロジェクトで既に極端な設定の Post Process Volume を使用している場合、視覚的に干渉する可能性があります。プリセットの `Priority` 値（デフォルト: 1000）を確認してください。
 
 ### Q: ゲームをポーズするとトランジションが止まります。

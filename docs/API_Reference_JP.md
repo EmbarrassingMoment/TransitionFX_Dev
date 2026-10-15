@@ -27,7 +27,7 @@ TransitionFXプラグインは、主に以下のコンポーネントで構成�
 
 ### レイテントアクション (Latent Action Nodes)
 
-これらのノードは、遷移が完了するまで実行を待機します。
+これらのノードは、遷移が完了するまで実行を待機します。遷移が完了前に停止された場合（`Stop Transition` / `Force Clear`）や開始に失敗した場合（無効なプリセットなど）、`Play Transition And Wait`、`Play Transition And Wait With Duration`、`Play Random Transition And Wait` は待機をやめて **Completed** を実行するため、Blueprint が待ち続けることはありません。
 
 #### Play Transition And Wait
 
@@ -82,7 +82,7 @@ TransitionFXプラグインは、主に以下のコンポーネントで構成�
 
 | ピン名 | タイプ | 説明 |
 | :--- | :--- | :--- |
-| **Preset** | Input | 使用する遷移プリセット (`UTransitionPreset`)。null の場合、`ForceClear` が呼ばれエラーがログ出力されます。 |
+| **Preset** | Input | 使用する遷移プリセット (`UTransitionPreset`)。null の場合、またはマテリアルか `Effect Class` が未設定の場合、`ForceClear` が呼ばれエラーがログ出力されます。 |
 | **Mode** | Input | 遷移モード (`Forward`: フェードアウト/0→1, `Reverse`: フェードイン/1→0)。 |
 | **Play Speed** | Input | 再生速度の倍率 (デフォルト: 1.0)。最小値 0.01 にクランプされます。 |
 | **bInvert** | Input | マスクを反転するかどうか。 |
@@ -150,7 +150,7 @@ TransitionFXプラグインは、主に以下のコンポーネントで構成�
 
 ![Open Level With Transition ノード](images/api_open_level_node.png)
 
-「フェードアウト → レベルオープン → フェードイン」のシーケンスを処理します。フェードアウトの完了から旧レベルが破棄されるまで画面は覆われたままで、新レベル側のフェードインは `PostLoadMapWithWorld` を通じて自動的に開始されます。`Preset` が null の場合はデフォルトの `DA_FadeToBlack` プリセットを使用します。
+「フェードアウト → レベルオープン → フェードイン」のシーケンスを処理します。フェードアウトの完了から旧レベルが破棄されるまで画面は覆われたままで、新レベル側のフェードインは `PostLoadMapWithWorld` を通じて自動的に開始されます。`Preset` が null の場合はデフォルトの `DA_FadeToBlack` プリセットを使用します。再生可能なプリセットがない場合（デフォルトプリセットをロードできない、またはプリセットのマテリアルか `Effect Class` が未設定）は、遷移なしでレベルを開き、エラーをログ出力します。
 
 *注: 内部的に、自動フェードインは `Reverse` モードではなく `Forward` モード + `bInvert=true` を使用します。視覚的な結果は同等です。*
 
@@ -162,7 +162,7 @@ TransitionFXプラグインは、主に以下のコンポーネントで構成�
 | **Duration** | Input | 遷移の持続時間（フェードアウトとフェードインの両方に適用）。デフォルト: 1.0。 |
 
 #### Open Level With Transition And Wait
-遷移（フェードアウト）を再生し、完了を待ってから指定されたレベルを開きます。新レベルでは自動的にリバース遷移（フェードイン）が再生されます。
+遷移（フェードアウト）を再生し、完了を待ってから指定されたレベルを開きます。新レベルでは自動的にリバース遷移（フェードイン）が再生されます。`Preset` が null の場合は `DA_FadeToBlack` を使用し、再生可能なプリセットがない場合は遷移なしでただちにレベルを開いてエラーをログ出力し、**Completed** を実行します。
 
 | ピン名 | タイプ | 説明 |
 | :--- | :--- | :--- |
@@ -275,7 +275,7 @@ UTransitionManagerSubsystem* TransitionSystem = GetGameInstance()->GetSubsystem<
 ### 主要関数
 
 #### StartTransition
-遷移を開始します。`Preset` が null またはマテリアルが未設定の場合、`ForceClear` が呼ばれエラーがログ出力されます。`PlaySpeed` は最小 0.01 にクランプされます。見える状態で終わる遷移（Reverse のフェードインなど）は完了時に自動的に停止してクリーンアップされ、覆った状態で終わる遷移（Forward のフェードアウトなど）は次の遷移、`ReverseTransition` / `InvertTransition`、または `StopTransition` までエフェクトを画面に残します（[エフェクトが消えるタイミング](#エフェクトが消えるタイミング)を参照）。
+遷移を開始します。`Preset` が null、またはマテリアルかエフェクトクラスが未設定の場合、`ForceClear` が呼ばれエラーがログ出力されます。`PlaySpeed` は最小 0.01 にクランプされます。見える状態で終わる遷移（Reverse のフェードインなど）は完了時に自動的に停止してクリーンアップされ、覆った状態で終わる遷移（Forward のフェードアウトなど）は次の遷移、`ReverseTransition` / `InvertTransition`、または `StopTransition` までエフェクトを画面に残します（[エフェクトが消えるタイミング](#エフェクトが消えるタイミング)を参照）。
 
 ```cpp
 void StartTransition(
@@ -352,7 +352,7 @@ void ForceClear();
 ```
 
 #### OpenLevelWithTransition
-「フェードアウト → レベルオープン → フェードイン」のシーケンスを処理します。レベル遷移をまたいで状態が維持されます。サブシステムの Blueprint ノードとしても呼び出せます。
+「フェードアウト → レベルオープン → フェードイン」のシーケンスを処理します。レベル遷移をまたいで状態が維持されます。サブシステムの Blueprint ノードとしても呼び出せます。`Preset` が null の場合は `GetDefaultFadePreset()` を使用し、再生可能なプリセットがない場合は遷移なしでレベルを開いてエラーをログ出力します。
 
 ```cpp
 void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
@@ -380,7 +380,7 @@ void ClearProgressThresholds();
 ```
 
 #### シーケンス再生 (Sequence Playback)
-`UTransitionSequence` データアセットのエントリを連続再生します。`PlaySequence` はシーケンスを検証し（null または空の場合は警告のみで何もしません）、再生中のトランジションやシーケンスがあれば先に停止します。レベル遷移が保留中の場合は無視されます。`StopSequence` は `OnSequenceCompleted` を発火せずに再生をキャンセルします。
+`UTransitionSequence` データアセットのエントリを連続再生します。`PlaySequence` はシーケンスを検証し（null または空の場合は警告のみで何もしません）、再生中のトランジションやシーケンスがあれば先に停止します。レベル遷移が保留中の場合は無視されます。プリセットが null のエントリや、マテリアルかエフェクトクラスが未設定のエントリは警告を出してスキップされます。`StopSequence` は `OnSequenceCompleted` を発火せずに再生をキャンセルします。
 
 ```cpp
 void PlaySequence(UTransitionSequence* Sequence);

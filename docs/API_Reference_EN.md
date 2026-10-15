@@ -27,7 +27,7 @@ Primary functionality is provided via `UTransitionBlueprintLibrary`, implemented
 
 ### Latent Action Nodes
 
-These nodes wait for the transition to complete before proceeding.
+These nodes wait for the transition to complete before proceeding. If the transition is stopped before it completes (`Stop Transition` / `Force Clear`) or fails to start (for example, an invalid preset), `Play Transition And Wait`, `Play Transition And Wait With Duration` and `Play Random Transition And Wait` stop waiting and fire **Completed** anyway, so the Blueprint never waits forever.
 
 #### Play Transition And Wait
 
@@ -82,7 +82,7 @@ On completion, a Fade Out (Forward without Invert) keeps covering the screen unt
 
 | Pin Name | Type | Description |
 | :--- | :--- | :--- |
-| **Preset** | Input | The transition preset (`UTransitionPreset`) to use. If null, `ForceClear` is called and an error is logged. |
+| **Preset** | Input | The transition preset (`UTransitionPreset`) to use. If null, or if it has no material or `Effect Class`, `ForceClear` is called and an error is logged. |
 | **Mode** | Input | Transition mode (`Forward`: Fade Out/0→1, `Reverse`: Fade In/1→0). |
 | **Play Speed** | Input | Playback speed multiplier (Default: 1.0). Clamped to a minimum of 0.01. |
 | **bInvert** | Input | Whether to invert the mask. |
@@ -150,7 +150,7 @@ Returns true once the current transition has completed (`OnTransitionCompleted` 
 
 ![Open Level With Transition node](images/api_open_level_node.png)
 
-Handles the sequence of "Fade Out -> Open Level -> Fade In". The screen stays covered from the end of the fade-out until the old level is torn down, and the fade-in on the new level side is automatically started via `PostLoadMapWithWorld`. If `Preset` is null, the default `DA_FadeToBlack` preset is used.
+Handles the sequence of "Fade Out -> Open Level -> Fade In". The screen stays covered from the end of the fade-out until the old level is torn down, and the fade-in on the new level side is automatically started via `PostLoadMapWithWorld`. If `Preset` is null, the default `DA_FadeToBlack` preset is used. If no playable preset is available (the default preset cannot be loaded, or the preset has no material or `Effect Class`), the level is opened without a transition and an error is logged.
 
 *Note: Internally, the auto fade-in uses `Forward` mode with `bInvert=true` rather than `Reverse` mode. The visual result is equivalent.*
 
@@ -162,7 +162,7 @@ Handles the sequence of "Fade Out -> Open Level -> Fade In". The screen stays co
 | **Duration** | Input | The duration of the transition (applies to both fade out and fade in). Default: 1.0. |
 
 #### Open Level With Transition And Wait
-Plays a transition (Fade Out), waits for it to complete, then opens the specified level. The new level will automatically play the reverse transition (Fade In).
+Plays a transition (Fade Out), waits for it to complete, then opens the specified level. The new level will automatically play the reverse transition (Fade In). A null `Preset` falls back to `DA_FadeToBlack`; if no playable preset is available, the level is opened right away without a transition, an error is logged, and **Completed** fires.
 
 | Pin Name | Type | Description |
 | :--- | :--- | :--- |
@@ -275,7 +275,7 @@ UTransitionManagerSubsystem* TransitionSystem = GetGameInstance()->GetSubsystem<
 ### Key Functions
 
 #### StartTransition
-Starts a transition. If `Preset` is null or its material is missing, `ForceClear` is called and an error is logged. `PlaySpeed` is clamped to a minimum of 0.01. A transition that ends revealed (e.g., a Reverse fade-in) stops and cleans up automatically; one that ends covered (e.g., a Forward fade-out) keeps its effect on screen until the next transition, `ReverseTransition` / `InvertTransition`, or `StopTransition` (see [When the Effect Is Removed](#when-the-effect-is-removed)).
+Starts a transition. If `Preset` is null or its material or effect class is missing, `ForceClear` is called and an error is logged. `PlaySpeed` is clamped to a minimum of 0.01. A transition that ends revealed (e.g., a Reverse fade-in) stops and cleans up automatically; one that ends covered (e.g., a Forward fade-out) keeps its effect on screen until the next transition, `ReverseTransition` / `InvertTransition`, or `StopTransition` (see [When the Effect Is Removed](#when-the-effect-is-removed)).
 
 ```cpp
 void StartTransition(
@@ -352,7 +352,7 @@ void ForceClear();
 ```
 
 #### OpenLevelWithTransition
-Handles the sequence of "Fade Out -> Open Level -> Fade In". Persists state across level transitions. Also callable from Blueprint on the subsystem.
+Handles the sequence of "Fade Out -> Open Level -> Fade In". Persists state across level transitions. Also callable from Blueprint on the subsystem. A null `Preset` falls back to `GetDefaultFadePreset()`; if no playable preset is available, the level is opened without a transition and an error is logged.
 
 ```cpp
 void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
@@ -380,7 +380,7 @@ void ClearProgressThresholds();
 ```
 
 #### Sequence Playback
-Plays a `UTransitionSequence` data asset's entries back-to-back. `PlaySequence` validates the sequence (null or empty is a no-op with a warning) and stops any currently playing transition or sequence first; it is ignored while a level transition is pending. `StopSequence` cancels playback without firing `OnSequenceCompleted`.
+Plays a `UTransitionSequence` data asset's entries back-to-back. `PlaySequence` validates the sequence (null or empty is a no-op with a warning) and stops any currently playing transition or sequence first; it is ignored while a level transition is pending. Entries whose preset is null or has no material or effect class are skipped with a warning. `StopSequence` cancels playback without firing `OnSequenceCompleted`.
 
 ```cpp
 void PlaySequence(UTransitionSequence* Sequence);

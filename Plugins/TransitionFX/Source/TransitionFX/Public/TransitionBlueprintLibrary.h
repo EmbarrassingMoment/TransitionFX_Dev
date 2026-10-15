@@ -23,6 +23,8 @@ class TRANSITIONFX_API UTransitionBlueprintLibrary : public UBlueprintFunctionLi
 public:
 	/**
 	 * Plays a transition and waits for it to complete.
+	 * Execution also continues if the transition is stopped before it completes
+	 * (StopTransition / ForceClear) or fails to start (e.g. an invalid preset).
 	 *
 	 * @param WorldContextObject The world context object.
 	 * @param Preset The transition preset to use.
@@ -51,6 +53,8 @@ public:
 
 	/**
 	 * Plays a transition with a specific duration and waits for it to complete.
+	 * Execution also continues if the transition is stopped before it completes
+	 * (StopTransition / ForceClear) or fails to start (e.g. an invalid preset).
 	 *
 	 * @param WorldContextObject The world context object.
 	 * @param Preset The transition preset to use.
@@ -92,6 +96,8 @@ public:
 	/**
 	 * Handles the sequence of "Fade Out -> Open Level -> Fade In".
 	 * Persists state across level transitions.
+	 * A null Preset falls back to the default fade; if no playable preset is available,
+	 * the level is opened without a transition and an error is logged.
 	 *
 	 * @param WorldContextObject The world context object.
 	 * @param LevelName The name of the level to open.
@@ -104,6 +110,8 @@ public:
 	/**
 	 * Plays a transition, waits for it to complete (Fade Out), then opens the specified level.
 	 * The new level will automatically play the reverse transition (Fade In).
+	 * A null Preset falls back to the default fade; if no playable preset is available,
+	 * the level is opened without a transition and an error is logged.
 	 *
 	 * @param WorldContextObject The world context object.
 	 * @param LevelName The name of the level to open.

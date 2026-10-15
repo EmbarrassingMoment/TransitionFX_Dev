@@ -89,7 +89,10 @@ public:
 	/** Cleans up console commands, delegates, and the effect pool. */
 	virtual void Deinitialize() override;
 
-	/** Starts a transition with the given preset. */
+	/**
+	 * Starts a transition with the given preset. A preset without a TransitionMaterial or
+	 * EffectClass is rejected with an error and clears any active transition.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (PlaySpeed = "1.0"))
 	void StartTransition(UTransitionPreset* Preset, ETransitionMode Mode = ETransitionMode::Forward, float PlaySpeed = 1.0f, bool bInvert = false, bool bHoldAtMax = false, FTransitionParameters OverrideParams = FTransitionParameters());
 
@@ -149,6 +152,8 @@ public:
 	/**
 	 * Handles the sequence of "Fade Out -> Open Level -> Fade In".
 	 * Persists state across level transitions.
+	 * A null Preset falls back to the default fade; if no playable preset is available,
+	 * the level is opened without a transition and an error is logged.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
 	void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);

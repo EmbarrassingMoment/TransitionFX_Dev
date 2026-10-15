@@ -27,7 +27,8 @@ void UTransitionSequencePlayer::Play(UTransitionSequence* Sequence)
 
 /**
  * Begins the entry at StepIndex, handles loop wrap-around / completion, and skips
- * null-preset entries with a warning. Skipping advances iteratively — once every
+ * entries whose preset is null or not playable (no TransitionMaterial or EffectClass)
+ * with a warning. Skipping advances iteratively — once every
  * entry has been visited without finding a playable preset, the sequence
  * finishes instead of cycling forever.
  */
@@ -83,6 +84,14 @@ void UTransitionSequencePlayer::StartSequenceStep(int32 StepIndex)
 			continue;
 		}
 
+		// StartTransition would reject this preset and ForceClear, aborting the whole sequence.
+		if (!Entry.Preset->IsPlayable())
+		{
+			UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: Entry %d's preset '%s' has no TransitionMaterial or EffectClass. Skipping."), StepIndex, *Entry.Preset->GetName());
+			StepIndex++;
+			continue;
+		}
+
 		UTransitionManagerSubsystem* Manager = GetManager();
 
 		CurrentSequenceStep = StepIndex;
@@ -103,8 +112,8 @@ void UTransitionSequencePlayer::StartSequenceStep(int32 StepIndex)
 		return;
 	}
 
-	// Every entry was visited and none has a preset — nothing is playable.
-	UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: Sequence '%s' has no playable entries (all presets are null). Finishing."), *CurrentSequence->GetName());
+	// Every entry was visited and none has a playable preset.
+	UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: Sequence '%s' has no playable entries (all presets are null or not playable). Finishing."), *CurrentSequence->GetName());
 	FinishSequence();
 }
 

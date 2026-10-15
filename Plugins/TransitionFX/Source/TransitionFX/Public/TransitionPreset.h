@@ -119,4 +119,10 @@ public:
 	/** Pitch of the transition sound. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio", meta = (ClampMin = "0.0"))
 	float SoundPitch;
+
+	/** Returns true if the preset can be played: both TransitionMaterial and EffectClass are set. */
+	bool IsPlayable() const
+	{
+		return TransitionMaterial != nullptr && EffectClass != nullptr;
+	}
 };

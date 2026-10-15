@@ -250,6 +250,15 @@ void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldCo
 		Preset = GetDefaultFadePreset();
 	}
 
+	// Without a playable preset the fade-out could never start (or complete), so the level
+	// would never open. Open it right away instead of failing the level change.
+	if (!Preset || !Preset->IsPlayable())
+	{
+		UE_LOG(LogTransitionFX, Error, TEXT("OpenLevelWithTransition: No playable preset (the default fade preset could not be loaded, or the preset has no TransitionMaterial or EffectClass). Opening '%s' without a transition."), *LevelName.ToString());
+		UGameplayStatics::OpenLevel(this, LevelName);
+		return;
+	}
+
 	PendingLevelName = LevelName;
 	PendingPreset = Preset;
 	PendingDuration = Duration;
@@ -481,9 +490,18 @@ TStatId UTransitionManagerSubsystem::GetStatId() const
  */
 void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, bool bInvert, bool bHoldAtMax, FTransitionParameters OverrideParams)
 {
-	if (!Preset || !Preset->TransitionMaterial)
+	if (!Preset || !Preset->IsPlayable())
 	{
-		UE_LOG(LogTransitionFX, Error, TEXT("TransitionFX: Invalid Preset or Material is missing!"));
+		if (!Preset || !Preset->TransitionMaterial)
+		{
+			UE_LOG(LogTransitionFX, Error, TEXT("TransitionFX: Invalid Preset or Material is missing!"));
+		}
+		else
+		{
+			// Without an effect class nothing would be rendered, yet the transition would still
+			// tick, block input and fire its events.
+			UE_LOG(LogTransitionFX, Error, TEXT("TransitionFX: Preset '%s' has no EffectClass. Set it to PostProcessTransitionEffect or WidgetTransitionEffect."), *Preset->GetName());
+		}
 		ForceClear();
 		return;
 	}
