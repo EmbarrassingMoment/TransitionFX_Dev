@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `Tests/AIUsability/`: an agent-readiness test for the plugin, built from Anthropic's own guidance. A static suite (`test_agent_readiness.py`, Python, no engine needed) checks the docs, public headers and `CLAUDE.md` against the Agent Skills authoring rules, the `claude plugin eval` suite reference, the "Writing effective tools for agents" criteria and the Claude Code `CLAUDE.md` guidance; a Claude Code plugin wrapper with a `using-transitionfx` skill and ten eval cases lets `claude plugin eval Tests/AIUsability` measure how reliably an agent integrates the plugin with and without its documentation. Excluded from the release ZIP.
+
 ### Changed
 
 - README (EN/JA) aligned with the shipped plugin and sample project: Version badge updated to 1.5.0; platform support stated as Win64 only (both modules use `PlatformAllowList`); the PostProcess pipeline requirement scoped to PostProcess presets; sample project requirements updated to UE 5.8 (the plugin itself still supports 5.5+); manual installation now points to `Plugins/TransitionFX` in the Releases ZIP and notes that it is source-only; the easing table shows editor display names alongside enum values and the `Progress Curve` slot name is corrected; `Priority` documented as PostProcess-only; Slice listed as unavailable on the widget layer alongside Pixelate.
@@ -15,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Roadmap moved from the READMEs to `docs/ROADMAP_EN.md` / `docs/ROADMAP_JP.md`, split into Planned and Shipped (with the release each item shipped in). The READMEs keep a short summary and a link.
 - README (JA): section headings unified into Japanese, and the Sponsor badge and sample-video link that only the English README had were added.
 - `CLAUDE.md` setup steps updated to the sample project's UE 5.8 requirement.
+- `CLAUDE.md` corrected where the agent-readiness test found it out of date: 14 (not 10) material functions, the full list of `Category` paths actually used in the headers, and `SetParameters` added to the `ITransitionEffect` method list; the Testing section now points at `Tests/AIUsability/`.
 
 ### Fixed
 

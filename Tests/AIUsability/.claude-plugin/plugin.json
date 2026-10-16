@@ -1,0 +1,10 @@
+{
+  "name": "transitionfx",
+  "displayName": "TransitionFX (agent-usability harness)",
+  "version": "1.5.0",
+  "description": "Gives Claude the TransitionFX Unreal Engine plugin's shipped documentation and public C++ headers so it can integrate, configure and debug TransitionFX transitions. Exists to measure, with `claude plugin eval`, how usable the plugin is for an AI agent.",
+  "author": { "name": "Kurorekishi (EmbarrassingMoment)", "url": "https://github.com/EmbarrassingMoment" },
+  "repository": "https://github.com/EmbarrassingMoment/TransitionFX_Dev",
+  "license": "MIT",
+  "keywords": ["unreal-engine", "transition", "agent-usability", "eval"]
+}

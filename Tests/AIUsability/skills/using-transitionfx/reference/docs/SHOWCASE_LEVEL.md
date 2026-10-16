@@ -1,0 +1,80 @@
+# ShowCase Level
+
+TransitionFX プラグインに含まれる全トランジションエフェクトをインタラクティブにプレビューできるデモレベル。
+
+## 概要
+
+- **レベル**: `Content/SampleLevel/L_ShowCase.umap`
+- **ウィジェット**: `Content/Widget/WBP_ShowCase.uasset`
+
+ShowCase レベルを PIE (Play In Editor) で実行すると、画面下部に操作パネルが表示される。
+ボタン操作で 39 種のトランジションプリセット（PostProcess 版 30 種 + ウィジェットレイヤー版 9 種）を切り替え・再生できる。
+
+## 操作方法
+
+| ボタン | 機能 |
+|--------|------|
+| **Prev / Next** | 表示中のプリセットを前後に切り替え |
+| **Play** | 選択中のプリセットを Forward → Hold → Reverse で再生 |
+| **Replay** | 同じプリセットを再度再生 |
+| **Play All** | 全プリセットを順番に自動再生 |
+
+## アーキテクチャ
+
+### Level Blueprint (L_ShowCase)
+
+1. `BeginPlay` で `AsyncLoadTransitionPresets` を呼び出し、全プリセットを非同期ロード＋シェーダーウォームアップ
+2. ロード完了コールバックで Soft Reference → Hard Reference に解決
+3. `WBP_ShowCase` ウィジェットを生成し Viewport に追加
+4. マウスカーソル表示、入力モードを UI Only に設定
+
+### Widget Blueprint (WBP_ShowCase)
+
+**デリゲートバインド方式**: `Event Construct` で `TransitionManagerSubsystem` のデリゲートを 1 回だけ Bind する。
+Bind/Unbind の繰り返しを避け、`bIsPlayAll` 状態変数で単発再生/ループ再生を分岐する。
+
+**再生フロー**:
+```
+StartTransition(Forward, bHoldAtMax=true)
+  → Progress 0.0 → 1.0 (画面が覆われる)
+  → OnTransitionHoldStarted → Delay 0.3s
+  → ReverseTransition(bAutoStop=true)
+  → Progress 1.0 → 0.0 (画面が現れる)
+  → OnTransitionCompleted
+  → bIsPlayAll ? 次のプリセットへ : 完了
+```
+
+**主要変数**:
+
+| 変数 | 型 | 用途 |
+|------|-----|------|
+| `TransitionPresets` | `TArray<UTransitionPreset*>` | 全プリセット配列 |
+| `CurrentIndex` | `Integer` | 選択中のインデックス |
+| `bIsPlaying` | `Boolean` | 再生中フラグ |
+| `bIsPlayAll` | `Boolean` | Play All モードフラグ |
+| `TransitionManager` | `UTransitionManagerSubsystem*` | サブシステム参照キャッシュ |
+
+## 含まれるプリセット (30 種)
+
+Fade, Iris, Diamond, DiamondWipe, RadialWipe, CrossWipe, CornerWipe, Box, BoxRoll, Triangle,
+Hexagon, Spiral, Tiles, RandomTiles, Blinds, PolkaDots, CheckerBoard, FlowerIris,
+TVSwitchOff, WavyCurtain, Wind, Pixelate, Split, SlidingDoor, Fan, Slice, Dissolve,
+TextureMask, StripeCascade, FadeToBlack
+
+> **Note:** `DA_LinearWipe` はプラグインに含まれるが、現在の ShowCase レベルからは参照されていない（唯一の未収録エフェクト）。
+
+## ウィジェットレイヤー版プリセット (9 種)
+
+`WidgetTransitionEffect` を使う `DA_Widget_*` プリセットもリストに含まれ、`DA_WavyCurtain` と `DA_Wind` の間にアルファベット順で並ぶ（一覧の 30〜38 番目）。
+
+Widget_Blinds, Widget_CheckerBoard, Widget_Dissolve, Widget_Fade, Widget_FadeToBlack, Widget_Iris,
+Widget_LinearWipe, Widget_RadialWipe, Widget_TextureMask
+
+これらは操作パネル（UMG）ごと画面を覆うので、再生中はパネルが見えなくなるのが正しい挙動。
+追加・更新は `Plugins/DevMaterialTools/Tools/build_widget_material.py`（アセット生成）と
+`register_widget_presets.py`（レベル登録）をエディタを閉じた状態でヘッドレス実行する。
+
+## 注意事項
+
+- C++ コードの変更は不要。すべて Blueprint / UMG で構成
+- 全アセットは Unreal Editor 上で手動作成する必要がある
