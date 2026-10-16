@@ -100,6 +100,34 @@ claude plugin eval Tests/AIUsability --trust-plugin --json results.json --thresh
 | `custom-effect-class` | `ITransitionEffect` の 5 メソッドと `EffectClass` への接続を正しく列挙できるか |
 | `limits-honesty` | 同時再生・レプリケーション・UEFN・Widget 版 Pixelate に「No」と答えられるか（幻覚ガード） |
 
+## 判定結果（2026-10-16、初回フル実行）
+
+静的テスト: 37 件中 35 件合格（未修正 2 件は上記のとおり、目次の無い長文ドキュメント 3 本と、発生元を含まない Error ログ 1 行）。
+
+挙動テスト（`--threshold 0.8`、各ケース 3 回 × WITH / W/OUT、Claude Code 2.1.301、約 3.0 USD、211 秒）:
+
+| ケース | WITH | W/OUT | Δ |
+| :--- | ---: | ---: | ---: |
+| cover-umg-hud | 1.00 | 0.00 | +1.00 |
+| cpp-red-iris-half-second | 0.93 | 0.07 | +0.87 |
+| custom-effect-class | 1.00 | 0.00 | +1.00 |
+| first-play-hitch | 1.00 | 0.00 | +1.00 |
+| level-change-with-fade | 1.00 | 0.00 | +1.00 |
+| limits-honesty | 1.00 | 0.50 | +0.50 |
+| loading-screen-hold | 1.00 | 0.00 | +1.00 |
+| reverse-vs-invert | 1.00 | 0.83 | +0.17 |
+| sequence-cannot-change-level | 1.00 | 0.17 | +0.83 |
+| stuck-black-screen | 1.00 | 0.00 | +1.00 |
+| **全体** | **0.99** | | **+0.84** |
+
+10 ケースすべてが閾値を超え、Skill は 30 回の WITH 実行すべてで起動しました。
+判定: **ドキュメントと公開ヘッダを渡せば、AI はこのプラグインを正しく使える（AI にとって使いやすい）**。
+一方 W/OUT がほぼ 0 なので、Claude はこのプラグインを事前知識として持っておらず、
+使いやすさは **ドキュメントの質に全面的に依存** しています。ドキュメントを壊すとそのまま使えなくなる、ということでもあります。
+
+唯一の WITH 減点（cpp ケース 3 回中 1 回）は、生成コードは正しいのに judge が `TransitionFXConfig::ColorParamName` を
+`FadeColor` と認めなかったもので、ルーブリックを修正済みです。
+
 ## 測れないこと
 
 - `plugin eval` の実行は隔離されており、UE エディタを起動できず、`CLAUDE.md` や `.claude/` も読み込まれません。
