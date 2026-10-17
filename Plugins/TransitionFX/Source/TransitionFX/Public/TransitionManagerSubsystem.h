@@ -114,7 +114,8 @@ public:
 
 	/**
 	 * Stops the current transition, or removes the effect that a completed transition
-	 * left covering the screen.
+	 * left covering the screen. Stopping the fade-out of a level transition before it
+	 * completes cancels the level transition.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void StopTransition();
@@ -134,7 +135,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TransitionFX")
 	float GetCurrentProgress() const;
 
-	/** Forcefully clears any active transition and resets input. */
+	/**
+	 * Forcefully clears any active transition and resets input. Also cancels a pending
+	 * level transition and any auto-reverse fade-in prepared for the next level load.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void ForceClear();
 
@@ -154,6 +158,9 @@ public:
 	 * Persists state across level transitions.
 	 * A null Preset falls back to the default fade; if no playable preset is available,
 	 * the level is opened without a transition and an error is logged.
+	 * Stopping (StopTransition / ForceClear) or replacing (StartTransition) the fade-out
+	 * before it completes cancels the level transition: the level is not opened and no
+	 * fade-in plays on the next level load.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
 	void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
@@ -228,6 +235,7 @@ public:
 
 private:
 	friend class UTransitionSequencePlayer;
+	friend class FOpenLevelTransitionLatentAction;
 
 	/** Stops and releases the current audio component. */
 	void StopAndClearAudio();
@@ -335,6 +343,29 @@ private:
 	/** The preset to use for the pending level transition. */
 	UPROPERTY()
 	TObjectPtr<UTransitionPreset> PendingPreset;
+
+	/**
+	 * Whether the fade-out of a level transition (OpenLevelWithTransition or
+	 * OpenLevelWithTransitionAndWait) has started and its level has not been opened yet.
+	 * Stopping, replacing or force-clearing that fade-out before it completes cancels the
+	 * level transition (see CancelPendingLevelTransition).
+	 */
+	bool bIsLevelFadeOutPending = false;
+
+	/**
+	 * Starts the fade-out of a level transition: replaces the current transition or sequence
+	 * (which cancels a previous level transition still fading out), prepares the auto-reverse
+	 * fade-in for the next level load, and marks the fade-out as pending. When
+	 * bOpenLevelWhenFadedOut is true, OnLevelTransitionFadeOutFinished opens LevelName once
+	 * the fade-out completes; otherwise the caller (the latent action) opens it.
+	 */
+	void StartLevelFadeOut(FName LevelName, UTransitionPreset* Preset, float Duration, bool bOpenLevelWhenFadedOut);
+
+	/**
+	 * Drops the pending level transition: its level is not opened, and no auto-reverse fade-in
+	 * plays on the next level load (this includes one prepared with PrepareAutoReverseTransition).
+	 */
+	void CancelPendingLevelTransition();
 
 	/** Callback fired when the fade-out phase of a level transition completes. Opens the pending level. */
 	UFUNCTION()

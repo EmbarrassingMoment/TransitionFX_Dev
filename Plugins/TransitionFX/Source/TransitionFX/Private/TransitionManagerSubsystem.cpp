@@ -259,19 +259,61 @@ void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldCo
 		return;
 	}
 
+	StartLevelFadeOut(LevelName, Preset, Duration, /*bOpenLevelWhenFadedOut=*/true);
+}
+
+/** Records the pending level transition and starts its fade-out. Shared by both OpenLevelWithTransition paths. */
+void UTransitionManagerSubsystem::StartLevelFadeOut(FName LevelName, UTransitionPreset* Preset, float Duration, bool bOpenLevelWhenFadedOut)
+{
+	// Replace the current sequence / transition before recording the new level transition.
+	// StartTransition would otherwise stop it internally, after the state below is set, and
+	// StopTransition would take that for a cancelled fade-out. Stopping here still cancels a
+	// previous level transition whose fade-out is playing, and the new effect is created in
+	// this same frame, so no frame exposes the scene.
+	if (IsSequencePlaying())
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("Level transition started while a sequence is playing. Cancelling sequence."));
+		StopSequence();
+	}
+	if (bIsTransitionActive || bIsCoveringScreen)
+	{
+		StopTransition();
+	}
+
 	PendingLevelName = LevelName;
 	PendingPreset = Preset;
 	PendingDuration = Duration;
 	bAutoReverseOnLevelLoad = true;
+	bIsLevelFadeOutPending = true;
 
 	// Ensure we don't have stale bindings
 	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
-	OnTransitionCompleted.AddDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
+	if (bOpenLevelWhenFadedOut)
+	{
+		OnTransitionCompleted.AddDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
+	}
 
 	float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(Preset->DefaultDuration, Duration);
 
 	// Start Fade Out (Forward, Invert=False)
 	StartTransition(Preset, ETransitionMode::Forward, PlaySpeed, false);
+}
+
+/** Clears the pending level transition state and the one-shot fade-out binding. */
+void UTransitionManagerSubsystem::CancelPendingLevelTransition()
+{
+	if (bIsLevelFadeOutPending)
+	{
+		UE_LOG(LogTransitionFX, Log, TEXT("TransitionFX: Level transition to '%s' cancelled because its fade-out was stopped or replaced before it completed."), *PendingLevelName.ToString());
+	}
+
+	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
+
+	bIsLevelFadeOutPending = false;
+	bAutoReverseOnLevelLoad = false;
+	PendingLevelName = NAME_None;
+	PendingPreset = nullptr;
+	PendingDuration = 1.0f;
 }
 
 /** Stores preset and duration for an auto-reverse transition on the next level load without starting playback. */
@@ -287,6 +329,17 @@ void UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished()
 {
 	// One-shot callback
 	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
+
+	// An OnTransitionCompleted handler that ran before this one may have force-cleared the
+	// level transition during the same broadcast.
+	if (!bIsLevelFadeOutPending)
+	{
+		return;
+	}
+
+	// The level is being opened, so stopping the (now covering) effect no longer cancels the
+	// level transition; the auto-reverse fade-in stays prepared for the next level load.
+	bIsLevelFadeOutPending = false;
 
 	UGameplayStatics::OpenLevel(this, PendingLevelName);
 }
@@ -436,6 +489,10 @@ void UTransitionManagerSubsystem::ForceClear()
 	{
 		SequencePlayer->Reset();
 	}
+
+	// A level transition must not open its level or fade in on the next level load after a
+	// force clear.
+	CancelPendingLevelTransition();
 
 	CleanupAndPoolCurrentEffect();
 
@@ -757,10 +814,21 @@ void UTransitionManagerSubsystem::InvertTransition(bool bAutoComplete)
 
 /**
  * Stops the active transition (or removes an effect kept covering the screen): cleans up
- * the effect, stops audio, restores input, and resets state.
+ * the effect, stops audio, restores input, and resets state. Cancels a level transition
+ * whose fade-out has not completed yet.
  */
 void UTransitionManagerSubsystem::StopTransition()
 {
+	// Stopping the fade-out of a level transition before it completes (directly, or through
+	// StartTransition replacing it) cancels the level transition; otherwise the next transition
+	// to complete would open the stale level. Once the fade-out has completed, the level is
+	// being opened, and stopping its covering effect (e.g. from OnWorldCleanup during that
+	// level travel) must keep the auto-reverse fade-in.
+	if (bIsLevelFadeOutPending && !bHasCompleted)
+	{
+		CancelPendingLevelTransition();
+	}
+
 	if (!bIsTransitionActive && !bIsCoveringScreen)
 	{
 		return;
@@ -876,7 +944,8 @@ void UTransitionManagerSubsystem::PlaySequence(UTransitionSequence* Sequence)
 
 	// Sequences and level transitions are mutually exclusive: refuse if a level
 	// transition (or auto-reverse plan) is pending. bAutoReverseOnLevelLoad is
-	// the authoritative in-flight flag — it is cleared in OnPostLoadMapWithWorld.
+	// the authoritative in-flight flag — it is cleared in OnPostLoadMapWithWorld,
+	// or by CancelPendingLevelTransition when the level transition is cancelled.
 	if (bAutoReverseOnLevelLoad)
 	{
 		UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: A level transition is pending. Sequences cannot run during level transitions. Ignoring."));
