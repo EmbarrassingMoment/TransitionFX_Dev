@@ -90,10 +90,10 @@ On completion, a Fade Out (Forward without Invert) keeps covering the screen unt
 | **Override Params** | Input | Structure for dynamically overriding material parameters (`FTransitionParameters`). |
 
 #### Stop Transition
-Stops the currently playing transition, or removes the effect that a completed Fade Out left covering the screen. Input is restored and `OnTransitionCompleted` does not fire.
+Stops the currently playing transition, or removes the effect that a completed Fade Out left covering the screen. Input is restored and `OnTransitionCompleted` does not fire. Stopping the fade-out of `Open Level With Transition` / `Open Level With Transition And Wait` before it completes cancels the level transition (see [Level Transition Nodes](#level-transition-nodes)).
 
 #### Force Clear
-Forcefully clears all transition states and resets input, and also cancels any playing sequence. Used for emergency stops or resetting.
+Forcefully clears all transition states and resets input, and also cancels any playing sequence and any pending level transition, including the automatic fade-in prepared for the next level load. Used for emergency stops or resetting.
 
 #### Reverse Transition
 Reverses the playback direction of the current transition (e.g., from Fade Out to Fade In). Works while a transition is playing, while it holds at max progress, and after a Fade Out has completed and is still covering the screen. After a transition that ended revealed has stopped, there is nothing to reverse (a warning is logged). If `bAutoStop` is true (default), the transition is finished automatically when the reverse completes; if false, it stays active at progress 0.
@@ -152,6 +152,8 @@ Returns true once the current transition has completed (`OnTransitionCompleted` 
 
 Handles the sequence of "Fade Out -> Open Level -> Fade In". The screen stays covered from the end of the fade-out until the old level is torn down, and the fade-in on the new level side is automatically started via `PostLoadMapWithWorld`. If `Preset` is null, the default `DA_FadeToBlack` preset is used. If no playable preset is available (the default preset cannot be loaded, or the preset has no material or `Effect Class`), the level is opened without a transition and an error is logged.
 
+Stopping the fade-out before it completes (`Stop Transition` / `Force Clear`), or replacing it with another transition (`Start Transition`, a Play Transition or Quick Fade node, or another level transition), cancels the level transition: the level is not opened, no fade-in plays on the next level load, and sequences can be played again. Once the fade-out has completed, the level is opened as usual.
+
 *Note: Internally, the auto fade-in uses `Forward` mode with `bInvert=true` rather than `Reverse` mode. The visual result is equivalent.*
 
 | Pin Name | Type | Description |
@@ -162,7 +164,7 @@ Handles the sequence of "Fade Out -> Open Level -> Fade In". The screen stays co
 | **Duration** | Input | The duration of the transition (applies to both fade out and fade in). Default: 1.0. |
 
 #### Open Level With Transition And Wait
-Plays a transition (Fade Out), waits for it to complete, then opens the specified level. The new level will automatically play the reverse transition (Fade In). A null `Preset` falls back to `DA_FadeToBlack`; if no playable preset is available, the level is opened right away without a transition, an error is logged, and **Completed** fires.
+Plays a transition (Fade Out), waits for it to complete, then opens the specified level. The new level will automatically play the reverse transition (Fade In). A null `Preset` falls back to `DA_FadeToBlack`; if no playable preset is available, the level is opened right away without a transition, an error is logged, and **Completed** fires. If the fade-out is stopped or replaced before it completes (as described for `Open Level With Transition`), the level is not opened, the automatic fade-in is cancelled, a warning is logged, and **Completed** fires.
 
 | Pin Name | Type | Description |
 | :--- | :--- | :--- |
@@ -170,7 +172,7 @@ Plays a transition (Fade Out), waits for it to complete, then opens the specifie
 | **Level Name** | Input | The name of the level to open. |
 | **Preset** | Input | The transition preset to use. |
 | **Duration** | Input | The duration of the transition (applies to both fade out and fade in). |
-| **Completed** | Output | Executed after the fade-out transition completes and `OpenLevel` is called. |
+| **Completed** | Output | Executed after the fade-out transition completes and `OpenLevel` is called, or when the level transition is cancelled (the level is then not opened). |
 
 ### Utility Nodes
 
@@ -289,7 +291,7 @@ void StartTransition(
 ```
 
 #### StopTransition
-Stops the current transition, or removes the effect that a completed transition left covering the screen. Restores input; does not broadcast `OnTransitionCompleted`.
+Stops the current transition, or removes the effect that a completed transition left covering the screen. Restores input; does not broadcast `OnTransitionCompleted`. Stopping the fade-out of a level transition before it completes cancels the level transition.
 
 ```cpp
 void StopTransition();
@@ -345,14 +347,14 @@ bool IsCurrentTransitionFinished() const;
 ```
 
 #### ForceClear
-Forcefully clears any active transition (including a playing sequence and an effect left covering the screen) and resets input. Used for emergency recovery.
+Forcefully clears any active transition (including a playing sequence and an effect left covering the screen) and resets input. Also cancels a pending level transition and any auto-reverse fade-in prepared for the next level load (including one set up with `PrepareAutoReverseTransition`). Used for emergency recovery.
 
 ```cpp
 void ForceClear();
 ```
 
 #### OpenLevelWithTransition
-Handles the sequence of "Fade Out -> Open Level -> Fade In". Persists state across level transitions. Also callable from Blueprint on the subsystem. A null `Preset` falls back to `GetDefaultFadePreset()`; if no playable preset is available, the level is opened without a transition and an error is logged.
+Handles the sequence of "Fade Out -> Open Level -> Fade In". Persists state across level transitions. Also callable from Blueprint on the subsystem. A null `Preset` falls back to `GetDefaultFadePreset()`; if no playable preset is available, the level is opened without a transition and an error is logged. Stopping (`StopTransition` / `ForceClear`) or replacing (`StartTransition`) the fade-out before it completes cancels the level transition: the level is not opened and no fade-in plays on the next level load.
 
 ```cpp
 void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
@@ -489,7 +491,7 @@ Functions helpful for development and debugging.
 ### Force Clear
 
 *   **Blueprint Node**: `ForceClear`
-    *   Instantly destroys all transition states and unblocks input. Used to recover from unexpected stuck states.
+    *   Instantly destroys all transition states (including a pending level transition) and unblocks input. Used to recover from unexpected stuck states.
 
 *   **Console Command**: `TransitionFX.ForceClear`
     *   **Important**: QA testers and developers can type this command in the console window (`@` or `~` key) to instantly recover from a stuck black screen.

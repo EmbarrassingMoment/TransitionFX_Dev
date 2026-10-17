@@ -98,6 +98,9 @@ public:
 	 * Persists state across level transitions.
 	 * A null Preset falls back to the default fade; if no playable preset is available,
 	 * the level is opened without a transition and an error is logged.
+	 * Stopping (StopTransition / ForceClear) or replacing (StartTransition) the fade-out
+	 * before it completes cancels the level transition: the level is not opened and no
+	 * fade-in plays on the next level load.
 	 *
 	 * @param WorldContextObject The world context object.
 	 * @param LevelName The name of the level to open.
@@ -112,6 +115,9 @@ public:
 	 * The new level will automatically play the reverse transition (Fade In).
 	 * A null Preset falls back to the default fade; if no playable preset is available,
 	 * the level is opened without a transition and an error is logged.
+	 * If the fade-out is stopped (StopTransition / ForceClear) or replaced (StartTransition)
+	 * before it completes, the level is not opened, no fade-in plays on the next level load,
+	 * and the node finishes.
 	 *
 	 * @param WorldContextObject The world context object.
 	 * @param LevelName The name of the level to open.

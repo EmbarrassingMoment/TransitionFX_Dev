@@ -83,13 +83,9 @@ public:
 	{
 		if (Manager.IsValid())
 		{
-			// Prepare Auto Reverse for the NEXT level
-			Manager->PrepareAutoReverseTransition(Preset, Duration);
-
-			float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(Preset->DefaultDuration, Duration);
-
-			// Start Fade Out (Forward, Invert=False)
-			Manager->StartTransition(Preset, ETransitionMode::Forward, PlaySpeed, false);
+			// Prepare Auto Reverse for the NEXT level and start the Fade Out (Forward, Invert=False).
+			// This action opens the level itself, so the subsystem does not bind its own OpenLevel.
+			Manager->StartLevelFadeOut(LevelName, Preset, Duration, /*bOpenLevelWhenFadedOut=*/false);
 		}
 	}
 
@@ -99,9 +95,20 @@ public:
 
 		if (Manager.IsValid())
 		{
-			// If transition finished (reached 1.0), we trigger OpenLevel
-			if (Manager->IsCurrentTransitionFinished())
+			// The fade-out was stopped, replaced by another transition or force-cleared, which
+			// cancelled the level transition (including the auto-reverse fade-in), or another
+			// level transition has taken over.
+			if (!Manager->bIsLevelFadeOutPending || Manager->PendingLevelName != LevelName)
 			{
+				UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransitionAndWait: Transition stopped or replaced before it completed. Aborting level load."));
+				bFinished = true;
+			}
+			// If transition finished (reached 1.0), we trigger OpenLevel
+			else if (Manager->IsCurrentTransitionFinished())
+			{
+				// The level is being opened: keep the auto-reverse fade-in prepared for it.
+				Manager->bIsLevelFadeOutPending = false;
+
 				if (const UObject* WorldContext = WorldContextObject.Get())
 				{
 					UGameplayStatics::OpenLevel(WorldContext, LevelName);
@@ -112,6 +119,7 @@ public:
 			else if (!Manager->IsTransitionPlaying())
 			{
 				UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransitionAndWait: Transition stopped manually. Aborting level load."));
+				Manager->CancelPendingLevelTransition();
 				bFinished = true;
 			}
 		}
