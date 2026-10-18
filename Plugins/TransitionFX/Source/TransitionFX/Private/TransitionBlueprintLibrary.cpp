@@ -73,6 +73,9 @@ public:
 	FName LevelName;
 	TWeakObjectPtr<const UObject> WorldContextObject;
 
+	/** Opens the level on the first update without a transition (no playable preset was available). */
+	bool bOpenWithoutTransition = false;
+
 	FOpenLevelTransitionLatentAction(const FLatentActionInfo& InLatentInfo, UTransitionManagerSubsystem* InManager, FName InLevelName, UTransitionPreset* Preset, float Duration, const UObject* InWorldContextObject)
 		: ExecutionFunction(InLatentInfo)
 		, OutputLink(InLatentInfo.Linkage)
@@ -93,7 +96,17 @@ public:
 	{
 		bool bFinished = false;
 
-		if (Manager.IsValid())
+		if (bOpenWithoutTransition)
+		{
+			// Open the level here, as the transition path does, so Completed fires before travel
+			// tears down this world.
+			if (const UObject* WorldContext = WorldContextObject.Get())
+			{
+				UGameplayStatics::OpenLevel(WorldContext, LevelName);
+			}
+			bFinished = true;
+		}
+		else if (Manager.IsValid())
 		{
 			// The fade-out was stopped, replaced by another transition or force-cleared, which
 			// cancelled the level transition (including the auto-reverse fade-in), or another
@@ -433,13 +446,16 @@ void UTransitionBlueprintLibrary::OpenLevelWithTransitionAndWait(const UObject* 
 					Preset = Manager->GetDefaultFadePreset();
 				}
 
-				// Without a playable preset the fade-out could never start, so open the level
-				// right away. Passing nullptr for Manager finishes the latent action on the first poll.
+				// Without a playable preset the fade-out could never start, so open the level without a
+				// transition. The latent action opens it on its first update and fires Completed in that
+				// same update; calling OpenLevel here instead would travel at the start of the next frame,
+				// before the action is ever polled, and Completed would never fire.
 				if (!Preset || !Preset->IsPlayable())
 				{
 					UE_LOG(LogTransitionFX, Error, TEXT("OpenLevelWithTransitionAndWait: No playable preset (the default fade preset could not be loaded, or the preset has no TransitionMaterial or EffectClass). Opening '%s' without a transition."), *LevelName.ToString());
-					UGameplayStatics::OpenLevel(WorldContextObject, LevelName);
-					LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FOpenLevelTransitionLatentAction(LatentInfo, nullptr, LevelName, nullptr, Duration, WorldContextObject));
+					FOpenLevelTransitionLatentAction* Action = new FOpenLevelTransitionLatentAction(LatentInfo, nullptr, LevelName, nullptr, Duration, WorldContextObject);
+					Action->bOpenWithoutTransition = true;
+					LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, Action);
 					return;
 				}
 
