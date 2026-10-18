@@ -16,8 +16,8 @@
 #include "TransitionFX.h"
 
 /**
- * Latent action that polls the transition manager and completes
- * when the current transition finishes or the manager becomes invalid.
+ * Latent action that polls the transition manager and completes when the current
+ * transition finishes, stops without finishing, or the manager becomes invalid.
  */
 class FTransitionLatentAction : public FPendingLatentAction
 {
@@ -41,8 +41,11 @@ public:
 
 		if (Manager.IsValid())
 		{
-			// If we're done (finished hold phase or fully completed), we trigger
-			bFinished = Manager->IsCurrentTransitionFinished();
+			// If we're done (finished hold phase or fully completed), we trigger.
+			// Safety: a transition that is no longer playing without having completed was
+			// stopped (StopTransition / ForceClear) or failed to start, and will never
+			// complete, so stop waiting to avoid hanging the Blueprint.
+			bFinished = Manager->IsCurrentTransitionFinished() || !Manager->IsTransitionPlaying();
 		}
 
 		Response.FinishAndTriggerIf(bFinished, ExecutionFunction.ExecutionFunction, OutputLink, CallbackTarget);
@@ -70,6 +73,9 @@ public:
 	FName LevelName;
 	TWeakObjectPtr<const UObject> WorldContextObject;
 
+	/** Opens the level on the first update without a transition (no playable preset was available). */
+	bool bOpenWithoutTransition = false;
+
 	FOpenLevelTransitionLatentAction(const FLatentActionInfo& InLatentInfo, UTransitionManagerSubsystem* InManager, FName InLevelName, UTransitionPreset* Preset, float Duration, const UObject* InWorldContextObject)
 		: ExecutionFunction(InLatentInfo)
 		, OutputLink(InLatentInfo.Linkage)
@@ -80,13 +86,9 @@ public:
 	{
 		if (Manager.IsValid())
 		{
-			// Prepare Auto Reverse for the NEXT level
-			Manager->PrepareAutoReverseTransition(Preset, Duration);
-
-			float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(Preset->DefaultDuration, Duration);
-
-			// Start Fade Out (Forward, Invert=False)
-			Manager->StartTransition(Preset, ETransitionMode::Forward, PlaySpeed, false);
+			// Prepare Auto Reverse for the NEXT level and start the Fade Out (Forward, Invert=False).
+			// This action opens the level itself, so the subsystem does not bind its own OpenLevel.
+			Manager->StartLevelFadeOut(LevelName, Preset, Duration, /*bOpenLevelWhenFadedOut=*/false);
 		}
 	}
 
@@ -94,11 +96,32 @@ public:
 	{
 		bool bFinished = false;
 
-		if (Manager.IsValid())
+		if (bOpenWithoutTransition)
 		{
-			// If transition finished (reached 1.0), we trigger OpenLevel
-			if (Manager->IsCurrentTransitionFinished())
+			// Open the level here, as the transition path does, so Completed fires before travel
+			// tears down this world.
+			if (const UObject* WorldContext = WorldContextObject.Get())
 			{
+				UGameplayStatics::OpenLevel(WorldContext, LevelName);
+			}
+			bFinished = true;
+		}
+		else if (Manager.IsValid())
+		{
+			// The fade-out was stopped, replaced by another transition or force-cleared, which
+			// cancelled the level transition (including the auto-reverse fade-in), or another
+			// level transition has taken over.
+			if (!Manager->bIsLevelFadeOutPending || Manager->PendingLevelName != LevelName)
+			{
+				UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransitionAndWait: Transition stopped or replaced before it completed. Aborting level load."));
+				bFinished = true;
+			}
+			// If transition finished (reached 1.0), we trigger OpenLevel
+			else if (Manager->IsCurrentTransitionFinished())
+			{
+				// The level is being opened: keep the auto-reverse fade-in prepared for it.
+				Manager->bIsLevelFadeOutPending = false;
+
 				if (const UObject* WorldContext = WorldContextObject.Get())
 				{
 					UGameplayStatics::OpenLevel(WorldContext, LevelName);
@@ -109,6 +132,7 @@ public:
 			else if (!Manager->IsTransitionPlaying())
 			{
 				UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransitionAndWait: Transition stopped manually. Aborting level load."));
+				Manager->CancelPendingLevelTransition();
 				bFinished = true;
 			}
 		}
@@ -420,6 +444,19 @@ void UTransitionBlueprintLibrary::OpenLevelWithTransitionAndWait(const UObject* 
 				{
 					UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransitionAndWait: Null Preset provided. Falling back to default fade."));
 					Preset = Manager->GetDefaultFadePreset();
+				}
+
+				// Without a playable preset the fade-out could never start, so open the level without a
+				// transition. The latent action opens it on its first update and fires Completed in that
+				// same update; calling OpenLevel here instead would travel at the start of the next frame,
+				// before the action is ever polled, and Completed would never fire.
+				if (!Preset || !Preset->IsPlayable())
+				{
+					UE_LOG(LogTransitionFX, Error, TEXT("OpenLevelWithTransitionAndWait: No playable preset (the default fade preset could not be loaded, or the preset has no TransitionMaterial or EffectClass). Opening '%s' without a transition."), *LevelName.ToString());
+					FOpenLevelTransitionLatentAction* Action = new FOpenLevelTransitionLatentAction(LatentInfo, nullptr, LevelName, nullptr, Duration, WorldContextObject);
+					Action->bOpenWithoutTransition = true;
+					LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, Action);
+					return;
 				}
 
 				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FOpenLevelTransitionLatentAction(LatentInfo, Manager, LevelName, Preset, Duration, WorldContextObject));

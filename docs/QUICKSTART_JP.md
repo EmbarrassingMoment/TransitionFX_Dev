@@ -15,16 +15,17 @@
 
 ## Step 1: プリセットの作成
 
-TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition Preset）**として管理します。
+TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition Preset）** として管理します。
 まず最初にこのアセットを作成します。
 
 ### 作成手順
 
-1. コンテンツブラウザで右クリック → `Miscellaneous` → `Data Asset` を選択
-2. クラス一覧から `TransitionPreset` を選択
-3. アセット名を設定（例: `DA_FadeToBlack`、`DA_Iris` など）
+1. コンテンツブラウザで右クリック → `Miscellaneous` → `Transition Preset` を選択
+2. アセット名を設定（例: `DA_FadeToBlack`、`DA_Iris` など）
 
-<!-- IMAGE: quickstart_create_data_asset.png - Content Browser で Data Asset を作成する手順のスクリーンショット -->
+> `Data Asset` を作成してクラス一覧から `TransitionPreset` を選択する方法でも作成できます。
+
+<!-- IMAGE: quickstart_create_data_asset.png - Content Browser で Transition Preset を作成する手順のスクリーンショット -->
 
 ### 設定項目
 
@@ -32,19 +33,21 @@ TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition
 
 | プロパティ | 説明 | 推奨値 |
 | :--- | :--- | :--- |
-| `Effect Class` | 使用するエフェクトのクラス | `PostProcessTransitionEffect` |
-| `Transition Material` | 遷移に使用するマテリアル | `M_Transition_Fade`、`M_Transition_Iris`、`M_Transition_Diamond` など |
+| `Effect Class` | 使用するエフェクトのクラス | `PostProcessTransitionEffect`（UMG/Slate UI も覆う場合は `WidgetTransitionEffect`。[UMG/Slate UI ごと覆いたい場合](#umgslate-ui-ごと覆いたい場合)を参照） |
+| `Transition Material` | 遷移に使用するマテリアル | `MI_Transition_Fade`、`MI_Transition_Iris`、`MI_Transition_Diamond` など（同梱プリセットが使用しているインスタンス）。ウィジェットレイヤー版プリセットでは対応する `MI_Widget_*` インスタンスを使用 |
 | `Default Duration` | 遷移の長さ（秒） | `1.0` |
 
 **動作設定**
 
 | プロパティ | 説明 | 推奨値 |
 | :--- | :--- | :--- |
+| `bOverrideTransitionColor` / `Transition Color` | 有効にすると、呼び出し側でオーバーライドしなくても `Transition Color` をマテリアルの `FadeColor` に適用する（例: 白へのフェード） | オフ（黒） |
 | `Easing Type` | 進行度に適用するイージング関数 | `Linear`（シンプルなフェードなら十分） |
 | `Progress Curve` | カスタムイージング用の FloatCurve（`Custom` 選択時のみ表示） | 任意 |
 | `bAutoBlockInput` | 遷移中にプレイヤー入力を自動でブロックする | `True` 推奨 |
 | `bTickWhenPaused` | ポーズ中でも遷移を動作させる | ポーズ画面を使う場合は `True` |
-| `Priority` | PostProcess の描画優先度 | `1000`（デフォルト） |
+| `Priority` | PostProcess の描画優先度（ウィジェットレイヤー版では使用されない） | `1000`（デフォルト） |
+| `Widget ZOrder` | フルスクリーンオーバーレイの重ね順（ウィジェットレイヤー版でのみ使用） | `10000`（デフォルト）。自作 UI がこれより大きい Z-order を使う場合は上げる |
 
 **オーディオ設定（任意）**
 
@@ -61,7 +64,7 @@ TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition
 ```
 DA_FadeToBlack
 ├─ Effect Class        : PostProcessTransitionEffect
-├─ Transition Material : M_Transition_Fade
+├─ Transition Material : MI_Transition_Fade
 ├─ Default Duration    : 1.0
 ├─ Easing Type         : EaseInOutSine
 ├─ bAutoBlockInput     : True
@@ -70,7 +73,7 @@ DA_FadeToBlack
 
 > **Tip**
 > マテリアルには `Progress` という名前のスカラーパラメータが必須です。
-> このパラメータが存在しない場合、遷移はアニメーションしません（警告ログが出力されます）。
+> このパラメータが存在しない場合、遷移はアニメーションしません（エラーログが出力されます）。
 
 ### カスタムイージングカーブの使用
 
@@ -177,7 +180,7 @@ TransitionSystem->AsyncLoadTransitionPresets(SoftPresets, OnComplete);
 
 ## Step 3: BPからの呼び出し方
 
-基本的な使い方は **`Play Transition And Wait`**ノードを呼ぶだけです。
+基本的な使い方は **`Play Transition And Wait`** ノードを呼ぶだけです。
 フェードアウト・フェードインはどちらも同じプリセットを使い、`Mode` ピンで切り替えます。
 
 ### 基本パターン：フェードアウト → 処理 → フェードイン
@@ -210,9 +213,12 @@ Play Transition And Wait
 【完了後の処理】
 ```
 
+> **Tip**
+> フェードアウトが完了した後も、エフェクトはフェードインが始まるまで画面を完全に覆ったまま残ります（`bAutoBlockInput` が有効なら入力もブロックされたまま）。そのため、処理中に背後が見えることはありません。エフェクトはフェードインの完了時に取り除かれます。フェードインしない場合は `Stop Transition` を呼んで、覆っているエフェクトを取り除いてください。
+
 ### 秒数で再生時間を指定したい場合
 
-`Play Speed` ではなく具体的な秒数で指定したい場合は **`Play Transition And Wait With Duration`**を使います。
+`Play Speed` ではなく具体的な秒数で指定したい場合は **`Play Transition And Wait With Duration`** を使います。
 
 ```
 Play Transition And Wait With Duration
@@ -223,7 +229,7 @@ Play Transition And Wait With Duration
 
 ### ランダムなエフェクトを使いたい場合
 
-複数のプリセットからランダムに再生したい場合は **`Play Random Transition And Wait`**を使います。
+複数のプリセットからランダムに再生したい場合は **`Play Random Transition And Wait`** を使います。
 
 ```
 Play Random Transition And Wait
@@ -236,7 +242,7 @@ Play Random Transition And Wait
 
 ![Open Level With Transition And Wait ノード](images/quickstart_open_level_bp.png)
 
-フェードアウト → レベルオープン → フェードインを 1 ノードで完結させたい場合は **`Open Level With Transition And Wait`**を使います。
+フェードアウト → レベルオープン → フェードインを 1 ノードで完結させたい場合は **`Open Level With Transition And Wait`** を使います。
 
 ```
 Open Level With Transition And Wait
@@ -254,7 +260,7 @@ Open Level With Transition And Wait
 
 ### プリセット不要で素早くフェードしたい場合
 
-DataAsset を作らずに手軽にフェードしたい場合は **`Quick Fade To Black`**/ **`Quick Fade From Black`**が使えます。
+DataAsset を作らずに手軽にフェードしたい場合は **`Quick Fade To Black`**/ **`Quick Fade From Black`** が使えます。
 
 ```
 Quick Fade To Black   ── Duration: 1.0
@@ -266,7 +272,7 @@ Quick Fade From Black ── Duration: 1.0
 > 黒フェード以外のエフェクトが必要な場合は、専用の DataAsset を作成して `Play Transition And Wait` を使ってください。
 
 > **注意**
-> `Quick Fade To Black` と `Quick Fade From Black` は**完了を待たない（Fire-and-Forget）**関数です。遷移を開始しますが、**完了まで待機しません**。フェード完了後にロジックを実行する必要がある場合は、代わりに `Play Transition And Wait` を使用するか、`OnTransitionCompleted` デリゲートにバインドしてください。
+> `Quick Fade To Black` と `Quick Fade From Black` は**完了を待たない（Fire-and-Forget）** 関数です。遷移を開始しますが、**完了まで待機しません**。フェード完了後にロジックを実行する必要がある場合は、代わりに `Play Transition And Wait` を使用するか、`OnTransitionCompleted` デリゲートにバインドしてください。
 
 ### マテリアルパラメータを動的に変えたい場合
 
@@ -284,7 +290,11 @@ Play Transition And Wait
 
 ### トランジションの色を変更する
 
-デフォルトではトランジションは黒にフェードします。色を変更する場合（例: 白）は、`Override Params` で `FadeColor` ベクターパラメータを使用します：
+デフォルトではトランジションは黒にフェードします。色を変更する（例: 白）方法は 2 つあります。
+
+**プリセットごとに指定する:** プリセットの `bOverrideTransitionColor` を有効にし、`Transition Color` を設定します。そのプリセットを使うすべての呼び出しにこの色が適用され、ピンを追加で繋ぐ必要はありません。
+
+**呼び出しごとに指定する:** `Override Params` で `FadeColor` ベクターパラメータを渡します：
 
 ```
 [Make TransitionParameters]
@@ -295,13 +305,16 @@ Play Transition And Wait
 └─ Override Params: ↑
 ```
 
+> **Tip**
+> 両方を設定した場合は、`Override Params` で渡した `FadeColor` がプリセットの `Transition Color` より優先されます。
+
 ### カスタムテクスチャマスクを使用する
 
 `TextureMask` エフェクトを使うと、グレースケールテクスチャでトランジションの進行順序を制御できます：
 
 1. マスクテクスチャをインポートします（グレースケール。黒=遷移開始、白=遷移終了）
-2. **重要:**テクスチャのインポート設定で **sRGB のチェックを外し**、圧縮設定を **Masks (no sRGB)**または **Grayscale**に設定してください
-3. `M_Transition_TextureMask` マテリアルを使用するプリセットを作成します
+2. **重要:** テクスチャのインポート設定で **sRGB のチェックを外し**、圧縮設定を **Masks (no sRGB)** または **Grayscale**に設定してください
+3. 同梱の `DA_TextureMask` プリセットを使用します（または `MI_Transition_TextureMask` マテリアルを使ったプリセットを作成します）
 4. `Override Params` でテクスチャを渡します：
 
 ```
@@ -317,8 +330,8 @@ Play Transition And Wait
 ### bInvert パラメータの意味
 
 `Play Transition And Wait` の `bInvert` ピンはトランジションマスクを反転させます：
-- **`bInvert = false`（デフォルト）:**トランジションは通常通り進行します（画面が徐々に覆われる）。
-- **`bInvert = true`:**マスクが反転し、先に覆われるはずだった領域が最後に覆われ、逆もまた然りになります。
+- **`bInvert = false`（デフォルト）:** トランジションは通常通り進行します（画面が徐々に覆われる）。
+- **`bInvert = true`:** マスクが反転し、先に覆われるはずだった領域が最後に覆われ、逆もまた然りになります。
 
 `Mode` を変更せずに「逆の見た目」を実現したい場合に便利です。例えば、Iris エフェクトで `bInvert = true` にすると、端から中央に閉じるのではなく、中央から端に向かって広がります。
 
@@ -332,7 +345,26 @@ Play Transition And Wait
 Play モードに入らずに、エディタ上で直接トランジションエフェクトをプレビューできます。
 **Tools > TransitionFX > TransitionFX Preview**からプレビューパネルにアクセスしてください。
 
-操作方法（再生コントロール、GIF キャプチャ、ビューポート設定）の詳細は [TransitionFX Preview Tool Manual](TransitionFX_PreviewTool_Manual.md) を参照してください。
+操作方法（再生コントロール、GIF キャプチャ、ビューポート設定）の詳細は [TransitionFX Preview Tool Manual](TransitionFX_PreviewTool_Manual.md)（英語）を参照してください。
+
+> **注意**
+> プレビューツールは PostProcess ボリューム経由で描画するため、一覧に表示されるのは `MI_Transition_*` のみです。ウィジェットレイヤー版のマテリアル（`MI_Widget_*`）はプレビューできないので、`DA_Widget_*` プリセットは PIE で確認してください。
+
+### UMG/Slate UI ごと覆いたい場合
+
+PostProcess 版のプリセット（`DA_*`）は UMG/Slate ウィジェットの下に描画されるため、遷移中も HUD やメニューは見えたままです。UI ごと覆いたい場合は **ウィジェットレイヤー版プリセット**（`DA_Widget_*`、エフェクトクラス `WidgetTransitionEffect`）を使います。ノードやピンはまったく同じです。
+
+```
+Play Transition And Wait
+├─ Preset : DA_Widget_Fade   ← DA_Fade の代わりに指定
+└─ Mode   : Forward
+```
+
+ウィジェットレイヤー版は 14 エフェクトで利用できます。一覧と制約は README の [ウィジェットレイヤー版](../README.ja.md#ウィジェットレイヤー版) を参照してください。
+
+### 複数のトランジションを連続再生したい場合
+
+トランジションを連続させたい場合（例: Fade → Hexagon）は、`TransitionSequence` アセット（右クリック → `Miscellaneous` → `Transition Sequence`）を作成し、 **`Play Sequence And Wait`** で再生します。エントリの設定、ループ、シーケンスのイベントについては README の [トランジションシーケンス](../README.ja.md#トランジションシーケンス) を参照してください。
 
 ---
 
@@ -342,9 +374,9 @@ Play モードに入らずに、エディタ上で直接トランジションエ
 
 ### 仕組み
 
-通常の遷移は進行度が 1.0 に達すると自動的に完了しますが、`bHoldAtMax = true` にすることで**進行度 1.0（画面が完全に覆われた状態）で一時停止（ホールド）**させることができます。ホールド中は入力もブロックされたままです。
+通常の遷移は進行度が 1.0 に達すると自動的に完了しますが、`bHoldAtMax = true` にすることで**進行度 1.0（画面が完全に覆われた状態）で一時停止（ホールド）** させることができます。ホールド中は入力もブロックされたままです。
 
-準備が整ったら `Release Hold` を呼ぶことで Forward 遷移が完了状態に移行します。その後、手動で `Play Transition And Wait`（Mode: Reverse）を呼び出すことでフェードインを行います。
+準備が整ったら `Release Hold` を呼ぶことで Forward 遷移が完了状態に移行します（画面は覆われたままです）。その後、手動で `Play Transition And Wait`（Mode: Reverse）を呼び出すことでフェードインを行います。ホールド中に `Reverse Transition` を直接呼ぶ方法もあり、この場合は `Release Hold` なしでホールド中のエフェクトがそのままフェードインします。
 
 ### 実装ワークフロー
 
@@ -425,6 +457,7 @@ void UMyClass::OnHoldStarted()
 | 症状 | 主な原因 |
 | :--- | :--- |
 | 画面が真っ暗なまま何も起きない | `bHoldAtMax = true` で `Release Hold` を呼び忘れた |
+| フェードアウト後に画面が黒いまま | フェードアウト（Forward）が完了した後にフェードインも `Stop Transition` も呼ばれていない（完了したフェードアウトは意図的に画面を覆い続けます） |
 | 画面が暗転したまま入力を受け付けない | `bAutoBlockInput = true` の状態で遷移が中断された |
 | 遷移が途中で止まって進まない | `Stop Transition` が意図せず呼ばれた、または `Play Speed` が極端に小さい |
 
@@ -495,7 +528,7 @@ Force Clear
 
 ## Step 6: イベント（デリゲート）の活用
 
-`TransitionManagerSubsystem` には 5 つのデリゲートが用意されており、遷移のタイミングに合わせてゲームロジックを実行できます。
+`TransitionManagerSubsystem` には遷移用の 5 つのデリゲートが用意されており、遷移のタイミングに合わせてゲームロジックを実行できます（シーケンス用にはさらに `OnSequenceCompleted` と `OnSequenceStepChanged` があります。README の [トランジションシーケンス](../README.ja.md#トランジションシーケンス) を参照）。
 
 | デリゲート | 発火タイミング |
 | :--- | :--- |
@@ -547,7 +580,7 @@ Set Visibility (HUD Widget)
 └─ Visibility: Hidden
 ```
 
-> **Tip:** HUD をトランジションで覆いたいだけなら、このパターンの代わりにウィジェットレイヤー版プリセット（`DA_Widget_*`、`WidgetTransitionEffect`）を使えます。オーバーレイは UMG/Slate UI の上に描画されます。README の「ウィジェットレイヤー版」を参照してください。
+> **Tip:** HUD をトランジションで覆いたいだけなら、このパターンの代わりにウィジェットレイヤー版プリセット（`DA_Widget_*`、`WidgetTransitionEffect`）を使えます。オーバーレイは UMG/Slate UI の上に描画されます。README の [ウィジェットレイヤー版](../README.ja.md#ウィジェットレイヤー版) を参照してください。
 
 **OnTransitionCompleted：フェードアウト完了後にレベルの状態を切り替える**
 

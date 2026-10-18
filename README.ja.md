@@ -6,7 +6,7 @@
 
 [![Available on Fab](https://img.shields.io/badge/Fab-Available-0096FF?style=flat&logo=epicgames&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.5%2B-black?style=flat&logo=unrealengine&logoColor=white)](https://www.unrealengine.com/)
-[![Version](https://img.shields.io/badge/Version-1.5.0-brightgreen?style=flat)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.6.0-brightgreen?style=flat)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Win64-blue?style=flat&logo=windows&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Blueprint](https://img.shields.io/badge/Blueprint-Ready-9B59B6?style=flat&logo=unrealengine&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
@@ -72,7 +72,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 すぐに試せるサンプルプロジェクトを [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から入手できます。プラグインのソース一式と、次の 2 つのサンプルレベルが含まれています。
 
-*   **`L_ShowCase`:** 30 種の組み込みエフェクトのうち 29 種と、ウィジェットレイヤー版プリセット 9 種を再生できます。詳しくは [ShowCase Level](docs/SHOWCASE_LEVEL.md) を参照してください。
+*   **`L_ShowCase`:** 45 種のプリセットを再生できます。30 種の組み込みエフェクトのうち 29 種（+ `DA_FadeToBlack`）と、ウィジェットレイヤー版（`DA_Widget_*`）プリセット 15 種です。詳しくは [ShowCase Level](docs/SHOWCASE_LEVEL.md) を参照してください。
 *   **`L_WidgetLayerSample`:** 画面の半分を不透明な UMG パネルで覆い、ウィジェットレイヤー版プリセットと PostProcess 版を比較できます。詳しくは [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) を参照してください。
 
 ▶ [YouTube でサンプル動画を見る](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
@@ -85,7 +85,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 2. zip を任意のフォルダに展開します（スペースや非 ASCII 文字を含むパスは避けてください）。
 3. `TransitionFX_Dev.uproject` を右クリックし、**「Visual Studio プロジェクトファイルを生成」** を選択します。
 4. `TransitionFX_Dev.uproject` を開きます。モジュールの再ビルドを促すダイアログが表示されたら **Yes** をクリックしてください。
-5. エディタは既定で `L_ShowCase` レベルを開きます。**Play** を押すとエフェクトをインタラクティブに確認できます。
+5. エディタは既定で `L_ShowCase` レベルを開きます。**Play** を押すとエフェクトをインタラクティブに確認できます（2 つの描画経路を比較するには `L_WidgetLayerSample` を開きます）。
 
 > **注意:** 初回起動時はシェーダーコンパイルに数分かかる場合があります。
 
@@ -115,13 +115,14 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 ![Data Asset のクラス選択ダイアログで Transition Preset を選択](docs/images/quickstart_create_data_asset.png)
 
 *   **Effect Class:** `PostProcessTransitionEffect`を選択します（UMG/Slate UI も覆いたい場合は `WidgetTransitionEffect`。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照）。
-*   **Transition Material:** `M_Transition_Fade`（または`M_Transition_Iris`、`M_Transition_Diamond`など）を選択します。ウィジェットレイヤー版のプリセットでは対応する `MI_Widget_*` インスタンスを使用します。
+*   **Transition Material:** `MI_Transition_Fade`（または`MI_Transition_Iris`、`MI_Transition_Diamond`など。同梱プリセットは `M_Transition_*` マスターのこれらのインスタンスを使用しています）を選択します。ウィジェットレイヤー版のプリセットでは対応する `MI_Widget_*` インスタンスを使用します。
 *   **bOverrideTransitionColor / TransitionColor:** (任意) 有効にすると、呼び出しごとにパラメータオーバーライドを渡さなくても、このプリセット固有のトランジションカラー（白へのフェードなど）を設定できます。色はマテリアルの `FadeColor` パラメータに適用され、呼び出し側の `Override Params` で色を指定した場合はそちらが優先されます。
 *   **Default Duration:** 秒単位で時間を設定します（例：`1.0`）。
 *   **Easing Type / Progress Curve:** イージング関数を選択します（デフォルト：`Linear`）。`Progress Curve` スロットは `Easing Type` が `Custom Curve` のときだけ表示され、独自のフロートカーブを指定できます。[イージングとタイミング](#イージングとタイミング)を参照。
 *   **bAutoBlockInput:** トランジション中のプレイヤー入力を自動的に無効にするには `True` に設定します。
 *   **bTickWhenPaused:** ゲームが一時停止中でもトランジションを再生するには `True` に設定します。
 *   **Priority:** PostProcess ボリュームの優先度です（デフォルト：`1000`）。`PostProcessTransitionEffect` でのみ使用され、ウィジェットレイヤー版プリセットでは代わりに `WidgetZOrder` を使用します。
+*   **Widget ZOrder:** フルスクリーンオーバーレイの重ね順です（デフォルト：`10000`）。`WidgetTransitionEffect` でのみ使用されます。
 *   **Audio:** (任意) 再生するサウンドアセットを割り当てます。ボリュームとピッチの制御が含まれます。
 
 ![TransitionPreset の設定パネル（プロパティ一覧）のスクリーンショット](docs/images/quickstart_preset_settings.png)
@@ -242,16 +243,16 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | 関数 | 説明 |
 | :--- | :--- |
 | **StartTransition(Preset, Mode, PlaySpeed, bInvert, bHoldAtMax, OverrideParams)** | 完了を待たずにトランジションを開始します。`bHoldAtMax` を指定すると画面を覆った状態で保持でき、ロード中などに使えます。 |
-| **ReleaseHold()** | 最大進行度で保持中のトランジションを完了させます。 |
-| **StopTransition()** | 現在のトランジションを即座に停止します。 |
-| **ReverseTransition(bool bAutoStop)** | 再生方向を反転します（例：フェードアウトからフェードインへ）。 |
+| **ReleaseHold()** | 最大進行度で保持中のトランジションを完了させます。ホールドしていたフェードアウトは完了後も画面を覆い続けます。 |
+| **StopTransition()** | 現在のトランジションを即座に停止します。完了したフェードアウトが画面を覆ったまま残っている場合は、そのエフェクトを取り除きます。 |
+| **ReverseTransition(bool bAutoStop)** | 再生方向を反転します（例：フェードアウトからフェードインへ）。ホールド中や、完了したフェードアウトからも使えます。 |
 | **InvertTransition(bool bAutoComplete)** | マスクを反転してトランジションを順方向に再生し直します。`bAutoComplete = false` の場合は最大進行度で保持します。 |
 | **SetPlaySpeed(float PlaySpeed)** | 再生速度の乗数を動的に変更します。 |
 | **ForceClear()** | トランジションの状態をすべてクリアし、プレイヤー入力を復帰させます。コンソールコマンド `TransitionFX.ForceClear` でも実行できます。 |
-| **GetCurrentProgress()** | 現在の進捗状況（0.0〜1.0）を返します。 |
-| **IsTransitionPlaying()** | トランジションが現在アクティブな場合に true を返します。 |
+| **GetCurrentProgress()** | 現在の進捗状況（0.0〜1.0）をイージング適用前の値で返します。 |
+| **IsTransitionPlaying()** | トランジションが再生中またはホールド中の場合に true を返します（完了後は、完了したフェードアウトが画面を覆ったまま残っていても false）。 |
 | **IsCurrentTransitionFinished()** | トランジションが終了状態に達している場合に true を返します（ポーリングに便利です）。 |
-| **AddProgressThreshold(float Threshold) / ClearProgressThresholds()** | `OnProgressThresholdReached` を 1 回発火させる進捗値を登録・クリアします。閾値は新しいトランジションの開始時にリセットされます。 |
+| **AddProgressThreshold(float Threshold) / ClearProgressThresholds()** | `OnProgressThresholdReached` をトランジションごとに 1 回発火させる進捗値を登録・クリアします。登録した閾値はクリアするまで残り、新しいトランジションの開始時に再び発火できるようになります。 |
 | **OpenLevelWithTransition / PrepareAutoReverseTransition** | レベル遷移用です。`PrepareAutoReverseTransition` は次のレベルロード時のフェードインを準備するだけで、トランジションは開始しません。 |
 | **PlaySequence / StopSequence / IsSequencePlaying / GetCurrentSequenceStep** | シーケンス再生。[トランジションシーケンス](#トランジションシーケンス)を参照。 |
 | **PreloadTransitionPresets / AsyncLoadTransitionPresets** | シェーダーのウォームアップ。[パフォーマンス最適化](#パフォーマンス最適化)を参照。 |
@@ -308,6 +309,12 @@ PostProcess 経路ではビューポートの上に描画される UMG/Slate ウ
 | Checkerboard | `DA_Widget_CheckerBoard` | `MI_Widget_Checkerboard` |
 | Blinds | `DA_Widget_Blinds` | `MI_Widget_Blinds` |
 | Texture Mask | `DA_Widget_TextureMask` | `MI_Widget_TextureMask` |
+| Diamond | `DA_Widget_Diamond` | `MI_Widget_Diamond` |
+| Sliding Doors | `DA_Widget_SlidingDoor` | `MI_Widget_SlidingDoor` |
+| Corner Wipe | `DA_Widget_CornerWipe` | `MI_Widget_CornerWipe` |
+| Polka Dots | `DA_Widget_PolkaDots` | `MI_Widget_PolkaDots` |
+| Random Tiles | `DA_Widget_RandomTiles` | `MI_Widget_RandomTiles` |
+| Hexagon | `DA_Widget_Hexagon` | `MI_Widget_Hexagon` |
 
 *   **Widget ZOrder:** プリセットの `WidgetZOrder`（既定 `10000`）で重ね順を指定できます。自作ウィジェットがこれより大きい Z-order を使う場合は値を上げてください。
 *   **ウィジェットレイヤーで利用できないエフェクト:** **Pixelate** と **Slice**。Pixelate はシーンを再サンプリングするため、オーバーレイでは再現できません。Slice のマテリアルは他のエフェクトとシーンの合成順が逆で、ウィジェットレイヤーへの変換が対応していません。それ以外のエフェクトのウィジェットレイヤー版は今後のリリースで追加予定です。

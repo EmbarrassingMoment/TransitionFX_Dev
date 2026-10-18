@@ -1,6 +1,7 @@
 # DevMaterialTools (ローカル作業用プラグイン)
 
-Python builder 向けに **Named Reroute Usage** ノードの生成+Declaration リンクを公開するエディタ専用ヘルパー。
+Python builder 向けに **Named Reroute Usage** ノードの生成+Declaration リンクなど、Python から届かない
+マテリアル/Blueprint 操作を公開するエディタ専用ヘルパー。
 
 **配布対象外**: TransitionFX プラグインには含めない。リリース ZIP(サンプルプロジェクト全体)からも `.github/workflows/release.yml` の rsync 除外で外してある。
 
@@ -30,6 +31,26 @@ usage = unreal.DevMaterialTools.create_named_reroute_usage(mat, decl, 200, 0)
 # 検証用: リンク先 Declaration 名を返す(リンク切れなら空文字)
 unreal.DevMaterialTools.get_named_reroute_usage_display_name(usage)
 ```
+
+## ルート入力の UseConstant 同期
+
+エディタは保存時にルートノードの各ピンへ `UseConstant = (未接続か)` を書き込む
+(`UMaterialGraph::LinkMaterialExpressionsFromGraph` → `UMaterialGraphNode_Root::UpdateInputUseConstant`)。
+`connect_material_property` は式をつなぐだけでこのフラグを解除しないため、エディタで未接続のまま保存された
+ピンに Python から接続すると、接続は無視されてピンの定数がコンパイルされる
+(PP マスターを複製した `M_Widget_*` の Opacity が定数 1 になり、PIE で不透明になっていた原因)。
+`UseConstant` は UPROPERTY でない bitfield なので Python から触れない。
+
+```python
+mel.connect_material_property(alpha_src, alpha_out, unreal.MaterialProperty.MP_OPACITY)
+changed = unreal.DevMaterialTools.sync_root_input_use_constant(mat)  # エディタの再リンクと同じ規則で全ピンを同期 + PostEditChange
+mel.recompile_material(mat)
+
+# 検証用
+unreal.DevMaterialTools.get_root_input_use_constant(mat, unreal.MaterialProperty.MP_OPACITY)  # → False
+```
+
+利用例: `Tools/build_widget_material.py`。
 
 ## Widget Blueprint ヘルパー (DevBlueprintTools)
 

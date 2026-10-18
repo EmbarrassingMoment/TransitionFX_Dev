@@ -6,7 +6,7 @@
 
 [![Available on Fab](https://img.shields.io/badge/Fab-Available-0096FF?style=flat&logo=epicgames&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.5%2B-black?style=flat&logo=unrealengine&logoColor=white)](https://www.unrealengine.com/)
-[![Version](https://img.shields.io/badge/Version-1.5.0-brightgreen?style=flat)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.6.0-brightgreen?style=flat)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Win64-blue?style=flat&logo=windows&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Blueprint](https://img.shields.io/badge/Blueprint-Ready-9B59B6?style=flat&logo=unrealengine&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
@@ -61,7 +61,7 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 A ready-to-use sample project is available on the [Releases page](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases).
 It includes the full plugin source and two sample levels:
 
-*   **`L_ShowCase`:** Plays 29 of the 30 built-in effects and the 9 widget-layer presets. See [ShowCase Level](docs/SHOWCASE_LEVEL.md) (Japanese).
+*   **`L_ShowCase`:** Plays 45 presets: 29 of the 30 built-in effects (plus `DA_FadeToBlack`) and the 15 widget-layer (`DA_Widget_*`) presets. See [ShowCase Level](docs/SHOWCASE_LEVEL.md) (Japanese).
 *   **`L_WidgetLayerSample`:** Covers half the screen with an opaque UMG panel so you can compare widget-layer presets with their PostProcess counterparts. See [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) (Japanese).
 
 ▶ [Watch the sample video on YouTube](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
@@ -74,7 +74,7 @@ It includes the full plugin source and two sample levels:
 2. Extract the zip to a folder (avoid paths with spaces or non-ASCII characters).
 3. Right-click `TransitionFX_Dev.uproject` and select **"Generate Visual Studio project files"**.
 4. Open `TransitionFX_Dev.uproject`. When prompted to rebuild missing modules, click **Yes**.
-5. The editor opens the `L_ShowCase` level by default. Press **Play** to explore the effects.
+5. The editor opens the `L_ShowCase` level by default. Press **Play** to explore the effects (or open `L_WidgetLayerSample` to compare the two rendering paths).
 
 > **Note:** The first launch will compile shaders, which may take several minutes.
 
@@ -104,13 +104,14 @@ You can also choose `Miscellaneous` > `Data Asset` and pick the `Transition Pres
 ![Pick Class For Data Asset Instance dialog with Transition Preset](docs/images/quickstart_create_data_asset.png)
 
 *   **Effect Class:** Select `PostProcessTransitionEffect` (or `WidgetTransitionEffect` to also cover UMG/Slate UI — see [Widget-Layer Variants](#widget-layer-variants)).
-*   **Transition Material:** Select `M_Transition_Fade` (or `M_Transition_Iris`, `M_Transition_Diamond`, etc.). Widget-layer presets use the matching `MI_Widget_*` instance instead.
+*   **Transition Material:** Select `MI_Transition_Fade` (or `MI_Transition_Iris`, `MI_Transition_Diamond`, etc. — the bundled presets use these instances of the `M_Transition_*` masters). Widget-layer presets use the matching `MI_Widget_*` instance instead.
 *   **bOverrideTransitionColor / TransitionColor:** (Optional) Enable to give this preset its own transition color, such as fade-to-white, without passing an override on every call. The color is applied to the material's `FadeColor` parameter, and a color passed in `Override Params` at the call site still takes precedence.
 *   **Default Duration:** Set duration in seconds (e.g., `1.0`).
 *   **Easing Type / Progress Curve:** Choose an easing function (default: `Linear`). The `Progress Curve` slot appears only when `Easing Type` is `Custom Curve`; assign your own Float Curve there. See [Transition Timing & Easing](#transition-timing--easing).
 *   **bAutoBlockInput:** Set to `True` to automatically disable player input during the transition.
 *   **bTickWhenPaused:** Set to `True` to allow the transition to play even when the game is paused.
 *   **Priority:** PostProcess volume priority (default: `1000`). Used only by `PostProcessTransitionEffect`; widget-layer presets use `WidgetZOrder` instead.
+*   **Widget ZOrder:** Z-order of the full-screen overlay (default: `10000`). Used only by `WidgetTransitionEffect`.
 *   **Audio:** (Optional) Assign a Sound asset to play. Includes Volume and Pitch controls.
 
 ![Screenshot of the TransitionPreset detail panel showing all properties](docs/images/quickstart_preset_settings.png)
@@ -231,16 +232,16 @@ The tables below list the Blueprint-callable API. For pin details and C++ signat
 | Function | Description |
 | :--- | :--- |
 | **StartTransition(Preset, Mode, PlaySpeed, bInvert, bHoldAtMax, OverrideParams)** | Starts a transition without waiting. Set `bHoldAtMax` to keep the screen covered, for example while loading. |
-| **ReleaseHold()** | Lets a transition held at max progress complete. |
-| **StopTransition()** | Instantly stops the current transition. |
-| **ReverseTransition(bool bAutoStop)** | Reverses the playback direction (e.g., from Fade Out to Fade In). |
+| **ReleaseHold()** | Lets a transition held at max progress complete. A held Fade Out keeps covering the screen after it completes. |
+| **StopTransition()** | Instantly stops the current transition, or removes the effect a completed Fade Out left covering the screen. |
+| **ReverseTransition(bool bAutoStop)** | Reverses the playback direction (e.g., from Fade Out to Fade In) — also from a hold or from a completed Fade Out. |
 | **InvertTransition(bool bAutoComplete)** | Flips the mask and replays the transition forward. With `bAutoComplete = false` it holds at max progress. |
 | **SetPlaySpeed(float PlaySpeed)** | Changes the playback speed multiplier dynamically. |
 | **ForceClear()** | Clears all transition state and restores player input. Also available as the console command `TransitionFX.ForceClear`. |
-| **GetCurrentProgress()** | Returns the current progress (0.0 to 1.0). |
-| **IsTransitionPlaying()** | Returns true if a transition is currently active. |
+| **GetCurrentProgress()** | Returns the current progress (0.0 to 1.0) before easing. |
+| **IsTransitionPlaying()** | Returns true while a transition is playing or holding (false once it has completed, even if a completed Fade Out still covers the screen). |
 | **IsCurrentTransitionFinished()** | Returns true if the transition has reached its end state (useful for polling). |
-| **AddProgressThreshold(float Threshold) / ClearProgressThresholds()** | Registers or clears progress values that fire `OnProgressThresholdReached` once. Thresholds reset when a new transition starts. |
+| **AddProgressThreshold(float Threshold) / ClearProgressThresholds()** | Registers or clears progress values that fire `OnProgressThresholdReached` once per transition. Registered thresholds stay until cleared; each new transition re-arms them. |
 | **OpenLevelWithTransition / PrepareAutoReverseTransition** | Level transitions. `PrepareAutoReverseTransition` only arms the fade-in for the next level load; it does not start a transition. |
 | **PlaySequence / StopSequence / IsSequencePlaying / GetCurrentSequenceStep** | Sequence playback. See [Transition Sequences](#transition-sequences). |
 | **PreloadTransitionPresets / AsyncLoadTransitionPresets** | Shader warmup. See [Performance Tips](#performance-tips). |
@@ -297,6 +298,12 @@ The PostProcess path cannot cover UMG/Slate widgets drawn above the viewport. Fo
 | Checkerboard | `DA_Widget_CheckerBoard` | `MI_Widget_Checkerboard` |
 | Blinds | `DA_Widget_Blinds` | `MI_Widget_Blinds` |
 | Texture Mask | `DA_Widget_TextureMask` | `MI_Widget_TextureMask` |
+| Diamond | `DA_Widget_Diamond` | `MI_Widget_Diamond` |
+| Sliding Doors | `DA_Widget_SlidingDoor` | `MI_Widget_SlidingDoor` |
+| Corner Wipe | `DA_Widget_CornerWipe` | `MI_Widget_CornerWipe` |
+| Polka Dots | `DA_Widget_PolkaDots` | `MI_Widget_PolkaDots` |
+| Random Tiles | `DA_Widget_RandomTiles` | `MI_Widget_RandomTiles` |
+| Hexagon | `DA_Widget_Hexagon` | `MI_Widget_Hexagon` |
 
 *   **Widget ZOrder:** Presets expose `WidgetZOrder` (default `10000`). Raise it if your own widgets use a higher Z-order.
 *   **Not available on the widget layer:** **Pixelate** and **Slice**. Pixelate resamples the scene, which an overlay cannot reproduce. Slice's material blends the scene in the reverse order from the other effects, which the widget-layer conversion does not support. Widget-layer variants of the remaining effects are planned for future releases.

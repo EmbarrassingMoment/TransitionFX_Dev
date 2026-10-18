@@ -36,6 +36,7 @@ void UTransitionManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	GetDefaultFadePreset();
 
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UTransitionManagerSubsystem::OnPostLoadMapWithWorld);
+	FWorldDelegates::OnWorldCleanup.AddUObject(this, &UTransitionManagerSubsystem::OnWorldCleanup);
 }
 
 /** Lazily loads and caches the default Fade to Black preset from the configured asset path. */
@@ -54,6 +55,7 @@ void UTransitionManagerSubsystem::Deinitialize()
 	IConsoleManager::Get().UnregisterConsoleObject(TEXT("TransitionFX.ForceClear"));
 
 	FCoreUObjectDelegates::PostLoadMapWithWorld.RemoveAll(this);
+	FWorldDelegates::OnWorldCleanup.RemoveAll(this);
 
 	// Clear any pending sequence timer and state before releasing the pool
 	if (SequencePlayer)
@@ -132,11 +134,13 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 				bHasCompleted = true;
 				OnTransitionCompleted.Broadcast();
 
+				// A completion handler may already have started, reversed, or stopped a
+				// transition; only finish this one if it is still the completed transition.
 				// Defer cleanup to FinishSequence / hot-swap when a sequence is playing,
 				// so the effect stays rendering between steps and no background frame is exposed.
-				if (bAutoStopOnReverseComplete && !IsSequencePlaying())
+				if (bHasCompleted && bIsTransitionActive && bAutoStopOnReverseComplete && !IsSequencePlaying())
 				{
-					StopTransition();
+					FinishCompletedTransition();
 				}
 			}
 		}
@@ -163,15 +167,16 @@ void UTransitionManagerSubsystem::Tick(float DeltaTime)
 				bHasCompleted = true;
 				OnTransitionCompleted.Broadcast();
 
-				// Auto-stop forward transitions that are not holding.
-				// Without this, the PostProcessVolume, AudioComponent, and tick remain active
-				// even though the transition is visually complete.
+				// Finish forward transitions that are not holding: one that ends revealed is
+				// stopped, one that ends covering the screen (a fade-out) keeps its effect on
+				// screen without ticking. A completion handler may already have started,
+				// reversed, or stopped a transition, in which case there is nothing to finish.
 				// During a sequence, StartTransition for the next step hot-swaps the effect,
-				// and FinishSequence cleans up the final step, so skip the auto-stop here
-				// to keep the rendered frame covered (no background flash between steps).
-				if (!IsSequencePlaying())
+				// and FinishSequence finishes the final step, so skip this here to keep the
+				// rendered frame covered (no background flash between steps).
+				if (bHasCompleted && bIsTransitionActive && !IsSequencePlaying())
 				{
-					StopTransition();
+					FinishCompletedTransition();
 				}
 			}
 		}
@@ -245,19 +250,70 @@ void UTransitionManagerSubsystem::OpenLevelWithTransition(const UObject* WorldCo
 		Preset = GetDefaultFadePreset();
 	}
 
+	// Without a playable preset the fade-out could never start (or complete), so the level
+	// would never open. Open it right away instead of failing the level change.
+	if (!Preset || !Preset->IsPlayable())
+	{
+		UE_LOG(LogTransitionFX, Error, TEXT("OpenLevelWithTransition: No playable preset (the default fade preset could not be loaded, or the preset has no TransitionMaterial or EffectClass). Opening '%s' without a transition."), *LevelName.ToString());
+		UGameplayStatics::OpenLevel(this, LevelName);
+		return;
+	}
+
+	StartLevelFadeOut(LevelName, Preset, Duration, /*bOpenLevelWhenFadedOut=*/true);
+}
+
+/** Records the pending level transition and starts its fade-out. Shared by both OpenLevelWithTransition paths. */
+void UTransitionManagerSubsystem::StartLevelFadeOut(FName LevelName, UTransitionPreset* Preset, float Duration, bool bOpenLevelWhenFadedOut)
+{
+	// Replace the current sequence / transition before recording the new level transition.
+	// StartTransition would otherwise stop it internally, after the state below is set, and
+	// StopTransition would take that for a cancelled fade-out. Stopping here still cancels a
+	// previous level transition whose fade-out is playing, and the new effect is created in
+	// this same frame, so no frame exposes the scene.
+	if (IsSequencePlaying())
+	{
+		UE_LOG(LogTransitionFX, Warning, TEXT("Level transition started while a sequence is playing. Cancelling sequence."));
+		StopSequence();
+	}
+	if (bIsTransitionActive || bIsCoveringScreen)
+	{
+		StopTransition();
+	}
+
 	PendingLevelName = LevelName;
 	PendingPreset = Preset;
 	PendingDuration = Duration;
 	bAutoReverseOnLevelLoad = true;
+	bIsLevelFadeOutPending = true;
 
 	// Ensure we don't have stale bindings
 	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
-	OnTransitionCompleted.AddDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
+	if (bOpenLevelWhenFadedOut)
+	{
+		OnTransitionCompleted.AddDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
+	}
 
 	float PlaySpeed = TransitionFXConfig::CalculatePlaySpeed(Preset->DefaultDuration, Duration);
 
 	// Start Fade Out (Forward, Invert=False)
 	StartTransition(Preset, ETransitionMode::Forward, PlaySpeed, false);
+}
+
+/** Clears the pending level transition state and the one-shot fade-out binding. */
+void UTransitionManagerSubsystem::CancelPendingLevelTransition()
+{
+	if (bIsLevelFadeOutPending)
+	{
+		UE_LOG(LogTransitionFX, Log, TEXT("TransitionFX: Level transition to '%s' cancelled because its fade-out was stopped or replaced before it completed."), *PendingLevelName.ToString());
+	}
+
+	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
+
+	bIsLevelFadeOutPending = false;
+	bAutoReverseOnLevelLoad = false;
+	PendingLevelName = NAME_None;
+	PendingPreset = nullptr;
+	PendingDuration = 1.0f;
 }
 
 /** Stores preset and duration for an auto-reverse transition on the next level load without starting playback. */
@@ -273,6 +329,17 @@ void UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished()
 {
 	// One-shot callback
 	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
+
+	// An OnTransitionCompleted handler that ran before this one may have force-cleared the
+	// level transition during the same broadcast.
+	if (!bIsLevelFadeOutPending)
+	{
+		return;
+	}
+
+	// The level is being opened, so stopping the (now covering) effect no longer cancels the
+	// level transition; the auto-reverse fade-in stays prepared for the next level load.
+	bIsLevelFadeOutPending = false;
 
 	UGameplayStatics::OpenLevel(this, PendingLevelName);
 }
@@ -423,6 +490,10 @@ void UTransitionManagerSubsystem::ForceClear()
 		SequencePlayer->Reset();
 	}
 
+	// A level transition must not open its level or fade in on the next level load after a
+	// force clear.
+	CancelPendingLevelTransition();
+
 	CleanupAndPoolCurrentEffect();
 
 	// Reset Input
@@ -440,6 +511,7 @@ void UTransitionManagerSubsystem::ForceClear()
 	bAutoStopOnReverseComplete = false;
 	bShouldHoldAtMax = false;
 	bIsHolding = false;
+	bIsCoveringScreen = false;
 	bIsInverted = false;
 	CurrentPreset = nullptr;
 	CurrentProgress = 0.0f;
@@ -475,9 +547,18 @@ TStatId UTransitionManagerSubsystem::GetStatId() const
  */
 void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETransitionMode Mode, float PlaySpeed, bool bInvert, bool bHoldAtMax, FTransitionParameters OverrideParams)
 {
-	if (!Preset || !Preset->TransitionMaterial)
+	if (!Preset || !Preset->IsPlayable())
 	{
-		UE_LOG(LogTransitionFX, Error, TEXT("TransitionFX: Invalid Preset or Material is missing!"));
+		if (!Preset || !Preset->TransitionMaterial)
+		{
+			UE_LOG(LogTransitionFX, Error, TEXT("TransitionFX: Invalid Preset or Material is missing!"));
+		}
+		else
+		{
+			// Without an effect class nothing would be rendered, yet the transition would still
+			// tick, block input and fire its events.
+			UE_LOG(LogTransitionFX, Error, TEXT("TransitionFX: Preset '%s' has no EffectClass. Set it to PostProcessTransitionEffect or WidgetTransitionEffect."), *Preset->GetName());
+		}
 		ForceClear();
 		return;
 	}
@@ -514,8 +595,10 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 	}
 	else
 	{
-		// Stop any existing transition (tears down the effect volume).
-		if (bIsTransitionActive)
+		// Stop any existing transition (tears down the effect volume). This also removes an
+		// effect kept covering the screen; the new effect is created in this same frame, so
+		// no frame exposes the background.
+		if (bIsTransitionActive || bIsCoveringScreen)
 		{
 			StopTransition();
 		}
@@ -690,9 +773,11 @@ void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
 		return;
 	}
 
+	// Also resumes a completed transition whose effect is still covering the screen.
 	CurrentMode = ETransitionMode::Reverse;
 	bAutoStopOnReverseComplete = bAutoStop;
 	bHasCompleted = false;
+	bIsCoveringScreen = false;
 	bIsTransitionActive = true;
 }
 
@@ -710,6 +795,11 @@ void UTransitionManagerSubsystem::InvertTransition(bool bAutoComplete)
 	if (CurrentEffect)
 	{
 		CurrentEffect->SetInvert(bIsInverted);
+
+		// Apply the restart progress right away. Otherwise, when called after this frame's
+		// Tick (e.g. from an OnTransitionCompleted handler), the flipped mask would render
+		// for one frame at the old progress (1.0) and briefly expose the scene.
+		CurrentEffect->UpdateProgress(UTransitionBlueprintLibrary::ApplyEasing(0.0f, CurrentPreset->EasingType, CurrentPreset->ProgressCurve));
 	}
 
 	// Reactivate transition in forward mode with inverted mask
@@ -718,13 +808,28 @@ void UTransitionManagerSubsystem::InvertTransition(bool bAutoComplete)
 	bShouldHoldAtMax = !bAutoComplete;
 	bIsHolding = false;
 	bHasCompleted = false;
+	bIsCoveringScreen = false;
 	bIsTransitionActive = true;
 }
 
-/** Stops the active transition: cleans up the effect, stops audio, restores input, and resets state. */
+/**
+ * Stops the active transition (or removes an effect kept covering the screen): cleans up
+ * the effect, stops audio, restores input, and resets state. Cancels a level transition
+ * whose fade-out has not completed yet.
+ */
 void UTransitionManagerSubsystem::StopTransition()
 {
-	if (!bIsTransitionActive)
+	// Stopping the fade-out of a level transition before it completes (directly, or through
+	// StartTransition replacing it) cancels the level transition; otherwise the next transition
+	// to complete would open the stale level. Once the fade-out has completed, the level is
+	// being opened, and stopping its covering effect (e.g. from OnWorldCleanup during that
+	// level travel) must keep the auto-reverse fade-in.
+	if (bIsLevelFadeOutPending && !bHasCompleted)
+	{
+		CancelPendingLevelTransition();
+	}
+
+	if (!bIsTransitionActive && !bIsCoveringScreen)
 	{
 		return;
 	}
@@ -746,8 +851,53 @@ void UTransitionManagerSubsystem::StopTransition()
 	// bHasCompleted preserved — reset by StartTransition() / ReverseTransition() / ForceClear()
 	bShouldHoldAtMax = false;
 	bIsHolding = false;
+	bIsCoveringScreen = false;
 	bIsInverted = false;
 	CurrentPreset = nullptr;
+}
+
+/** Keeps a completed transition's effect on screen if it ends covering the screen; otherwise stops it. */
+void UTransitionManagerSubsystem::FinishCompletedTransition()
+{
+	if (!bIsTransitionActive)
+	{
+		return;
+	}
+
+	if (!bHasCompleted || !EndsCoveringScreen())
+	{
+		StopTransition();
+		return;
+	}
+
+	// Stopping now would remove the effect and expose the scene right after a fade-out.
+	// Stop ticking instead, but keep the effect (at full coverage), the preset, input
+	// blocking and the transition sound until the next StartTransition replaces the effect
+	// in the same frame, ReverseTransition / InvertTransition resume from it, or
+	// StopTransition / ForceClear / level travel remove it.
+	bIsTransitionActive = false;
+	bIsCoveringScreen = true;
+	bShouldHoldAtMax = false;
+	bIsHolding = false;
+}
+
+/** Forward without Invert ends at full coverage, and so does Reverse with Invert. */
+bool UTransitionManagerSubsystem::EndsCoveringScreen() const
+{
+	return (CurrentMode == ETransitionMode::Forward) != bIsInverted;
+}
+
+/**
+ * Level travel tears down the world that owns a PostProcess effect's volume and clears all
+ * viewport widgets, so a kept covering effect can no longer be shown. Release it here so the
+ * effect does not keep references into the old world.
+ */
+void UTransitionManagerSubsystem::OnWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources)
+{
+	if (bIsCoveringScreen && World && World == GetWorld())
+	{
+		StopTransition();
+	}
 }
 
 /** Registers a progress threshold value, clamped to [0.0, 1.0]. */
@@ -794,19 +944,20 @@ void UTransitionManagerSubsystem::PlaySequence(UTransitionSequence* Sequence)
 
 	// Sequences and level transitions are mutually exclusive: refuse if a level
 	// transition (or auto-reverse plan) is pending. bAutoReverseOnLevelLoad is
-	// the authoritative in-flight flag — it is cleared in OnPostLoadMapWithWorld.
+	// the authoritative in-flight flag — it is cleared in OnPostLoadMapWithWorld,
+	// or by CancelPendingLevelTransition when the level transition is cancelled.
 	if (bAutoReverseOnLevelLoad)
 	{
 		UE_LOG(LogTransitionFX, Warning, TEXT("PlaySequence: A level transition is pending. Sequences cannot run during level transitions. Ignoring."));
 		return;
 	}
 
-	// Stop any existing transition/sequence cleanly.
+	// Stop any existing transition/sequence cleanly (including an effect kept covering the screen).
 	if (IsSequencePlaying())
 	{
 		StopSequence();
 	}
-	else if (bIsTransitionActive)
+	else if (bIsTransitionActive || bIsCoveringScreen)
 	{
 		StopTransition();
 	}

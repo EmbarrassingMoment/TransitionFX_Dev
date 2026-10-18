@@ -29,11 +29,11 @@ PIE で実行すると、画面の **右半分が不透明な UMG パネル**、
 
 | ボタン | 機能 |
 |--------|------|
-| **Prev / Next** | `DA_Widget_*` プリセット（アルファベット順 9 種）を切り替え |
+| **Prev / Next** | `DA_Widget_*` プリセット（アルファベット順 15 種）を切り替え |
 | **Play Widget Layer** | 選択中の `DA_Widget_*` を再生 |
 | **Play PostProcess** | 同名の PostProcess 版 `DA_*` を再生（未登録なら Status に表示） |
 
-上段のラベルに `[n/9] DA_Widget_X | PostProcess: DA_X`、その下の Status に再生状態が出る。
+上段のラベルに `[n/15] DA_Widget_X | PostProcess: DA_X`、その下の Status に再生状態が出る。
 
 ## アーキテクチャ
 
@@ -81,8 +81,11 @@ D:\UE_5.8\Engine\Binaries\Win64\UnrealEditor-Cmd.exe TransitionFX_Dev.uproject -
 ```
 
 - WBP とレベルを **削除して作り直す**（デザイナで手を入れた内容は消える）
-- `WidgetPresets` は `/TransitionFX/Data` の `DA_Widget_*` 全部、`PostProcessPresets` は同名の `DA_*` を自動で割り当てる。
-  ウィジェットレイヤー版を追加したら再実行すれば一覧に載る
+- `WidgetPresets` は `/TransitionFX/Data` の `DA_Widget_*` 全部、`PostProcessPresets` は同名の `DA_*` を自動で割り当てる
+- ウィジェットレイヤー版を追加しただけなら、作り直さずに一覧だけ更新する
+  `Plugins\DevMaterialTools\Tools\update_widget_layer_sample_presets.py` を同じ要領で実行する
+  （WBP の CDO の `WidgetPresets` / `PostProcessPresets` だけを書き換えて保存。レイアウトとレベルは触らない。
+  結果は `Saved/DevMaterialTools/update_widget_layer_sample_presets.result.json`）
 - `UWidgetTree` は Python から触れないため、ウィジェット生成とルート設定は
   `DevBlueprintTools.construct_widget_in_tree` / `set_widget_tree_root`（DevMaterialTools プラグインの C++）経由
 - 結果は `Saved/DevMaterialTools/build_widget_layer_sample.result.json`（`result: PASS` を確認する。コマンドレットの exit code は常に 1）
