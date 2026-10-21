@@ -8,13 +8,17 @@ TransitionFX 規約への適合:
   - 出力 = lerp(SceneTexture.rgb, FadeColor.rgb, alpha) -> EmissiveColor
     (全マスター共通の Lerp→Emissive チェーン / Progress・Invert・FadeColor 三点セット)
   - uv はポストプロセスの TexCoord をそのまま使用 (sandbox の p/toUV 往復は不要)
-  - AA は Smoothness 定数の代わりに進行軸方向の解析的 1px (= 1/ViewSize.axis)。
-    fwidth(pos) はストライプ境界の微分スパイクが出るため解析値を使う
-  - パラメータ名は既存 MI 互換: Direction / SplitCount / StripeDelay
+  - エッジ幅 w = max(2px, Smoothness)。px は進行軸方向の解析的 1px (= 1/ViewSize.axis)。
+    fwidth(pos) はストライプ境界の微分スパイクが出るため解析値を使う。
+    Smoothness (UV 単位, 既定 0) で 2px より柔らかいエッジにできる
+  - パラメータ名は既存 MI 互換: Direction / SplitCount / StripeDelay / Smoothness
 
 fix(getFixTransition 相当) は呼び出しが1回だけなので MF 化せずインライン:
   accel = 1 + StripeDelay * SplitCount * max(1, SplitCount - 1)
-  fix   = Progress / SplitCount * accel
+  fix   = Progress * (accel / SplitCount + w)
+  mask  = smoothstep(fix, fix - w, pos)
++w により Progress=0 では帯全体が pos の手前 (完全に見える)、Progress=1 では
+pos の最大値 accel/SplitCount の奥 (完全に覆う) に来る。
 ルール: GLSL ローカル変数 = Named Reroute Declaration / 再利用 = Usage。
 
 実行例:
@@ -52,11 +56,19 @@ def _connect(frm, out_name, to, in_name):
     return ok
 
 n_cleared_comments = dmt.clear_comments_in_material(mat)
-mel.delete_all_material_expressions(mat)
-print(f"[TEST] cleared existing graph (comments removed: {n_cleared_comments})")
+# delete_all_material_expressions は1回では消し残る (交互スキップ様) ため空になるまで繰り返す
+for _ in range(10):
+    if not mel.get_material_expressions(mat):
+        break
+    mel.delete_all_material_expressions(mat)
+graph_cleared = not mel.get_material_expressions(mat)
+print(f"[TEST] cleared existing graph: {graph_cleared} (comments removed: {n_cleared_comments})")
 
+created = []
 def expr(cls, x, y):
-    return mel.create_material_expression(mat, cls, x, y)
+    e = mel.create_material_expression(mat, cls, x, y)
+    created.append(e)
+    return e
 
 decl_map = {}
 def make_decl(name, src, x, y, color, out_name=""):
@@ -68,7 +80,9 @@ def make_decl(name, src, x, y, color, out_name=""):
     return dcl
 
 def use(name, x, y):
-    return dmt.create_named_reroute_usage(mat, decl_map[name], x, y)
+    u = dmt.create_named_reroute_usage(mat, decl_map[name], x, y)
+    created.append(u)
+    return u
 
 def sparam(name, default, x, y):
     p = expr(unreal.MaterialExpressionScalarParameter, x, y)
@@ -118,14 +132,6 @@ acc.set_editor_property("const_a", 1.0)
 _connect(mul_a, "", acc, "B")
 make_decl("accel", acc, -1900, 280, C_SC)
 
-# ---- fix = Progress / SplitCount * accel ----
-div_t = expr(unreal.MaterialExpressionDivide, -2500, 550)
-_connect(prog_p, "", div_t, "A"); _connect(split_p, "", div_t, "B")
-acc_u = use("accel", -2350, 620)
-mul_f = expr(unreal.MaterialExpressionMultiply, -2200, 550)
-_connect(div_t, "", mul_f, "A"); _connect(acc_u, "", mul_f, "B")
-make_decl("fix", mul_f, -2050, 550, C_SC)
-
 # ---- px = 進行軸方向の 1px = 1 / lerp(R.x, R.y, step(1.5, Direction)) ----
 r_u = use("R", -2500, 900)
 rx_aa = expr(unreal.MaterialExpressionComponentMask, -2350, 860)
@@ -148,18 +154,36 @@ px_div.set_editor_property("const_a", 1.0)
 _connect(lerp_axis, "", px_div, "B")
 make_decl("px", px_div, -1900, 930, C_UV)
 
-# ---- mask: smoothstep(fix + px, fix - px, pos)  (Min > Max の反転指定: pos < fix で 1) ----
+# ---- w = max(2px, Smoothness): エッジ幅 (Smoothness 0 = 解析的 AA のみ) ----
+px_u = use("px", -1750, 930)
+px2 = expr(unreal.MaterialExpressionMultiply, -1600, 930)
+px2.set_editor_property("const_b", 2.0)
+_connect(px_u, "", px2, "A")
+smooth_p = sparam("Smoothness", 0.0, -1750, 1030)
+max_w = expr(unreal.MaterialExpressionMax, -1450, 980)
+_connect(px2, "", max_w, "A"); _connect(smooth_p, "", max_w, "B")
+make_decl("w", max_w, -1300, 980, C_SC)
+
+# ---- fix = Progress * (accel / SplitCount + w) ----
+acc_u = use("accel", -2500, 620)
+div_t = expr(unreal.MaterialExpressionDivide, -2350, 580)
+_connect(acc_u, "", div_t, "A"); _connect(split_p, "", div_t, "B")
+w_u1 = use("w", -2350, 680)
+add_w = expr(unreal.MaterialExpressionAdd, -2200, 620)
+_connect(div_t, "", add_w, "A"); _connect(w_u1, "", add_w, "B")
+mul_f = expr(unreal.MaterialExpressionMultiply, -2050, 560)
+_connect(prog_p, "", mul_f, "A"); _connect(add_w, "", mul_f, "B")
+make_decl("fix", mul_f, -1900, 560, C_SC)
+
+# ---- mask: smoothstep(fix, fix - w, pos)  (Min > Max の反転指定: pos < fix - w で 1) ----
 fix_u1 = use("fix", -1750, 450)
-px_u1 = use("px", -1750, 550)
-add_e = expr(unreal.MaterialExpressionAdd, -1600, 500)
-_connect(fix_u1, "", add_e, "A"); _connect(px_u1, "", add_e, "B")
 fix_u2 = use("fix", -1750, 650)
-px_u2 = use("px", -1750, 750)
+w_u2 = use("w", -1750, 750)
 sub_e = expr(unreal.MaterialExpressionSubtract, -1600, 700)
-_connect(fix_u2, "", sub_e, "A"); _connect(px_u2, "", sub_e, "B")
+_connect(fix_u2, "", sub_e, "A"); _connect(w_u2, "", sub_e, "B")
 pos_u = use("pos", -1600, 380)
 ss = expr(unreal.MaterialExpressionSmoothStep, -1450, 500)
-_connect(add_e, "", ss, "Min")
+_connect(fix_u1, "", ss, "Min")
 _connect(sub_e, "", ss, "Max")
 _connect(pos_u, "", ss, "Value")
 
@@ -200,10 +224,13 @@ COMMENTS = [
     ("pos = StripePos(uv): per-stripe local pos + stripe index * StripeDelay", -2560, -110, 660, 260, C_CO),
     ("accel = 1 + StripeDelay*SplitCount*max(1, SplitCount-1): last stripe closes at Progress=1",
      -2560, 170, 810, 280, C_SC),
-    ("fix = Progress/SplitCount * accel: per-stripe close threshold", -2560, 470, 660, 240, C_SC),
-    ("px = 1px along transition axis (analytic AA width; fwidth(pos) would spike at stripe seams)",
+    ("fix = Progress * (accel/SplitCount + w): per-stripe close threshold; +w keeps Progress 0/1 fully open/closed",
+     -2560, 470, 760, 300, C_SC),
+    ("px = 1px along transition axis (analytic AA; fwidth(pos) would spike at stripe seams)",
      -2560, 800, 810, 330, C_UV),
-    ("mask = AA step(pos < fix), alpha = ApplyInvert(mask) = |Invert - mask|", -1810, 330, 910, 480, C_FX),
+    ("w = max(2px, Smoothness): edge width (Smoothness 0 = AA only)", -1790, 870, 620, 260, C_SC),
+    ("mask = smoothstep(fix, fix - w, pos), alpha = ApplyInvert(mask) = |Invert - mask|",
+     -1810, 330, 910, 480, C_FX),
     ("out = lerp(scene.rgb, FadeColor.rgb, alpha) -> emissive", -1160, -350, 860, 480, C_CL),
 ]
 comment_ok = []
@@ -214,23 +241,26 @@ print(f"[TEST] Comments created: {sum(comment_ok)}/{len(comment_ok)}")
 
 # ---- 検証 ----
 decls, usage_count = [], {}
-for e in mel.get_material_expressions(mat):
+all_exprs = mel.get_material_expressions(mat)
+for e in all_exprs:
     if isinstance(e, unreal.MaterialExpressionNamedRerouteDeclaration):
         decls.append(str(e.get_editor_property("name")))
     elif isinstance(e, unreal.MaterialExpressionNamedRerouteUsage):
         nm = dmt.get_named_reroute_usage_display_name(e)
         usage_count[nm] = usage_count.get(nm, 0) + 1
 
-expected_decls = sorted(["uv", "R", "pos", "accel", "fix", "px", "alpha", "col"])
-expected_usages = {"uv": 1, "R": 1, "pos": 1, "accel": 1, "fix": 2, "px": 2, "alpha": 1, "col": 1}
+expected_decls = sorted(["uv", "R", "pos", "accel", "fix", "px", "w", "alpha", "col"])
+expected_usages = {"uv": 1, "R": 1, "pos": 1, "accel": 1, "fix": 2, "px": 1, "w": 2, "alpha": 1, "col": 1}
 print(f"[TEST] Declarations ({len(decls)}): {sorted(decls)}")
 print(f"[TEST] Usage counts: {dict(sorted(usage_count.items()))}")
 print(f"[TEST] Connections: {sum(results)}/{len(results)} succeeded")
+print(f"[TEST] Expressions: {len(all_exprs)} (created {len(created)})")
 
 mel.recompile_material(mat)
 saved = lib.save_asset(MAT_PATH)
 print(f"[TEST] Saved: {saved}")
 
-passed = (all(results) and sorted(decls) == expected_decls
-          and usage_count == expected_usages and all(comment_ok) and saved)
+passed = (all(results) and graph_cleared and sorted(decls) == expected_decls
+          and usage_count == expected_usages and len(all_exprs) == len(created)
+          and all(comment_ok) and saved)
 print("[TEST] RESULT: " + ("PASS" if passed else "FAIL"))
