@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- **Master material cleanup** — Removed nodes that no longer contributed to the output: 24 in `M_Transition_Split`, 3 in `M_Transition_CrossWipe`, and unused `AspectRaito` reroute declarations in 12 PostProcess masters and 7 `M_Widget_*` masters. `MF_StripePos` no longer exposes duplicate `Direction` / `Delay` inputs. Masters that still used the `Default Lit` shading model (Box Roll, Fade, Polka Dots, Slice, Stripe Cascade, TV Switch Off and Texture Mask, plus the Fade, Polka Dots and Texture Mask widget masters) now use `Unlit`, like the rest; PostProcess and UI materials are always rendered unlit, so this is cosmetic. Shader instruction counts and parameter lists are unchanged, so these effects look the same.
+- `T_Circle_SDF` (the default mask of Texture Mask) is no longer streamed, so a transition never samples a low-resolution mip while the full texture is still streaming in.
+- `Plugins/DevMaterialTools/Tools/cleanup_material_graphs.py` (sample project / dev tooling only) — removes unreachable nodes from the master materials and material functions and normalizes shading model and blend mode. It only saves a material when its shader statistics and parameter names are unchanged after the edit. The Stripe Cascade builders (`build_m_stripecascade.py`, `build_mf_stripepos.py`) now repeat the graph clear until it is empty and check the node count, because a single clear call had left 11 stale nodes in the material and 9 in the function.
+
+### Fixed
+
+- **Stripe Cascade's `Smoothness` parameter had no effect.** It was listed as adjustable in 1.4.0, but the edge had been switched to a fixed analytic anti-aliasing width, so the parameter was left unconnected. `Smoothness` now sets the edge width in screen UV units along the wipe direction. The default `0` keeps the previous 2-pixel anti-aliased edge, and larger values (for example `0.02`–`0.06`) give a soft gradient edge. The edge travels a little further with the extra width, so `Progress` 0 still shows the whole scene and `Progress` 1 still covers the whole screen for any `Smoothness`.
+- `M_Transition_TVSwitchOff` used the `Alpha Holdout` blend mode instead of `Opaque` like the other masters. Without Substrate the output is unchanged, because PostProcess materials ignore the blend mode unless *Output Alpha* is enabled; it now compiles 2 fewer shader permutations and has the same vertex shader and sampler count as the other masters. With Substrate enabled, the engine's PostProcess shader outputs black for `Alpha Holdout` materials, so the effect would have rendered as a black screen.
+
 ## [1.6.0] - 2026-10-18
 
 ### Added
