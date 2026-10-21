@@ -120,6 +120,7 @@ Plugins/TransitionFX/
 - **Weak pointers for cache**: `TWeakObjectPtr` for `CachedPlayerController` to handle destruction safely.
 - **Category**: All `UFUNCTION`/`UPROPERTY` use `Category = "TransitionFX"` or `"TransitionFX|Sequence"`.
 - **No Blueprint-only builds assumption**: The plugin must work for both Blueprint-only and C++ projects; keep all required logic in the Runtime module.
+- **Plugin content is saved with UE 5.5**: any `.uasset` that the UE 5.8 sample project saves under `Plugins/TransitionFX/Content` gets a package version that UE 5.5/5.6 refuse to load (59 assets shipped that way in 1.4.0–1.6.0; fixed in 1.6.1). Never save plugin assets from the 5.8 editor or the 5.8 `pythonscript` commandlet. Author them in a UE 5.5 project that contains the plugin (built with UE 5.5 `RunUAT BuildPlugin`) and DevMaterialTools, run the `Plugins/DevMaterialTools/Tools/` builders there, then copy the changed files back. `check_plugin_asset_versions.py` must pass before committing (the release workflow runs it); `dump_plugin_assets.py` + `compare_plugin_dumps.py` verify a 5.5 rebuild against the previous content in UE 5.8. Builders must use `DevMaterialTools.get_material_expressions` / `get_material_function_expressions`, not the `MaterialEditingLibrary` versions (UE 5.6+ only).
 
 ## Platform & Compatibility Notes
 
@@ -131,4 +132,4 @@ Plugins/TransitionFX/
 
 ## CI/CD
 
-`.github/workflows/release.yml` triggers on version tags (`v*`) to build a distribution ZIP (excluding binaries/intermediates), parse CHANGELOG.md, and publish a GitHub release.
+`.github/workflows/release.yml` triggers on version tags (`v*`) to check that every plugin asset loads in UE 5.5 (`check_plugin_asset_versions.py`), build a distribution ZIP (excluding binaries/intermediates), parse CHANGELOG.md, and publish a GitHub release.

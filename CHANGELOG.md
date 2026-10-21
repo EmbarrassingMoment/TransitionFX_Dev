@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.6.1] - 2026-10-21
+
+### Fixed
+
+- **Plugin content could not be loaded in Unreal Engine 5.5 and 5.6.** Since 1.4.0, 59 of the plugin's 150 assets had been saved by UE 5.8, the sample project's engine, and an older engine refuses packages saved by a newer one. Affected were every widget-layer asset (`DA_Widget_*`, `M_Widget_*`, `MI_Widget_*`), Box Roll and Stripe Cascade, `M_Transition_Pixelate`, `DA_LinearWipe`, `DA_SequenceSamples`, and `MF_CorrectAspectRatio` / `MF_GetMaxScreenRadius`. Most effects use those two material functions, so most transitions failed to compile in UE 5.5 and 5.6. All plugin assets are now saved by UE 5.5 and load in UE 5.5 through 5.8. Compared with 1.6.0 in UE 5.8, every preset, material instance and material keeps the same values, parameters and shader instruction counts. The only difference is that Stripe Cascade's material graph lost 11 unconnected nodes, including an unused `Smoothness` parameter that never had an effect.
+
+### Changed
+
+- Plugin version bumped to **1.6.1** (`TransitionFX.uplugin` `VersionName`); README (EN/JA) version badge updated to match.
+- The release workflow now fails if any plugin asset was saved in a format UE 5.5 cannot load (`Plugins/DevMaterialTools/Tools/check_plugin_asset_versions.py`).
+- Sample project / dev tooling only: the DevMaterialTools material builders run in UE 5.5 as well. Plugin content is now authored in a UE 5.5 project. DevMaterialTools adds `get_material_expressions` / `get_material_function_expressions`, which `MaterialEditingLibrary` provides only from UE 5.6. The Stripe Cascade builders create their assets when missing. New tools: `dump_plugin_assets.py` and `compare_plugin_dumps.py` record and compare asset contents across engine versions, `restore_from_dump.py` writes recorded values back, and `ue55_reapply_renames.py` redoes the 1.4.0 renames on the 5.5-saved versions.
+
 ## [1.6.0] - 2026-10-18
 
 ### Added
