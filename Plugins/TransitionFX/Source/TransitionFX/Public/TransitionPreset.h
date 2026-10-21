@@ -43,18 +43,12 @@ class TRANSITIONFX_API UTransitionPreset : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UTransitionPreset()
-		: DefaultDuration(1.0f)
-		, EasingType(ETransitionEasing::Linear)
-		, bAutoBlockInput(true)
-		, bTickWhenPaused(false)
-		, Priority(1000.0f)
-		, SoundVolume(1.0f)
-		, SoundPitch(1.0f)
-	{
-	}
+	UTransitionPreset();
 
-	/** The class of the transition effect to spawn. */
+	/**
+	 * The class of the transition effect to spawn. Defaults to PostProcessTransitionEffect;
+	 * use WidgetTransitionEffect (with an MI_Widget_* material) to also cover UMG/Slate UI.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX", meta = (MustImplement = "/Script/TransitionFX.TransitionEffect"))
 	TSubclassOf<UObject> EffectClass;
 

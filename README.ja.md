@@ -114,7 +114,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 ![Data Asset のクラス選択ダイアログで Transition Preset を選択](docs/images/quickstart_create_data_asset.png)
 
-*   **Effect Class:** `PostProcessTransitionEffect`を選択します（UMG/Slate UI も覆いたい場合は `WidgetTransitionEffect`。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照）。
+*   **Effect Class:** `PostProcessTransitionEffect`（新規プリセットの既定値）。UMG/Slate UI も覆いたい場合は `WidgetTransitionEffect` に変更します（[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照）。
 *   **Transition Material:** `MI_Transition_Fade`（または`MI_Transition_Iris`、`MI_Transition_Diamond`など。同梱プリセットは `M_Transition_*` マスターのこれらのインスタンスを使用しています）を選択します。ウィジェットレイヤー版のプリセットでは対応する `MI_Widget_*` インスタンスを使用します。
 *   **bOverrideTransitionColor / TransitionColor:** (任意) 有効にすると、呼び出しごとにパラメータオーバーライドを渡さなくても、このプリセット固有のトランジションカラー（白へのフェードなど）を設定できます。色はマテリアルの `FadeColor` パラメータに適用され、呼び出し側の `Override Params` で色を指定した場合はそちらが優先されます。
 *   **Default Duration:** 秒単位で時間を設定します（例：`1.0`）。

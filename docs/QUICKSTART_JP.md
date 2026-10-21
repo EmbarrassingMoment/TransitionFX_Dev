@@ -33,7 +33,7 @@ TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition
 
 | プロパティ | 説明 | 推奨値 |
 | :--- | :--- | :--- |
-| `Effect Class` | 使用するエフェクトのクラス | `PostProcessTransitionEffect`（UMG/Slate UI も覆う場合は `WidgetTransitionEffect`。[UMG/Slate UI ごと覆いたい場合](#umgslate-ui-ごと覆いたい場合)を参照） |
+| `Effect Class` | 使用するエフェクトのクラス | `PostProcessTransitionEffect`（既定値。UMG/Slate UI も覆う場合は `WidgetTransitionEffect`。[UMG/Slate UI ごと覆いたい場合](#umgslate-ui-ごと覆いたい場合)を参照） |
 | `Transition Material` | 遷移に使用するマテリアル | `MI_Transition_Fade`、`MI_Transition_Iris`、`MI_Transition_Diamond` など（同梱プリセットが使用しているインスタンス）。ウィジェットレイヤー版プリセットでは対応する `MI_Widget_*` インスタンスを使用 |
 | `Default Duration` | 遷移の長さ（秒） | `1.0` |
 

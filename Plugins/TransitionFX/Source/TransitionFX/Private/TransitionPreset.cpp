@@ -1,12 +1,24 @@
 // Copyright (c) 2026 Kurorekishi (EmbarrassingMoment).
 
 #include "TransitionPreset.h"
+#include "PostProcessTransitionEffect.h"
+
+UTransitionPreset::UTransitionPreset()
+	: EffectClass(UPostProcessTransitionEffect::StaticClass())
+	, DefaultDuration(1.0f)
+	, EasingType(ETransitionEasing::Linear)
+	, bAutoBlockInput(true)
+	, bTickWhenPaused(false)
+	, Priority(1000.0f)
+	, SoundVolume(1.0f)
+	, SoundPitch(1.0f)
+{
+}
 
 #if WITH_EDITOR
 #include "MaterialDomain.h"
 #include "Materials/Material.h"
 #include "Misc/DataValidation.h"
-#include "PostProcessTransitionEffect.h"
 #include "TransitionFXConfig.h"
 #include "WidgetTransitionEffect.h"
 

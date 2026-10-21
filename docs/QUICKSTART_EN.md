@@ -33,7 +33,7 @@ First, create this asset.
 
 | Property | Description | Recommended Value |
 | :--- | :--- | :--- |
-| `Effect Class` | The class of the effect to use | `PostProcessTransitionEffect` (`WidgetTransitionEffect` to also cover UMG/Slate UI — see [Covering UMG/Slate UI](#when-the-transition-must-cover-umgslate-ui)) |
+| `Effect Class` | The class of the effect to use | `PostProcessTransitionEffect` (default; `WidgetTransitionEffect` to also cover UMG/Slate UI — see [Covering UMG/Slate UI](#when-the-transition-must-cover-umgslate-ui)) |
 | `Transition Material` | The material used for the transition | `MI_Transition_Fade`, `MI_Transition_Iris`, `MI_Transition_Diamond`, etc. (the instances the bundled presets use). Widget-layer presets use the matching `MI_Widget_*` instance |
 | `Default Duration` | The length of the transition (seconds) | `1.0` |
 

@@ -21,7 +21,7 @@ Check the following in order. Items 2–4 can be checked without playing: right-
 1. **Preset is not set:** Ensure the `Preset` pin of the node is connected. If `nullptr` is passed, an error is logged and `ForceClear` is called internally.
 2. **Material is not assigned:** Open your `TransitionPreset` data asset and confirm that `Transition Material` is set. If the material is missing, the transition will not render.
 3. **`Progress` parameter is missing from the material:** All transition materials require a scalar parameter named `Progress`. If it does not exist, the effect will not animate (an error is output to the log).
-4. **Effect Class is not set:** Confirm that `Effect Class` is set to `PostProcessTransitionEffect` or `WidgetTransitionEffect` (or your custom effect class). If it is not set, the transition does not start and an error naming the preset is logged. `WidgetTransitionEffect` requires a UI-domain material (`MI_Widget_*`); a PostProcess material will not render on the widget layer.
+4. **Effect Class is not set:** Confirm that `Effect Class` is set to `PostProcessTransitionEffect` or `WidgetTransitionEffect` (or your custom effect class). New presets start with `PostProcessTransitionEffect`, so this only happens when the field was cleared. If it is not set, the transition does not start and an error naming the preset is logged. `WidgetTransitionEffect` requires a UI-domain material (`MI_Widget_*`); a PostProcess material will not render on the widget layer.
 5. **Post Process settings conflict:** If your project already uses a Post Process Volume with extreme settings, it may visually interfere. Check the `Priority` value in the preset (default: 1000).
 
 ### Q: The transition freezes when the game is paused.
