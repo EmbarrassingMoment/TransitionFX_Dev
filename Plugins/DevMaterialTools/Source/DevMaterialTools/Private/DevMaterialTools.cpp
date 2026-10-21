@@ -216,3 +216,35 @@ bool UDevMaterialTools::GetRootInputUseConstant(UMaterial* Material, EMaterialPr
 	}
 	return bUseConstant;
 }
+
+TArray<UMaterialExpression*> UDevMaterialTools::GetMaterialExpressions(const UMaterial* Material)
+{
+	TArray<UMaterialExpression*> Result;
+	if (Material)
+	{
+		for (UMaterialExpression* Expression : Material->GetExpressions())
+		{
+			if (Expression)
+			{
+				Result.Add(Expression);
+			}
+		}
+	}
+	return Result;
+}
+
+TArray<UMaterialExpression*> UDevMaterialTools::GetMaterialFunctionExpressions(const UMaterialFunction* MaterialFunction)
+{
+	TArray<UMaterialExpression*> Result;
+	if (MaterialFunction)
+	{
+		for (UMaterialExpression* Expression : MaterialFunction->GetExpressions())
+		{
+			if (Expression)
+			{
+				Result.Add(Expression);
+			}
+		}
+	}
+	return Result;
+}

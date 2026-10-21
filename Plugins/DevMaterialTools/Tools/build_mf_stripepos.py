@@ -41,8 +41,13 @@ def V4s(x):
     v.set_editor_properties({"x": x, "y": 0.0, "z": 0.0, "w": 0.0})
     return v
 
-fn = lib.load_asset(FN_PATH)
-assert fn, f"{FN_PATH} not found"
+fn = lib.load_asset(FN_PATH) if lib.does_asset_exist(FN_PATH) else None
+if fn is None:
+    # 無い場合 (例: 新しいエンジンで保存されて読めない版を消して UE 5.5 で作り直すとき) は新規作成
+    fn = unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+        FN_PATH.rsplit("/", 1)[1], FN_PATH.rsplit("/", 1)[0], unreal.MaterialFunction, unreal.MaterialFunctionFactoryNew())
+    print(f"[TEST] created new {FN_PATH}")
+assert fn, f"{FN_PATH} could not be loaded or created"
 
 n_cleared_comments = dmt.clear_comments_in_function(fn)
 mel.delete_all_material_expressions_in_function(fn)
@@ -149,7 +154,7 @@ saved = lib.save_asset(FN_PATH)
 
 # ---- 検証 ----
 decls, usage_count = [], {}
-for e in mel.get_material_function_expressions(fn):
+for e in dmt.get_material_function_expressions(fn):
     if isinstance(e, unreal.MaterialExpressionNamedRerouteDeclaration):
         decls.append(str(e.get_editor_property("name")))
     elif isinstance(e, unreal.MaterialExpressionNamedRerouteUsage):

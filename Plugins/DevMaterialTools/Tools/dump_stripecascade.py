@@ -10,6 +10,7 @@ import unreal
 
 mel = unreal.MaterialEditingLibrary
 lib = unreal.EditorAssetLibrary
+dmt = unreal.DevMaterialTools
 
 def dump_expr(e, indent="  "):
     cls = e.get_class().get_name()
@@ -41,7 +42,7 @@ def dump_material(path):
         print(f"[DUMP] output_alpha={mat.get_editor_property('blendable_output_alpha')}")
     except Exception as ex:
         print(f"[DUMP] prop error: {ex}")
-    for e in mel.get_material_expressions(mat):
+    for e in dmt.get_material_expressions(mat):
         dump_expr(e)
 
 def dump_function(path):
@@ -55,7 +56,7 @@ def dump_function(path):
         print(f"[DUMP] expose_to_library={fn.get_editor_property('expose_to_library')}")
     except Exception:
         pass
-    for e in mel.get_material_function_expressions(fn):
+    for e in dmt.get_material_function_expressions(fn):
         dump_expr(e)
 
 def dump_instance(path):

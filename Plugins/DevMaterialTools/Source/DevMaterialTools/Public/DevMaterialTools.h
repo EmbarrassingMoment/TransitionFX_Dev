@@ -80,4 +80,15 @@ public:
 	/** Returns a root input's UseConstant flag (false for inputs without one, e.g. ShadingModel). For verification from Python. */
 	UFUNCTION(BlueprintCallable, Category = "DevMaterialTools")
 	static bool GetRootInputUseConstant(UMaterial* Material, EMaterialProperty Property);
+
+	/**
+	 * All expressions of a Material, like MaterialEditingLibrary.get_material_expressions, which only exists from UE 5.6.
+	 * The builders use these so they also run in the UE 5.5 workspace that plugin content is saved from.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "DevMaterialTools")
+	static TArray<UMaterialExpression*> GetMaterialExpressions(const UMaterial* Material);
+
+	/** All expressions of a Material Function, like MaterialEditingLibrary.get_material_function_expressions (UE 5.6+). */
+	UFUNCTION(BlueprintCallable, Category = "DevMaterialTools")
+	static TArray<UMaterialExpression*> GetMaterialFunctionExpressions(const UMaterialFunction* MaterialFunction);
 };
