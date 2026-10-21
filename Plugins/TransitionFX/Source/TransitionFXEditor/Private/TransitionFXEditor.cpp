@@ -4,9 +4,9 @@
 #include "AssetTypeActions_TransitionPreset.h"
 #include "AssetTypeActions_TransitionSequence.h"
 #include "STransitionPreviewPanel.h"
+#include "TransitionFXGraphPinFactory.h"
 #include "AssetToolsModule.h"
-#include "AssetRegistry/AssetRegistryModule.h"
-#include "Settings/ContentBrowserSettings.h"
+#include "EdGraphUtilities.h"
 #include "ToolMenus.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Framework/Docking/TabManager.h"
@@ -24,18 +24,9 @@ void FTransitionFXEditorModule::StartupModule()
 	TransitionSequenceActions = MakeShared<FAssetTypeActions_TransitionSequence>();
 	AssetTools.RegisterAssetTypeActions(TransitionSequenceActions.ToSharedRef());
 
-	// Ensure plugin content is indexed by the AssetRegistry
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
-	AssetRegistry.ScanPathsSynchronous({TEXT("/TransitionFX")}, /*bForceRescan=*/ true);
-
-	// Enable plugin content visibility in Content Browser and asset pickers
-	UContentBrowserSettings* CBSettings = GetMutableDefault<UContentBrowserSettings>();
-	if (CBSettings && !CBSettings->GetDisplayPluginFolders())
-	{
-		CBSettings->SetDisplayPluginFolders(true);
-		CBSettings->PostEditChange();
-	}
+	// List the bundled presets in TransitionPreset / TransitionSequence pin pickers regardless of Show Plugin Content
+	GraphPinFactory = MakeShared<FTransitionFXGraphPinFactory>();
+	FEdGraphUtilities::RegisterVisualPinFactory(GraphPinFactory);
 
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(
 		PreviewTabId,
@@ -63,6 +54,12 @@ void FTransitionFXEditorModule::ShutdownModule()
 	}
 	TransitionPresetActions.Reset();
 	TransitionSequenceActions.Reset();
+
+	if (GraphPinFactory.IsValid())
+	{
+		FEdGraphUtilities::UnregisterVisualPinFactory(GraphPinFactory);
+		GraphPinFactory.Reset();
+	}
 
 	UToolMenus::UnRegisterStartupCallback(this);
 	UToolMenus::UnregisterOwner(this);

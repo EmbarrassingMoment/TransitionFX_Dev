@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- Blueprint pins of type `TransitionPreset` / `TransitionSequence` (for example **Preset** on *Play Transition And Wait*) now list the bundled presets even while the Content Browser's **Show Plugin Content** setting is off, through a TransitionFX pin widget whose asset picker always includes plugin content. The **Preset** of Transition Sequence entries and **Transition Material** in presets do the same (`ForceShowPluginContent`).
+
+### Fixed
+
+- The editor module no longer turns the Content Browser's **Show Plugin Content** setting back on at every editor start. The setting is saved in your per-user editor settings and shared by all of your projects, so turning it off never lasted while a project with TransitionFX was opened. The module also no longer forces a synchronous rescan of the plugin's content at startup; the Asset Registry already scans it. Asset pickers outside TransitionFX follow the setting again — see the FAQ if a `TransitionPreset` variable of your own does not list the bundled presets.
+
 ## [1.6.0] - 2026-10-18
 
 ### Added

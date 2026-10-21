@@ -20,7 +20,7 @@ struct TRANSITIONFX_API FTransitionSequenceEntry
 	GENERATED_BODY()
 
 	/** The transition preset to play for this entry. Required. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition", meta = (ForceShowPluginContent))
 	TObjectPtr<UTransitionPreset> Preset = nullptr;
 
 	/** Playback direction for this entry. */
