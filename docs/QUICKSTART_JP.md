@@ -59,6 +59,8 @@ TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition
 
 ![TransitionPreset の詳細パネルのスクリーンショット](images/quickstart_preset_settings.png)
 
+再生せずにプリセットを確認するには、右クリックして `Asset Actions` > `Validate Assets` を選びます（保存時にも実行されます）。エラーは再生やアニメーションができない設定を示します：Effect Class や Transition Material の未設定、マテリアルに `Progress` パラメータがない、Effect Class とドメインが合わないマテリアル。警告は効果のない設定を示します（`FadeColor` のないマテリアルでの `bOverrideTransitionColor`、Progress Curve のない `Custom Curve` イージングなど）。
+
 ### 設定例：シンプルなフェードアウト
 
 ```

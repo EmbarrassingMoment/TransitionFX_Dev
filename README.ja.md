@@ -125,6 +125,8 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 *   **Widget ZOrder:** フルスクリーンオーバーレイの重ね順です（デフォルト：`10000`）。`WidgetTransitionEffect` でのみ使用されます。
 *   **Audio:** (任意) 再生するサウンドアセットを割り当てます。ボリュームとピッチの制御が含まれます。
 
+再生せずにプリセットを確認するには、右クリックして `Asset Actions` > `Validate Assets` を選びます（保存時にも実行されます）。Effect Class や Transition Material の未設定、`Progress` パラメータのないマテリアル、Effect Class とドメインが合わないマテリアル（`PostProcessTransitionEffect` には `MI_Transition_*`、`WidgetTransitionEffect` には `MI_Widget_*`）を報告します。
+
 ![TransitionPreset の設定パネル（プロパティ一覧）のスクリーンショット](docs/images/quickstart_preset_settings.png)
 
 ### 2. ブループリントから呼び出す

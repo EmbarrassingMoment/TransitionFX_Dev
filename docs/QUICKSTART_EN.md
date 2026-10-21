@@ -59,6 +59,8 @@ First, create this asset.
 
 ![Screenshot of the TransitionPreset detail panel showing all properties](images/quickstart_preset_settings.png)
 
+To check a preset without playing it, right-click it and choose `Asset Actions` > `Validate Assets` (validation also runs when you save it). Errors mean the preset will not play or animate: no Effect Class or Transition Material, no `Progress` parameter in the material, or a material whose domain does not match the Effect Class. Warnings point out settings that have no effect, such as `bOverrideTransitionColor` on a material without `FadeColor`, or `Custom Curve` easing without a Progress Curve.
+
 ### Example Setting: Simple Fade Out
 
 ```

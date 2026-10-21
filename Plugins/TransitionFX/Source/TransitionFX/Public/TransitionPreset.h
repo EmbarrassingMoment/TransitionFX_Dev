@@ -125,4 +125,14 @@ public:
 	{
 		return TransitionMaterial != nullptr && EffectClass != nullptr;
 	}
+
+#if WITH_EDITOR
+	/**
+	 * Editor data validation (Validate Assets, and on save when the Data Validation plugin is enabled).
+	 * Errors: no material or effect class, no "Progress" parameter, or a material domain the built-in effect
+	 * class cannot render (PostProcess / UI). Warnings: no "Invert" parameter, no "FadeColor" parameter while
+	 * bOverrideTransitionColor is set, and Custom easing without a ProgressCurve.
+	 */
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 };

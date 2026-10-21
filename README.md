@@ -114,6 +114,8 @@ You can also choose `Miscellaneous` > `Data Asset` and pick the `Transition Pres
 *   **Widget ZOrder:** Z-order of the full-screen overlay (default: `10000`). Used only by `WidgetTransitionEffect`.
 *   **Audio:** (Optional) Assign a Sound asset to play. Includes Volume and Pitch controls.
 
+To check a preset without playing it, right-click it and choose `Asset Actions` > `Validate Assets` (validation also runs when you save it). It reports a missing Effect Class or Transition Material, a material without the `Progress` parameter, and a material whose domain does not match the Effect Class (`MI_Transition_*` for `PostProcessTransitionEffect`, `MI_Widget_*` for `WidgetTransitionEffect`).
+
 ![Screenshot of the TransitionPreset detail panel showing all properties](docs/images/quickstart_preset_settings.png)
 
 ### 2. Call from Blueprint

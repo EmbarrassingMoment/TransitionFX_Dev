@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **Editor validation for presets and sequences.** `UTransitionPreset` and `UTransitionSequence` implement `IsDataValid`, so **Asset Actions > Validate Assets** (and validation on save) reports problems before you play them. Preset errors: no Effect Class, no Transition Material, a material without the `Progress` scalar parameter, and a material whose domain the built-in effect class cannot render (`WidgetTransitionEffect` needs a User Interface material, `PostProcessTransitionEffect` a Post Process material; custom effect classes are not checked). Preset warnings: a material without `Invert` (inverted playback has no effect), `bOverrideTransitionColor` on a material without `FadeColor`, and `Custom` easing without a Progress Curve. Sequence errors: entries with no preset or with a preset that has no material or effect class (playback skips them); a sequence with no entries is a warning. All bundled presets and `DA_SequenceSamples` validate without errors or warnings. README, Quick Start Guide and FAQ (EN/JA) mention the check.
+
+### Fixed
+
+- FAQ (EN/JP): a material without the `Progress` parameter logs an error, not a warning.
+
 ## [1.6.0] - 2026-10-18
 
 ### Added
