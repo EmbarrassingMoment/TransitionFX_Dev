@@ -18,6 +18,10 @@ jobs:
           lfs: true
           fetch-depth: 0
 
+      # The plugin supports UE 5.5+, and UE 5.5 cannot load packages saved by a newer engine
+      - name: Check plugin assets load in UE 5.5
+        run: python3 Plugins/DevMaterialTools/Tools/check_plugin_asset_versions.py Plugins/TransitionFX/Content
+
       - name: Create distribution zip
         run: |
           TAG_NAME="${GITHUB_REF_NAME}"

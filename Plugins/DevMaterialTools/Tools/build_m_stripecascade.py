@@ -39,7 +39,16 @@ C_FX = unreal.LinearColor(1.0, 0.9, 0.3, 1.0)   # マスク = 黄
 
 fn_pos = lib.load_asset(MF_POS_PATH)
 fn_inv = lib.load_asset(MF_INV_PATH)
-mat = lib.load_asset(MAT_PATH)
+mat = lib.load_asset(MAT_PATH) if lib.does_asset_exist(MAT_PATH) else None
+if mat is None:
+    # 無い場合 (例: 新しいエンジンで保存されて読めない版を消して UE 5.5 で作り直すとき) は
+    # 他のマスターと同じ PostProcess 設定で新規作成する
+    mat = unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+        MAT_PATH.rsplit("/", 1)[1], MAT_PATH.rsplit("/", 1)[0], unreal.Material, unreal.MaterialFactoryNew())
+    mat.set_editor_property("material_domain", unreal.MaterialDomain.MD_POST_PROCESS)
+    mat.set_editor_property("blendable_location", unreal.BlendableLocation.BL_SCENE_COLOR_AFTER_TONEMAPPING)
+    mat.set_editor_property("blendable_output_alpha", False)
+    print(f"[TEST] created new {MAT_PATH}")
 assert fn_pos and fn_inv and mat, "required assets not found"
 
 results = []
@@ -214,7 +223,7 @@ print(f"[TEST] Comments created: {sum(comment_ok)}/{len(comment_ok)}")
 
 # ---- 検証 ----
 decls, usage_count = [], {}
-for e in mel.get_material_expressions(mat):
+for e in dmt.get_material_expressions(mat):
     if isinstance(e, unreal.MaterialExpressionNamedRerouteDeclaration):
         decls.append(str(e.get_editor_property("name")))
     elif isinstance(e, unreal.MaterialExpressionNamedRerouteUsage):

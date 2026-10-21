@@ -130,7 +130,7 @@ def convert_material(c, effect):
     mat = lib.duplicate_asset(src, dst)
     if not c.check("duplicated", mat is not None):
         return None
-    exprs = list(mel.get_material_expressions(mat))
+    exprs = list(dev.get_material_expressions(mat))
     c.log["expr_count_before"] = len(exprs)
 
     scenes = [e for e in exprs if isinstance(e, unreal.MaterialExpressionSceneTexture)]
@@ -178,7 +178,7 @@ def convert_material(c, effect):
     mel.recompile_material(mat)
     c.check("domain UI", mat.get_editor_property("material_domain") == unreal.MaterialDomain.MD_UI)
     c.check("blend translucent", mat.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_TRANSLUCENT)
-    after = len(list(mel.get_material_expressions(mat)))
+    after = len(list(dev.get_material_expressions(mat)))
     c.log["expr_count_after"] = after
     c.check("expression count = before - 3", after == len(exprs) - 3)
     c.check("material saved", lib.save_asset(dst))

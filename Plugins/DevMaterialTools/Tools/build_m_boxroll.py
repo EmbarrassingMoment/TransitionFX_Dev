@@ -339,7 +339,7 @@ print(f"[TEST] Comments created: {sum(comment_ok)}/{len(comment_ok)}")
 
 # ---- 検証 ----
 decls, usage_count, class_count = [], {}, {}
-for e in mel.get_material_expressions(mat):
+for e in dmt.get_material_expressions(mat):
     cn = e.get_class().get_name()
     class_count[cn] = class_count.get(cn, 0) + 1
     if isinstance(e, unreal.MaterialExpressionNamedRerouteDeclaration):
@@ -356,7 +356,7 @@ expected_usages = {"Rows": 5, "Speed": 4, "DTCol": 4, "DTRow": 4, "aspect": 3,
                    "Px": 4, "S": 8, "HalfDiag": 3, "Cols": 5, "StartX": 4,
                    "uv": 4, "lastLand": 1, "t": 3, "rowHere": 3, "d": 1,
                    "aa": 1, "alpha": 1, "col": 1}
-n_exprs = len(mel.get_material_expressions(mat))
+n_exprs = len(dmt.get_material_expressions(mat))
 expected_exprs = 128  # 7 params + 3 sources + 41 ops + 18 decls + 59 usages
 usages_ok = all(u is not None for u in usages) and len(usages) == 59
 domain_ok = mat.get_editor_property("material_domain") == unreal.MaterialDomain.MD_POST_PROCESS

@@ -148,7 +148,7 @@ saved = lib.save_asset(full)
 
 # ---- 検証 ----
 counts = {}
-for e in mel.get_material_function_expressions(fn):
+for e in dmt.get_material_function_expressions(fn):
     cn = e.get_class().get_name()
     counts[cn] = counts.get(cn, 0) + 1
 print(f"[TEST] {MF_NAME} nodes: {dict(sorted(counts.items()))}")
