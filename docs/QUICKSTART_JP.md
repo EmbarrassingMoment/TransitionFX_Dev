@@ -33,7 +33,7 @@ TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition
 
 | プロパティ | 説明 | 推奨値 |
 | :--- | :--- | :--- |
-| `Effect Class` | 使用するエフェクトのクラス | `PostProcessTransitionEffect`（UMG/Slate UI も覆う場合は `WidgetTransitionEffect`。[UMG/Slate UI ごと覆いたい場合](#umgslate-ui-ごと覆いたい場合)を参照） |
+| `Effect Class` | 使用するエフェクトのクラス | `PostProcessTransitionEffect`（既定値。UMG/Slate UI も覆う場合は `WidgetTransitionEffect`。[UMG/Slate UI ごと覆いたい場合](#umgslate-ui-ごと覆いたい場合)を参照） |
 | `Transition Material` | 遷移に使用するマテリアル | `MI_Transition_Fade`、`MI_Transition_Iris`、`MI_Transition_Diamond` など（同梱プリセットが使用しているインスタンス）。ウィジェットレイヤー版プリセットでは対応する `MI_Widget_*` インスタンスを使用 |
 | `Default Duration` | 遷移の長さ（秒） | `1.0` |
 
@@ -58,6 +58,8 @@ TransitionFX では、遷移エフェクトの設定を **DataAsset（Transition
 | `Sound Pitch` | ピッチ（デフォルト: `1.0`） |
 
 ![TransitionPreset の詳細パネルのスクリーンショット](images/quickstart_preset_settings.png)
+
+再生せずにプリセットを確認するには、右クリックして `Asset Actions` > `Validate Assets` を選びます（保存時にも実行されます）。エラーは再生やアニメーションができない設定を示します：Effect Class や Transition Material の未設定、マテリアルに `Progress` パラメータがない、Effect Class とドメインが合わないマテリアル。警告は効果のない設定を示します（`FadeColor` のないマテリアルでの `bOverrideTransitionColor`、Progress Curve のない `Custom Curve` イージングなど）。
 
 ### 設定例：シンプルなフェードアウト
 

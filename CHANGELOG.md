@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **Editor validation for presets and sequences.** `UTransitionPreset` and `UTransitionSequence` implement `IsDataValid`, so **Asset Actions > Validate Assets** (and validation on save) reports problems before you play them. Preset errors: no Effect Class, no Transition Material, a material without the `Progress` scalar parameter, and a material whose domain the built-in effect class cannot render (`WidgetTransitionEffect` needs a User Interface material, `PostProcessTransitionEffect` a Post Process material; custom effect classes are not checked). Preset warnings: a material without `Invert` (inverted playback has no effect), `bOverrideTransitionColor` on a material without `FadeColor`, and `Custom` easing without a Progress Curve. Sequence errors: entries with no preset or with a preset that has no material or effect class (playback skips them); a sequence with no entries is a warning. All bundled presets and `DA_SequenceSamples` validate without errors or warnings. README, Quick Start Guide and FAQ (EN/JA) mention the check.
+
+### Changed
+
+- **`Effect Class` now defaults to `PostProcessTransitionEffect`.** New presets — from the **Transition Preset** Content Browser entry, the generic Data Asset dialog, or `NewObject` in C++/Blueprint — no longer start with no effect class, which `StartTransition` rejects. Presets saved by earlier versions with `Effect Class` left unset also load as `PostProcessTransitionEffect`, because an unset value was not stored in the asset; presets that chose a class keep it, and a class cleared from now on stays cleared. README, Quick Start Guide, FAQ and API Reference (EN/JA) note the default.
+
+### Fixed
+
+- FAQ (EN/JP): a material without the `Progress` parameter logs an error, not a warning.
 ## [1.6.1] - 2026-10-21
 
 ### Fixed
