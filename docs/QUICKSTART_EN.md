@@ -33,7 +33,7 @@ First, create this asset.
 
 | Property | Description | Recommended Value |
 | :--- | :--- | :--- |
-| `Effect Class` | The class of the effect to use | `PostProcessTransitionEffect` (`WidgetTransitionEffect` to also cover UMG/Slate UI — see [Covering UMG/Slate UI](#when-the-transition-must-cover-umgslate-ui)) |
+| `Effect Class` | The class of the effect to use | `PostProcessTransitionEffect` (default; `WidgetTransitionEffect` to also cover UMG/Slate UI — see [Covering UMG/Slate UI](#when-the-transition-must-cover-umgslate-ui)) |
 | `Transition Material` | The material used for the transition | `MI_Transition_Fade`, `MI_Transition_Iris`, `MI_Transition_Diamond`, etc. (the instances the bundled presets use). Widget-layer presets use the matching `MI_Widget_*` instance |
 | `Default Duration` | The length of the transition (seconds) | `1.0` |
 
@@ -58,6 +58,8 @@ First, create this asset.
 | `Sound Pitch` | Pitch (default: `1.0`) |
 
 ![Screenshot of the TransitionPreset detail panel showing all properties](images/quickstart_preset_settings.png)
+
+To check a preset without playing it, right-click it and choose `Asset Actions` > `Validate Assets` (validation also runs when you save it). Errors mean the preset will not play or animate: no Effect Class or Transition Material, no `Progress` parameter in the material, or a material whose domain does not match the Effect Class. Warnings point out settings that have no effect, such as `bOverrideTransitionColor` on a material without `FadeColor`, or `Custom Curve` easing without a Progress Curve.
 
 ### Example Setting: Simple Fade Out
 

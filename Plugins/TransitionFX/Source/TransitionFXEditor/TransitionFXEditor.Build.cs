@@ -36,7 +36,9 @@ public class TransitionFXEditor : ModuleRules
                 "DesktopPlatform",
                 "AssetTools",
                 "AssetRegistry",
-                "ContentBrowser"
+                "ContentBrowser",
+                "GraphEditor",
+                "BlueprintGraph"
             }
         );
     }
