@@ -40,6 +40,7 @@ TEXTURES = ["/TransitionFX/Textures/T_Circle_SDF"]
 OUT_DIR = os.path.join(unreal.Paths.project_saved_dir(), "DevMaterialTools")
 OUT_FILE = os.path.join(OUT_DIR, "cleanup_material_graphs.result.json")
 DRY_RUN = os.environ.get("TFX_DRY_RUN", "") == "1"
+ANY_MATERIAL = None  # UE 5.5 の function_expression_inputs 用 (main で設定)
 
 ROOT_PROPS = ("MP_EMISSIVE_COLOR", "MP_OPACITY", "MP_OPACITY_MASK", "MP_BASE_COLOR", "MP_NORMAL", "MP_METALLIC",
               "MP_SPECULAR", "MP_ROUGHNESS", "MP_AMBIENT_OCCLUSION", "MP_WORLD_POSITION_OFFSET",
@@ -55,6 +56,8 @@ dev = unreal.DevMaterialTools
 
 
 def list_assets(folder, prefix):
+    # コマンドレットのアセットレジストリはプラグインコンテンツを走査済みとは限らない (1.7.0 でエディタモジュールの強制走査を外した)
+    unreal.AssetRegistryHelpers.get_asset_registry().scan_paths_synchronous([folder], True)
     out = []
     for path in sorted(lib.list_assets(folder, recursive=True, include_folder=False)):
         name = path.split("/")[-1].split(".")[0]
@@ -119,11 +122,21 @@ def snapshot(mat):
     }
 
 
+def function_expression_inputs(fn, e):
+    """MaterialEditingLibrary.get_inputs_for_material_function_expression は UE 5.6 以降のみ。
+    5.5 ではマテリアル版で代用する: その実装は Material 引数を null チェックにしか使わず、式自身の入力を列挙する
+    (5.5 と 5.8 の MaterialEditingLibrary.cpp で同じ)。"""
+    f = getattr(mel, "get_inputs_for_material_function_expression", None)
+    if f:
+        return f(fn, e)
+    return mel.get_inputs_for_material_expression(ANY_MATERIAL, e)
+
+
 def clean_function(path):
     fn = lib.load_asset(path)
     exprs = list(dev.get_material_function_expressions(fn))
     roots = [e for e in exprs if isinstance(e, unreal.MaterialExpressionFunctionOutput)]
-    dead = unreachable(exprs, mel.get_inputs_for_material_function_expression, fn, roots)
+    dead = unreachable(exprs, function_expression_inputs, fn, roots)
     kept = [describe(e) for e in dead if e.get_class().get_name() in IO_CLASSES]
     removed = []
     for e in dead:
@@ -165,6 +178,8 @@ def main():
     result = {"dry_run": DRY_RUN, "materials": {}, "functions": {}, "textures": {}}
     mat_paths = list_assets(MAT_DIR, "M_")
     mats = {p: lib.load_asset(p) for p in mat_paths}
+    global ANY_MATERIAL
+    ANY_MATERIAL = next(iter(mats.values()))
     before = {p: snapshot(m) for p, m in mats.items()}
     if all(not any(s["stats"].values()) for s in before.values()):
         result["aborted"] = "shader statistics are all zero (run with -AllowCommandletRendering)"
