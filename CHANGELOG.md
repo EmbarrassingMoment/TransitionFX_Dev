@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [Unreleased]
+## [1.7.0] - 2026-10-22
 
 ### Added
 
@@ -15,10 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Plugin version bumped to **1.7.0** (`TransitionFX.uplugin` `VersionName`); README (EN/JA) version badge updated to match.
 - **`Effect Class` now defaults to `PostProcessTransitionEffect`.** New presets — from the **Transition Preset** Content Browser entry, the generic Data Asset dialog, or `NewObject` in C++/Blueprint — no longer start with no effect class, which `StartTransition` rejects. Presets saved by earlier versions with `Effect Class` left unset also load as `PostProcessTransitionEffect`, because an unset value was not stored in the asset; presets that chose a class keep it, and a class cleared from now on stays cleared. README, Quick Start Guide, FAQ and API Reference (EN/JA) note the default.
 - **Master material cleanup** — Removed nodes that no longer contributed to the output: 24 in `M_Transition_Split`, 3 in `M_Transition_CrossWipe`, and unused `AspectRaito` reroute declarations in 12 PostProcess masters and 7 `M_Widget_*` masters. `MF_StripePos` no longer exposes duplicate `Direction` / `Delay` inputs. Masters that still used the `Default Lit` shading model (Box Roll, Fade, Polka Dots, Slice, Stripe Cascade, TV Switch Off and Texture Mask, plus the Fade, Polka Dots and Texture Mask widget masters) now use `Unlit`, like the rest; PostProcess and UI materials are always rendered unlit, so this is cosmetic. Shader instruction counts and parameter lists are unchanged, so these effects look the same.
 - `T_Circle_SDF` (the default mask of Texture Mask) is no longer streamed, so a transition never samples a low-resolution mip while the full texture is still streaming in.
-- `Plugins/DevMaterialTools/Tools/cleanup_material_graphs.py` (sample project / dev tooling only) — removes unreachable nodes from the master materials and material functions and normalizes shading model and blend mode. It only saves a material when its shader statistics and parameter names are unchanged after the edit. The Stripe Cascade builders (`build_m_stripecascade.py`, `build_mf_stripepos.py`) now repeat the graph clear until it is empty and check the node count, because a single clear call had left 11 stale nodes in the material and 9 in the function.
+- `Plugins/DevMaterialTools/Tools/cleanup_material_graphs.py` (sample project / dev tooling only) — removes unreachable nodes from the master materials and material functions and normalizes shading model and blend mode. It only saves a material when its shader statistics and parameter names are unchanged after the edit. The Stripe Cascade builders (`build_m_stripecascade.py`, `build_mf_stripepos.py`) now repeat the graph clear until it is empty and check the node count, because a single clear call had left 11 stale nodes in the material and 9 in the function. These tools also run in UE 5.5 (where the plugin content is authored) and scan the plugin content into the Asset Registry themselves, since the editor module no longer does so at startup.
 
 ### Fixed
 
