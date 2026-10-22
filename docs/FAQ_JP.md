@@ -43,6 +43,10 @@ TransitionFX プラグインに関するよくある質問をまとめていま�
 - プラグインのコンテンツが正しくコピーされていない。`Plugins/TransitionFX/Content/Materials/` ディレクトリが存在し、`M_Transition_*.uasset` ファイルが含まれていることを確認してください。
 - `TextureMask` エフェクトを使用している場合、マスクテクスチャの **sRGB がオフ**になっており、圧縮設定が **Masks (no sRGB)** または **Grayscale** になっていることを確認してください。
 
+### Q: アセットピッカーに同梱プリセット（`DA_*`）が表示されません。
+
+TransitionFX 自身のピッカーは常にプラグインのコンテンツを表示します。対象は Blueprint ノードの `TransitionPreset` / `TransitionSequence` 型のピン（*Play Transition And Wait* の **Preset** など）、Transition Sequence の各エントリの **Preset**、プリセットの **Transition Material** です。それ以外のピッカー（自分で追加した `TransitionPreset` 型の Blueprint 変数やプロパティなど）はエディタの **Show Plugin Content** 設定に従い、この設定は UE 5.8 より前では既定でオフです。コンテンツブラウザの **Settings** メニューからオンにするか、自作の C++ プロパティに `meta = (ForceShowPluginContent)` を付けてください。
+
 ---
 
 ## 仕様・挙動について

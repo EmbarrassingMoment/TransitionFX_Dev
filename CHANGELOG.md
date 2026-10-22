@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - **Editor validation for presets and sequences.** `UTransitionPreset` and `UTransitionSequence` implement `IsDataValid`, so **Asset Actions > Validate Assets** (and validation on save) reports problems before you play them. Preset errors: no Effect Class, no Transition Material, a material without the `Progress` scalar parameter, and a material whose domain the built-in effect class cannot render (`WidgetTransitionEffect` needs a User Interface material, `PostProcessTransitionEffect` a Post Process material; custom effect classes are not checked). Preset warnings: a material without `Invert` (inverted playback has no effect), `bOverrideTransitionColor` on a material without `FadeColor`, and `Custom` easing without a Progress Curve. Sequence errors: entries with no preset or with a preset that has no material or effect class (playback skips them); a sequence with no entries is a warning. All bundled presets and `DA_SequenceSamples` validate without errors or warnings. README, Quick Start Guide and FAQ (EN/JA) mention the check.
+- Blueprint pins of type `TransitionPreset` / `TransitionSequence` (for example **Preset** on *Play Transition And Wait*) now list the bundled presets even while the Content Browser's **Show Plugin Content** setting is off, through a TransitionFX pin widget whose asset picker always includes plugin content. The **Preset** of Transition Sequence entries and **Transition Material** in presets do the same (`ForceShowPluginContent`).
 
 ### Changed
 
@@ -19,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - FAQ (EN/JP): a material without the `Progress` parameter logs an error, not a warning.
+- The editor module no longer turns the Content Browser's **Show Plugin Content** setting back on at every editor start. The setting is saved in your per-user editor settings and shared by all of your projects, so turning it off never lasted while a project with TransitionFX was opened. The module also no longer forces a synchronous rescan of the plugin's content at startup; the Asset Registry already scans it. Asset pickers outside TransitionFX follow the setting again — see the FAQ if a `TransitionPreset` variable of your own does not list the bundled presets.
+
 ## [1.6.1] - 2026-10-21
 
 ### Fixed

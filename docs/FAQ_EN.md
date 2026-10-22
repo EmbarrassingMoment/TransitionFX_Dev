@@ -43,6 +43,10 @@ This typically occurs when:
 - The plugin content has not been properly copied to the project. Ensure the `Plugins/TransitionFX/Content/Materials/` directory exists and contains the `M_Transition_*.uasset` files.
 - If using the `TextureMask` effect, confirm that your mask texture has **sRGB unchecked** and Compression set to **Masks (no sRGB)** or **Grayscale**.
 
+### Q: The bundled presets (`DA_*`) are missing from an asset picker.
+
+TransitionFX's own pickers always list the plugin's content: the `TransitionPreset` / `TransitionSequence` pins of Blueprint nodes (such as **Preset** on *Play Transition And Wait*), the **Preset** of each Transition Sequence entry, and **Transition Material** in a preset. Other pickers — for example a Blueprint variable or a property of your own whose type is `TransitionPreset` — follow the editor's **Show Plugin Content** setting, which is off by default before UE 5.8. Turn it on from the Content Browser's **Settings** menu, or add `meta = (ForceShowPluginContent)` to your own C++ properties.
+
 ---
 
 ## Specifications & Behavior

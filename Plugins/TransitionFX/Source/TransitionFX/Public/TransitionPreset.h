@@ -53,7 +53,7 @@ public:
 	TSubclassOf<UObject> EffectClass;
 
 	/** The material to use for this transition. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX", meta = (ForceShowPluginContent))
 	TObjectPtr<UMaterialInterface> TransitionMaterial;
 
 	/**

@@ -6,10 +6,11 @@
 #include "Modules/ModuleManager.h"
 
 class IAssetTypeActions;
+struct FGraphPanelPinFactory;
 
 /**
  * Editor module for the TransitionFX plugin.
- * Registers the transition preview tab and editor menus.
+ * Registers the transition preview tab, editor menus and the TransitionFX asset pin widgets.
  */
 class FTransitionFXEditorModule : public IModuleInterface
 {
@@ -25,4 +26,5 @@ private:
 
 	TSharedPtr<IAssetTypeActions> TransitionPresetActions;
 	TSharedPtr<IAssetTypeActions> TransitionSequenceActions;
+	TSharedPtr<FGraphPanelPinFactory> GraphPinFactory;
 };
