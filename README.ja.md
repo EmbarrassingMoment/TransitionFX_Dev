@@ -173,6 +173,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | [ShowCase Level](docs/SHOWCASE_LEVEL.md) | `L_ShowCase` サンプルレベルの操作方法と収録プリセット |
 | [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) | ウィジェットレイヤー版と PostProcess 版を比較する `L_WidgetLayerSample` レベル |
 | [ロードマップ](docs/ROADMAP_JP.md)（[English](docs/ROADMAP_EN.md)） | 優先度別の予定機能と提供済みの項目 |
+| [AIエージェントガイド](docs/AI_AGENT_GUIDE_JP.md)（[English](docs/AI_AGENT_GUIDE_EN.md)） | Claude Code、Codex、Cursor、Copilot などにプラグイン同梱の `AGENTS.md` を読ませる方法 |
 | [CHANGELOG](CHANGELOG.md) | リリース履歴（英語のみ） |
 
 ## トランジションモード: Forward / Reverse / Invert

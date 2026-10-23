@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **Agent guide shipped with the plugin.** `Plugins/TransitionFX/AGENTS.md` describes the public Blueprint/C++ API, the bundled `DA_*` / `DA_Widget_*` presets, common patterns (fade out/in, `bHoldAtMax` loading screens, level changes, shader warmup, sequences), a troubleshooting table, and the rules an AI coding agent should follow when wiring TransitionFX into a user's project. `Plugins/TransitionFX/CLAUDE.md` imports it for Claude Code; Codex, Cursor, Copilot, Gemini CLI and others read `AGENTS.md` directly. The file travels with the plugin, so Fab and manual installs get it.
+- `docs/AI_AGENT_GUIDE_EN.md` / `docs/AI_AGENT_GUIDE_JP.md`: how users point their agent at the guide, including the engine-level (Fab launcher) install where the plugin sits outside the project, with a snippet to paste into their own `AGENTS.md` / `CLAUDE.md`. Linked from both READMEs.
+
+### Changed
+
+- Sample project only: the root `CLAUDE.md` now states that it covers plugin development and points usage questions to the plugin's `AGENTS.md`.
+
 ## [1.6.1] - 2026-10-21
 
 ### Fixed
