@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+This file covers **developing the plugin and this sample project**. If you are helping someone **use** TransitionFX in their own project, read `Plugins/TransitionFX/AGENTS.md` instead (it ships with the plugin; `docs/AI_AGENT_GUIDE_EN.md` explains how users point their agent at it).
+
 ## Build & Setup
 
 This is an Unreal Engine plugin project: the `TransitionFX` plugin targets UE 5.5+, while this sample/dev project is set up for UE 5.8 (its targets use `BuildSettingsVersion.V7`, which requires UE 5.7+). There are no CLI build scripts — all compilation happens through the UE editor or Visual Studio 2022.
