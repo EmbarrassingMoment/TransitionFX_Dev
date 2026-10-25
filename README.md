@@ -164,6 +164,7 @@ You can bind to the following events in the `TransitionManagerSubsystem`:
 | [ShowCase Level](docs/SHOWCASE_LEVEL.md) | Controls and preset list of the `L_ShowCase` sample level (Japanese only) |
 | [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) | The `L_WidgetLayerSample` level for comparing widget-layer and PostProcess presets (Japanese only) |
 | [Roadmap](docs/ROADMAP_EN.md) ([日本語](docs/ROADMAP_JP.md)) | Planned features by priority, and what has already shipped |
+| [AI Agent Guide](docs/AI_AGENT_GUIDE_EN.md) ([日本語](docs/AI_AGENT_GUIDE_JP.md)) | How to point Claude Code, Codex, Cursor, Copilot, etc. at the plugin's bundled `AGENTS.md` |
 | [Changelog](CHANGELOG.md) | Release history |
 
 ## Transition Modes: Forward / Reverse / Invert
