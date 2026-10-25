@@ -50,8 +50,13 @@ if fn is None:
 assert fn, f"{FN_PATH} could not be loaded or created"
 
 n_cleared_comments = dmt.clear_comments_in_function(fn)
-mel.delete_all_material_expressions_in_function(fn)
-print(f"[TEST] cleared existing graph (comments removed: {n_cleared_comments})")
+# delete_all_material_expressions_in_function は1回では消し残る (交互スキップ様) ため空になるまで繰り返す
+for _ in range(10):
+    if not dmt.get_material_function_expressions(fn):
+        break
+    mel.delete_all_material_expressions_in_function(fn)
+graph_cleared = not dmt.get_material_function_expressions(fn)
+print(f"[TEST] cleared existing graph: {graph_cleared} (comments removed: {n_cleared_comments})")
 
 fn.set_editor_property("description",
     "StripeCascade: per-stripe local position plus stripe index * Delay. "
@@ -59,8 +64,11 @@ fn.set_editor_property("description",
     "Output range [0, 1/SplitCount + Delay*(SplitCount-1)] saturated to <=1.")
 fn.set_editor_property("expose_to_library", True)
 
+created = []
 def expr(cls, x, y):
-    return mel.create_material_expression_in_function(fn, cls, x, y)
+    e = mel.create_material_expression_in_function(fn, cls, x, y)
+    created.append(e)
+    return e
 
 def make_input(name, x, y, sort, input_type, default=None):
     n_ = expr(unreal.MaterialExpressionFunctionInput, x, y)
@@ -82,7 +90,9 @@ def make_decl(name, src, x, y, color):
     return dcl
 
 def use(name, x, y):
-    return dmt.create_named_reroute_usage_in_function(fn, decl_map[name], x, y)
+    u = dmt.create_named_reroute_usage_in_function(fn, decl_map[name], x, y)
+    created.append(u)
+    return u
 
 uv_in    = make_input("UV", -2100, -100, 0, unreal.FunctionInputType.FUNCTION_INPUT_VECTOR2)
 dir_in   = make_input("Direction", -2100, 100, 1, unreal.FunctionInputType.FUNCTION_INPUT_SCALAR, 0.0)
@@ -154,7 +164,8 @@ saved = lib.save_asset(FN_PATH)
 
 # ---- 検証 ----
 decls, usage_count = [], {}
-for e in dmt.get_material_function_expressions(fn):
+all_exprs = dmt.get_material_function_expressions(fn)
+for e in all_exprs:
     if isinstance(e, unreal.MaterialExpressionNamedRerouteDeclaration):
         decls.append(str(e.get_editor_property("name")))
     elif isinstance(e, unreal.MaterialExpressionNamedRerouteUsage):
@@ -166,7 +177,8 @@ expected_usages = {"targetPos": 2, "threshold": 2, "remainder": 1, "count": 1}
 print(f"[TEST] decls: {sorted(decls)}")
 print(f"[TEST] usages: {dict(sorted(usage_count.items()))}")
 print(f"[TEST] Connections: {sum(results)}/{len(results)} succeeded")
+print(f"[TEST] Expressions: {len(all_exprs)} (created {len(created)})")
 print(f"[TEST] Saved: {saved}")
-passed = (all(results) and sorted(decls) == expected_decls
-          and usage_count == expected_usages and saved)
+passed = (all(results) and graph_cleared and sorted(decls) == expected_decls
+          and usage_count == expected_usages and len(all_exprs) == len(created) and saved)
 print("[TEST] RESULT: " + ("PASS" if passed else "FAIL"))

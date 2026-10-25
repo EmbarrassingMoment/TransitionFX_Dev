@@ -15,7 +15,6 @@
 - [ ] **Simultaneous Transitions** `Low` — Support for layering multiple independent transitions with a multi-slot manager
 
 ### Improvements & Optimization
-- [ ] **Preset Validation in Editor** `High` — Warn if a preset has no material or is missing the required `Progress` parameter
 - [ ] **Editor Preset Thumbnails** `Medium` — Auto-generate static thumbnails for TransitionPreset assets in the Content Browser
 - [ ] **Blueprint Preset Picker Widget** `Medium` — A visual dropdown showing available presets with mini-previews
 - [ ] **Shader Complexity Tiers** `Low` — Simplified material variants for performance-sensitive platforms
@@ -35,6 +34,7 @@
 | :--- | :--- |
 | **UMG Widget-Layer Transitions** — A full-screen Slate overlay path (`WidgetTransitionEffect`) that also covers UMG/Slate UI, available for 8 effects | v1.5.0 |
 | **Widget-Layer Variants, second wave** — Diamond, Sliding Doors, Corner Wipe, Polka Dots, Random Tiles and Hexagon (14 effects in total) | v1.6.0 |
+| **Preset Validation in Editor** — `TransitionPreset` / `TransitionSequence` implement `IsDataValid`, so **Validate Assets** reports a missing material, effect class or `Progress` parameter and a material domain the effect class cannot render | v1.7.0 |
 | **Configurable Pool Size** — The effect pool cap is exposed as `MaxPoolSizePerEffectClass` under **Project Settings > Plugins > TransitionFX** | v1.4.0 |
 | **Transition Color per Preset** — `bOverrideTransitionColor` / `TransitionColor` on presets (e.g., fade-to-white) without call-site overrides | v1.3.0 |
 | **Transition Chaining / Sequencing** — A DataAsset-based sequence of presets played back-to-back with optional looping | v1.2.0 |

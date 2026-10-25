@@ -107,6 +107,7 @@ Plugins/TransitionFX/
 │       ├── STransitionPreviewPanel.cpp    ← preview panel UI + playback
 │       ├── TransitionPreviewGifCapture.cpp ← single-GIF capture engine (frames/encode/save)
 │       ├── TransitionPreviewBatchCaptureDriver.cpp ← dev-tools batch GIF workflows (TRANSITIONFX_DEV_TOOLS)
+│       ├── TransitionFXGraphPinFactory.cpp ← Preset/Sequence BP pin picker that always lists plugin content (never touch the editor-wide Show Plugin Content setting)
 │       └── GifEncoder.cpp                ← GIF89a encoder for docs
 └── Content/
     ├── Data/          ← 46 DA_*.uasset presets (30 effects + DA_FadeToBlack + 15 DA_Widget_*) + Sequence/ sample

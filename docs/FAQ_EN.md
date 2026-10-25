@@ -16,12 +16,12 @@ Frequently asked questions about the TransitionFX plugin.
 
 ### Q: The transition doesn't appear at all. What could be the cause?
 
-Check the following in order:
+Check the following in order. Items 2–4 can be checked without playing: right-click the preset and choose `Asset Actions` > `Validate Assets`.
 
 1. **Preset is not set:** Ensure the `Preset` pin of the node is connected. If `nullptr` is passed, an error is logged and `ForceClear` is called internally.
 2. **Material is not assigned:** Open your `TransitionPreset` data asset and confirm that `Transition Material` is set. If the material is missing, the transition will not render.
-3. **`Progress` parameter is missing from the material:** All transition materials require a scalar parameter named `Progress`. If it does not exist, the effect will not animate (a warning is output to the log).
-4. **Effect Class is not set:** Confirm that `Effect Class` is set to `PostProcessTransitionEffect` or `WidgetTransitionEffect` (or your custom effect class). If it is not set, the transition does not start and an error naming the preset is logged. `WidgetTransitionEffect` requires a UI-domain material (`MI_Widget_*`); a PostProcess material will not render on the widget layer.
+3. **`Progress` parameter is missing from the material:** All transition materials require a scalar parameter named `Progress`. If it does not exist, the effect will not animate (an error is output to the log).
+4. **Effect Class is not set:** Confirm that `Effect Class` is set to `PostProcessTransitionEffect` or `WidgetTransitionEffect` (or your custom effect class). New presets start with `PostProcessTransitionEffect`, so this only happens when the field was cleared. If it is not set, the transition does not start and an error naming the preset is logged. `WidgetTransitionEffect` requires a UI-domain material (`MI_Widget_*`); a PostProcess material will not render on the widget layer.
 5. **Post Process settings conflict:** If your project already uses a Post Process Volume with extreme settings, it may visually interfere. Check the `Priority` value in the preset (default: 1000).
 
 ### Q: The transition freezes when the game is paused.
@@ -42,6 +42,10 @@ This typically occurs when:
 - The material asset referenced by the preset has been **moved or renamed** in the Content Browser. Re-assign the material in the preset.
 - The plugin content has not been properly copied to the project. Ensure the `Plugins/TransitionFX/Content/Materials/` directory exists and contains the `M_Transition_*.uasset` files.
 - If using the `TextureMask` effect, confirm that your mask texture has **sRGB unchecked** and Compression set to **Masks (no sRGB)** or **Grayscale**.
+
+### Q: The bundled presets (`DA_*`) are missing from an asset picker.
+
+TransitionFX's own pickers always list the plugin's content: the `TransitionPreset` / `TransitionSequence` pins of Blueprint nodes (such as **Preset** on *Play Transition And Wait*), the **Preset** of each Transition Sequence entry, and **Transition Material** in a preset. Other pickers — for example a Blueprint variable or a property of your own whose type is `TransitionPreset` — follow the editor's **Show Plugin Content** setting, which is off by default before UE 5.8. Turn it on from the Content Browser's **Settings** menu, or add `meta = (ForceShowPluginContent)` to your own C++ properties.
 
 ---
 

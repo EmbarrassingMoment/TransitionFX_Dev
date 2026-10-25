@@ -6,7 +6,7 @@
 
 [![Available on Fab](https://img.shields.io/badge/Fab-Available-0096FF?style=flat&logo=epicgames&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.5%2B-black?style=flat&logo=unrealengine&logoColor=white)](https://www.unrealengine.com/)
-[![Version](https://img.shields.io/badge/Version-1.6.1-brightgreen?style=flat)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.7.0-brightgreen?style=flat)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Win64-blue?style=flat&logo=windows&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Blueprint](https://img.shields.io/badge/Blueprint-Ready-9B59B6?style=flat&logo=unrealengine&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
@@ -114,7 +114,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 ![Data Asset のクラス選択ダイアログで Transition Preset を選択](docs/images/quickstart_create_data_asset.png)
 
-*   **Effect Class:** `PostProcessTransitionEffect`を選択します（UMG/Slate UI も覆いたい場合は `WidgetTransitionEffect`。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照）。
+*   **Effect Class:** `PostProcessTransitionEffect`（新規プリセットの既定値）。UMG/Slate UI も覆いたい場合は `WidgetTransitionEffect` に変更します（[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照）。
 *   **Transition Material:** `MI_Transition_Fade`（または`MI_Transition_Iris`、`MI_Transition_Diamond`など。同梱プリセットは `M_Transition_*` マスターのこれらのインスタンスを使用しています）を選択します。ウィジェットレイヤー版のプリセットでは対応する `MI_Widget_*` インスタンスを使用します。
 *   **bOverrideTransitionColor / TransitionColor:** (任意) 有効にすると、呼び出しごとにパラメータオーバーライドを渡さなくても、このプリセット固有のトランジションカラー（白へのフェードなど）を設定できます。色はマテリアルの `FadeColor` パラメータに適用され、呼び出し側の `Override Params` で色を指定した場合はそちらが優先されます。
 *   **Default Duration:** 秒単位で時間を設定します（例：`1.0`）。
@@ -124,6 +124,8 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 *   **Priority:** PostProcess ボリュームの優先度です（デフォルト：`1000`）。`PostProcessTransitionEffect` でのみ使用され、ウィジェットレイヤー版プリセットでは代わりに `WidgetZOrder` を使用します。
 *   **Widget ZOrder:** フルスクリーンオーバーレイの重ね順です（デフォルト：`10000`）。`WidgetTransitionEffect` でのみ使用されます。
 *   **Audio:** (任意) 再生するサウンドアセットを割り当てます。ボリュームとピッチの制御が含まれます。
+
+再生せずにプリセットを確認するには、右クリックして `Asset Actions` > `Validate Assets` を選びます（保存時にも実行されます）。Effect Class や Transition Material の未設定、`Progress` パラメータのないマテリアル、Effect Class とドメインが合わないマテリアル（`PostProcessTransitionEffect` には `MI_Transition_*`、`WidgetTransitionEffect` には `MI_Widget_*`）を報告します。
 
 ![TransitionPreset の設定パネル（プロパティ一覧）のスクリーンショット](docs/images/quickstart_preset_settings.png)
 

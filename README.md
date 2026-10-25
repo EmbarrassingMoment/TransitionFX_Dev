@@ -6,7 +6,7 @@
 
 [![Available on Fab](https://img.shields.io/badge/Fab-Available-0096FF?style=flat&logo=epicgames&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.5%2B-black?style=flat&logo=unrealengine&logoColor=white)](https://www.unrealengine.com/)
-[![Version](https://img.shields.io/badge/Version-1.6.1-brightgreen?style=flat)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.7.0-brightgreen?style=flat)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Win64-blue?style=flat&logo=windows&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Blueprint](https://img.shields.io/badge/Blueprint-Ready-9B59B6?style=flat&logo=unrealengine&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
@@ -103,7 +103,7 @@ You can also choose `Miscellaneous` > `Data Asset` and pick the `Transition Pres
 
 ![Pick Class For Data Asset Instance dialog with Transition Preset](docs/images/quickstart_create_data_asset.png)
 
-*   **Effect Class:** Select `PostProcessTransitionEffect` (or `WidgetTransitionEffect` to also cover UMG/Slate UI — see [Widget-Layer Variants](#widget-layer-variants)).
+*   **Effect Class:** `PostProcessTransitionEffect` (the default for new presets). Switch to `WidgetTransitionEffect` to also cover UMG/Slate UI — see [Widget-Layer Variants](#widget-layer-variants).
 *   **Transition Material:** Select `MI_Transition_Fade` (or `MI_Transition_Iris`, `MI_Transition_Diamond`, etc. — the bundled presets use these instances of the `M_Transition_*` masters). Widget-layer presets use the matching `MI_Widget_*` instance instead.
 *   **bOverrideTransitionColor / TransitionColor:** (Optional) Enable to give this preset its own transition color, such as fade-to-white, without passing an override on every call. The color is applied to the material's `FadeColor` parameter, and a color passed in `Override Params` at the call site still takes precedence.
 *   **Default Duration:** Set duration in seconds (e.g., `1.0`).
@@ -113,6 +113,8 @@ You can also choose `Miscellaneous` > `Data Asset` and pick the `Transition Pres
 *   **Priority:** PostProcess volume priority (default: `1000`). Used only by `PostProcessTransitionEffect`; widget-layer presets use `WidgetZOrder` instead.
 *   **Widget ZOrder:** Z-order of the full-screen overlay (default: `10000`). Used only by `WidgetTransitionEffect`.
 *   **Audio:** (Optional) Assign a Sound asset to play. Includes Volume and Pitch controls.
+
+To check a preset without playing it, right-click it and choose `Asset Actions` > `Validate Assets` (validation also runs when you save it). It reports a missing Effect Class or Transition Material, a material without the `Progress` parameter, and a material whose domain does not match the Effect Class (`MI_Transition_*` for `PostProcessTransitionEffect`, `MI_Widget_*` for `WidgetTransitionEffect`).
 
 ![Screenshot of the TransitionPreset detail panel showing all properties](docs/images/quickstart_preset_settings.png)
 

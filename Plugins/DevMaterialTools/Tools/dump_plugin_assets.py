@@ -151,6 +151,8 @@ def dump_texture(tex):
 
 def main():
     result = {"engine": unreal.SystemLibrary.get_engine_version(), "assets": {}, "errors": {}}
+    # コマンドレットのアセットレジストリはプラグインコンテンツを走査済みとは限らない (1.7.0 でエディタモジュールの強制走査を外した)
+    unreal.AssetRegistryHelpers.get_asset_registry().scan_paths_synchronous([ROOT], True)
     for path in sorted(lib.list_assets(ROOT, recursive=True, include_folder=False)):
         package = path.split(".")[0]
         try:

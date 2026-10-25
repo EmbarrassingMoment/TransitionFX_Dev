@@ -20,7 +20,7 @@ struct TRANSITIONFX_API FTransitionSequenceEntry
 	GENERATED_BODY()
 
 	/** The transition preset to play for this entry. Required. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition", meta = (ForceShowPluginContent))
 	TObjectPtr<UTransitionPreset> Preset = nullptr;
 
 	/** Playback direction for this entry. */
@@ -73,4 +73,12 @@ public:
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sequence", meta = (ClampMin = "0", EditCondition = "bLoop"))
 	int32 LoopCount = 0;
+
+#if WITH_EDITOR
+	/**
+	 * Editor data validation: errors for entries whose preset is missing or not playable (the player skips them),
+	 * a warning for a sequence with no entries. Each preset's own settings are checked by UTransitionPreset.
+	 */
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 };

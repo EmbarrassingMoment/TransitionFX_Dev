@@ -43,23 +43,17 @@ class TRANSITIONFX_API UTransitionPreset : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UTransitionPreset()
-		: DefaultDuration(1.0f)
-		, EasingType(ETransitionEasing::Linear)
-		, bAutoBlockInput(true)
-		, bTickWhenPaused(false)
-		, Priority(1000.0f)
-		, SoundVolume(1.0f)
-		, SoundPitch(1.0f)
-	{
-	}
+	UTransitionPreset();
 
-	/** The class of the transition effect to spawn. */
+	/**
+	 * The class of the transition effect to spawn. Defaults to PostProcessTransitionEffect;
+	 * use WidgetTransitionEffect (with an MI_Widget_* material) to also cover UMG/Slate UI.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX", meta = (MustImplement = "/Script/TransitionFX.TransitionEffect"))
 	TSubclassOf<UObject> EffectClass;
 
 	/** The material to use for this transition. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TransitionFX", meta = (ForceShowPluginContent))
 	TObjectPtr<UMaterialInterface> TransitionMaterial;
 
 	/**
@@ -125,4 +119,14 @@ public:
 	{
 		return TransitionMaterial != nullptr && EffectClass != nullptr;
 	}
+
+#if WITH_EDITOR
+	/**
+	 * Editor data validation (Validate Assets, and on save when the Data Validation plugin is enabled).
+	 * Errors: no material or effect class, no "Progress" parameter, or a material domain the built-in effect
+	 * class cannot render (PostProcess / UI). Warnings: no "Invert" parameter, no "FadeColor" parameter while
+	 * bOverrideTransitionColor is set, and Custom easing without a ProgressCurve.
+	 */
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 };
