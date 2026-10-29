@@ -10,13 +10,43 @@
 #include "ToolMenus.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Framework/Docking/TabManager.h"
+#include "Misc/RedirectCollector.h"
+#include "UObject/ICookInfo.h"
+#include "UObject/SoftObjectPath.h"
+#include "TransitionFXConfig.h"
 
 #define LOCTEXT_NAMESPACE "TransitionFXEditor"
 
 const FName FTransitionFXEditorModule::PreviewTabId(TEXT("TransitionFXPreview"));
 
+namespace
+{
+	/**
+	 * Adds the assets the runtime loads by path (the default fade preset used by QuickFade and by level
+	 * transitions without a preset, and QuickFade's fallback material) to the cook as startup soft references,
+	 * so a packaged game contains them even when no cooked asset references them.
+	 *
+	 * The ModifyCook delegate is deliberately not used: the cooker counts packages added there as explicit
+	 * requests, which turns off "cook all content" for projects that list no maps to cook. Startup soft
+	 * references are added after that decision. The cooker consumes them, so they are registered again after
+	 * every cook in this process.
+	 */
+	void RegisterRuntimeLoadedAssetsForCook()
+	{
+		GRedirectCollector.OnSoftObjectPathLoaded(FSoftObjectPath(TransitionFXConfig::DefaultFadePresetPath), nullptr);
+		GRedirectCollector.OnSoftObjectPathLoaded(FSoftObjectPath(TransitionFXConfig::FallbackFadeMaterialPath), nullptr);
+	}
+}
+
 void FTransitionFXEditorModule::StartupModule()
 {
+	// Cook the default fade assets even when the project references none of them
+	RegisterRuntimeLoadedAssetsForCook();
+	CookFinishedHandle = UE::Cook::FDelegates::CookFinished.AddLambda([](UE::Cook::ICookInfo&)
+	{
+		RegisterRuntimeLoadedAssetsForCook();
+	});
+
 	// Register AssetTypeActions for TransitionPreset and TransitionSequence
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	TransitionPresetActions = MakeShared<FAssetTypeActions_TransitionPreset>();
@@ -39,6 +69,8 @@ void FTransitionFXEditorModule::StartupModule()
 
 void FTransitionFXEditorModule::ShutdownModule()
 {
+	UE::Cook::FDelegates::CookFinished.Remove(CookFinishedHandle);
+
 	// Unregister AssetTypeActions
 	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
 	{

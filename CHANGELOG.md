@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sample project only: the root `CLAUDE.md` now states that it covers plugin development and points usage questions to the plugin's `AGENTS.md`.
 
+### Fixed
+
+- **Quick Fade and level transitions without a preset did nothing in packaged builds** of projects that list their maps to cook (or request specific content in another way, which the engine's default plugins already do in UE 5.8). `DA_FadeToBlack` and the fallback material `M_Transition_Fade` are loaded by path at runtime, so the cooker left them out unless a cooked asset referenced them. In the packaged game, **Quick Fade To Black** / **Quick Fade From Black** then logged "Invalid Preset or Material is missing!" and showed nothing, and **Open Level With Transition** with no preset changed the level without a fade. PIE was not affected. The editor module now adds both assets to every cook (4 packages: the preset, its material instance, the master material and `MF_ApplyInvert`). It does this without counting as an explicit cook request, so projects that list no maps still cook all of their content. Earlier versions can work around it by adding `/TransitionFX/Data` to **Project Settings > Packaging > Additional Asset Directories to Cook**, or by referencing `DA_FadeToBlack` from any cooked asset.
+
 ## [1.7.0] - 2026-10-22
 
 ### Added

@@ -10,6 +10,7 @@
 namespace TransitionFXConfig
 {
 	const TCHAR* const DefaultFadePresetPath = TEXT("/TransitionFX/Data/DA_FadeToBlack.DA_FadeToBlack");
+	const TCHAR* const FallbackFadeMaterialPath = TEXT("/TransitionFX/Materials/M_Transition_Fade.M_Transition_Fade");
 
 	const FName ProgressParamName(TEXT("Progress"));
 	const FName InvertParamName(TEXT("Invert"));

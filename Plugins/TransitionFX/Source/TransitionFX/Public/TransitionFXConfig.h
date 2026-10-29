@@ -19,6 +19,9 @@ namespace TransitionFXConfig
 	/** Default path for the Fade to Black preset data asset. */
 	extern TRANSITIONFX_API const TCHAR* const DefaultFadePresetPath;
 
+	/** Path of the fade material QuickFade falls back to when the default fade preset cannot be loaded. */
+	extern TRANSITIONFX_API const TCHAR* const FallbackFadeMaterialPath;
+
 	/** Material parameter name for transition progress (0.0 to 1.0). */
 	extern TRANSITIONFX_API const FName ProgressParamName;
 
