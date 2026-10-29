@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/header.png" alt="TransitionFX – Transition Manager & Effects Library" width="100%">
+  <img src="docs/images/header.webp" alt="TransitionFX – Transition Manager & Effects Library" width="100%">
 </p>
 
 # TransitionFX
@@ -175,8 +175,8 @@ The `Invert` flag flips which area of the screen is covered — it is **not** th
 
 | Invert | Behavior | Preview |
 | :--- | :--- | :--- |
-| **Off** (default) | The effect shape **covers** the screen (closes inward). Standard Fade Out. | ![Forward Invert Off](docs/images/forward_invert_off.gif) |
-| **On** | The effect shape **reveals** the screen (opens outward). Inverts the mask. | ![Forward Invert On](docs/images/forward_invert_on.gif) |
+| **Off** (default) | The effect shape **covers** the screen (closes inward). Standard Fade Out. | ![Forward Invert Off](docs/images/forward_invert_off.webp) |
+| **On** | The effect shape **reveals** the screen (opens outward). Inverts the mask. | ![Forward Invert On](docs/images/forward_invert_on.webp) |
 
 > **Tip:** To achieve a Fade In without using `Reverse` mode, set `Mode: Forward` + `Invert: True`.
 
@@ -184,7 +184,7 @@ The `Invert` flag flips which area of the screen is covered — it is **not** th
 
 For complex effects like "Fade to Black → Iris Open → Dissolve In", create a `TransitionSequence` data asset.
 
-![Sequence sample: Fade (Forward) followed by Hexagon (Reverse)](docs/images/sequence_fade_hexagon.gif)
+![Sequence sample: Fade (Forward) followed by Hexagon (Reverse)](docs/images/sequence_fade_hexagon.webp)
 
 *The bundled `DA_SequenceSamples` asset: `DA_Fade` Forward, then `DA_Hexagon` Reverse, played back-to-back with one `Play Sequence And Wait` call.*
 
@@ -253,35 +253,35 @@ The tables below list the Blueprint-callable API. For pin details and C++ signat
 
 | Effect Name | Description | Preview |
 | :--- | :--- | :--- |
-| **Fade** | Standard opacity fade. Simple and lightweight. | ![Fade](docs/images/effect_fade.gif) |
-| **Iris** | Classic circular wipe closing toward the center. Aspect ratio corrected. | ![Iris](docs/images/effect_iris.gif) |
-| **Flower Iris** | An iris wipe in the shape of a flower with rounded petals. The number of petals and the flower's shape (sharpness) are adjustable. | ![Flower Iris](docs/images/effect_flower_iris.gif) |
-| **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | ![Diamond](docs/images/effect_diamond.gif) |
-| **Diamond Band Wipe** | A dynamic transition where a diamond-shaped band expands from the center, splitting apart to reveal the underlying scene. | ![Diamond Band](docs/images/effect_diamond_wipe.gif) |
-| **Box** | A simple square expanding from the center. Basic geometric transition. | ![Box](docs/images/effect_box.gif) |
-| **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | ![Linear Wipe](docs/images/effect_linear_wipe.gif) |
-| **Sliding Doors** | A horizontal wipe where two panels slide from opposite sides and meet in the center, like elevator or airlock doors. | ![Sliding Doors](docs/images/effect_slidingdoor.gif) |
-| **Corner Wipe** | A directional wipe that starts from a specified corner and expands diagonally until it covers the entire screen. The origin corner (0-3) can be dynamically selected. | ![Corner Wipe](docs/images/effect_cornerwipe.gif) |
-| **Split** | A stylish wipe that splits the screen in half from the center and opens outward. Supports adjustable split angles (horizontal, vertical, diagonal). | ![Split](docs/images/effect_split.gif) |
-| **Wavy Curtain** | A directional wipe similar to Linear Wipe, but with an animated wavy boundary like a curtain. | ![Wavy Curtain](docs/images/effect_wavy_curtain.gif) |
-| **Radial Wipe** | Clock-like radial wipe. Supports smooth edges and adjustable start angle. | ![Radial Wipe](docs/images/effect_radial_wipe.gif) |
-| **Fan** | A pinwheel-style wipe where angular blades sweep out from the center and rotate to cover the screen, like an opening folding fan. | ![Fan](docs/images/effect_fan.gif) |
-| **Tiles** | The screen is divided into a grid, and blocks expand outward from the center like a wave. | ![Tiles](docs/images/effect_tiles.gif) |
-| **Box Roll** | Boxes roll in from the right edge and stack up row by row until they cover the screen. Row count, roll speed, and per-column/per-row stagger are adjustable. | ![Box Roll](docs/images/effect_boxroll.gif) |
-| **Polka Dots** | A wave of expanding circles (halftone pattern) covers the screen. Pop and modern look. | ![Polka Dots](docs/images/effect_polka_dots.gif) |
-| **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | ![Blinds](docs/images/effect_blinds.gif) |
-| **Slice** | The screen is cut into strips that slide off-screen in alternating directions with staggered timing. Slice count, direction, softness, and stagger are adjustable. | ![Slice](docs/images/effect_slice.gif) |
-| **Stripe Cascade** | The screen is divided into stripes that wipe closed one after another with a staggered delay, cascading across the screen. Stripe count, direction (4-way), stagger delay, and edge softness are adjustable. | ![Stripe Cascade](docs/images/effect_stripe_cascade.gif) |
-| **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | ![Spiral](docs/images/effect_spiral.gif) |
-| **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | ![Random Tiles](docs/images/effect_random_tiles.gif) |
-| **Dissolve** | A classic transition where the screen dissolves like mist or sand using procedural noise. Optimized with a precise threshold margin. | ![Dissolve](docs/images/effect_dissolve.gif) |
-| **Wind** | A directional wipe with streak noise, simulating wind blowing the image away. | ![Wind](docs/images/effect_wind.gif) |
-| **Cross Wipe** | A cross shape expands from the center, pushing the image into the four corners until it vanishes. | ![Cross Wipe](docs/images/effect_cross_wipe.gif) |
-| **Texture Mask** | Uses a grayscale texture to determine the transition order (Black=Start, White=End). Supports custom mask textures via Parameter Overrides. | ![Texture Mask](docs/images/effect_texture_mask.gif) |
-| **TV Switch Off** | A retro CRT TV turn-off effect. Collapses vertically into a line, then horizontally into a point. | ![TV Switch Off](docs/images/effect_tv_switch_off.gif) |
-| **Hexagon** | A sci-fi style honeycomb wipe. A wave of hexagonal cells smoothly shrinks into their centers. | ![Hexagon](docs/images/effect_hexagon.gif) |
-| **Triangle** | A stylish polygon-style wipe where sharp triangles shrink and disappear in a ripple effect from the center. | ![Triangle](docs/images/effect_triangle.gif) |
-| **Checkerboard** | A checkerboard pattern that tiles the screen and expands to cover it. Classic retro feel. | ![Checkerboard](docs/images/effect_checkerboard.gif) |
+| **Fade** | Standard opacity fade. Simple and lightweight. | ![Fade](docs/images/effect_fade.webp) |
+| **Iris** | Classic circular wipe closing toward the center. Aspect ratio corrected. | ![Iris](docs/images/effect_iris.webp) |
+| **Flower Iris** | An iris wipe in the shape of a flower with rounded petals. The number of petals and the flower's shape (sharpness) are adjustable. | ![Flower Iris](docs/images/effect_flower_iris.webp) |
+| **Diamond** | Diamond-shaped wipe closing toward the center. Retro style. | ![Diamond](docs/images/effect_diamond.webp) |
+| **Diamond Band Wipe** | A dynamic transition where a diamond-shaped band expands from the center, splitting apart to reveal the underlying scene. | ![Diamond Band](docs/images/effect_diamond_wipe.webp) |
+| **Box** | A simple square expanding from the center. Basic geometric transition. | ![Box](docs/images/effect_box.webp) |
+| **Linear Wipe** | Directional wipe (adjustable Angle). Accurately covers the screen from edge to edge. | ![Linear Wipe](docs/images/effect_linear_wipe.webp) |
+| **Sliding Doors** | A horizontal wipe where two panels slide from opposite sides and meet in the center, like elevator or airlock doors. | ![Sliding Doors](docs/images/effect_slidingdoor.webp) |
+| **Corner Wipe** | A directional wipe that starts from a specified corner and expands diagonally until it covers the entire screen. The origin corner (0-3) can be dynamically selected. | ![Corner Wipe](docs/images/effect_cornerwipe.webp) |
+| **Split** | A stylish wipe that splits the screen in half from the center and opens outward. Supports adjustable split angles (horizontal, vertical, diagonal). | ![Split](docs/images/effect_split.webp) |
+| **Wavy Curtain** | A directional wipe similar to Linear Wipe, but with an animated wavy boundary like a curtain. | ![Wavy Curtain](docs/images/effect_wavy_curtain.webp) |
+| **Radial Wipe** | Clock-like radial wipe. Supports smooth edges and adjustable start angle. | ![Radial Wipe](docs/images/effect_radial_wipe.webp) |
+| **Fan** | A pinwheel-style wipe where angular blades sweep out from the center and rotate to cover the screen, like an opening folding fan. | ![Fan](docs/images/effect_fan.webp) |
+| **Tiles** | The screen is divided into a grid, and blocks expand outward from the center like a wave. | ![Tiles](docs/images/effect_tiles.webp) |
+| **Box Roll** | Boxes roll in from the right edge and stack up row by row until they cover the screen. Row count, roll speed, and per-column/per-row stagger are adjustable. | ![Box Roll](docs/images/effect_boxroll.webp) |
+| **Polka Dots** | A wave of expanding circles (halftone pattern) covers the screen. Pop and modern look. | ![Polka Dots](docs/images/effect_polka_dots.webp) |
+| **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | ![Blinds](docs/images/effect_blinds.webp) |
+| **Slice** | The screen is cut into strips that slide off-screen in alternating directions with staggered timing. Slice count, direction, softness, and stagger are adjustable. | ![Slice](docs/images/effect_slice.webp) |
+| **Stripe Cascade** | The screen is divided into stripes that wipe closed one after another with a staggered delay, cascading across the screen. Stripe count, direction (4-way), stagger delay, and edge softness are adjustable. | ![Stripe Cascade](docs/images/effect_stripe_cascade.webp) |
+| **Spiral** | A hypnotic spiral effect that swirls into the center. Supports adjustable rotation spin and start angle. | ![Spiral](docs/images/effect_spiral.webp) |
+| **Random Tiles** | A stochastic transition where grid tiles appear in a random order using procedural noise. | ![Random Tiles](docs/images/effect_random_tiles.webp) |
+| **Dissolve** | A classic transition where the screen dissolves like mist or sand using procedural noise. Optimized with a precise threshold margin. | ![Dissolve](docs/images/effect_dissolve.webp) |
+| **Wind** | A directional wipe with streak noise, simulating wind blowing the image away. | ![Wind](docs/images/effect_wind.webp) |
+| **Cross Wipe** | A cross shape expands from the center, pushing the image into the four corners until it vanishes. | ![Cross Wipe](docs/images/effect_cross_wipe.webp) |
+| **Texture Mask** | Uses a grayscale texture to determine the transition order (Black=Start, White=End). Supports custom mask textures via Parameter Overrides. | ![Texture Mask](docs/images/effect_texture_mask.webp) |
+| **TV Switch Off** | A retro CRT TV turn-off effect. Collapses vertically into a line, then horizontally into a point. | ![TV Switch Off](docs/images/effect_tv_switch_off.webp) |
+| **Hexagon** | A sci-fi style honeycomb wipe. A wave of hexagonal cells smoothly shrinks into their centers. | ![Hexagon](docs/images/effect_hexagon.webp) |
+| **Triangle** | A stylish polygon-style wipe where sharp triangles shrink and disappear in a ripple effect from the center. | ![Triangle](docs/images/effect_triangle.webp) |
+| **Checkerboard** | A checkerboard pattern that tiles the screen and expands to cover it. Classic retro feel. | ![Checkerboard](docs/images/effect_checkerboard.webp) |
 | **Pixelate** | A pixelation effect that progressively reduces the screen resolution until it fades out. | — |
 
 > **Tip for Texture Masks:**
@@ -316,7 +316,7 @@ The PostProcess path cannot cover UMG/Slate widgets drawn above the viewport. Fo
 
 | PostProcess (`DA_Iris`) — the UMG panel stays visible | Widget layer (`DA_Widget_Iris`) — the UMG panel is covered too |
 | :--- | :--- |
-| ![PostProcess Iris over UMG](docs/images/widget_layer_postprocess_iris.gif) | ![Widget-layer Iris over UMG](docs/images/widget_layer_widget_iris.gif) |
+| ![PostProcess Iris over UMG](docs/images/widget_layer_postprocess_iris.webp) | ![Widget-layer Iris over UMG](docs/images/widget_layer_widget_iris.webp) |
 
 ## Transition Timing & Easing
 Control how the transition progresses over time using the `Easing Type` (`EasingType`) property in your Transition Preset. Names below are shown as they appear in the editor, with the C++ enum value in parentheses.
@@ -325,18 +325,18 @@ Control how the transition progresses over time using the `Easing Type` (`Easing
 
 | Easing Type | Description | Preview |
 | :--- | :--- | :--- |
-| **Linear** | Constant speed (Default). Good for simple fades. | ![Linear](docs/images/easing_linear.gif) |
-| **Sine In** (`EaseInSine`) | Starts slow, accelerates smoothly. | ![EaseInSine](docs/images/easing_ease_in_sine.gif) |
-| **Sine Out** (`EaseOutSine`) | Starts fast, decelerates smoothly. | ![EaseOutSine](docs/images/easing_ease_out_sine.gif) |
-| **Sine In/Out** (`EaseInOutSine`) | Smooth acceleration at start and deceleration at end. | ![EaseInOutSine](docs/images/easing_ease_in_out_sine.gif) |
-| **Cubic In** (`EaseInCubic`) | Starts slow with stronger acceleration. | ![EaseInCubic](docs/images/easing_ease_in_cubic.gif) |
-| **Cubic Out** (`EaseOutCubic`) | Starts fast with stronger deceleration. | ![EaseOutCubic](docs/images/easing_ease_out_cubic.gif) |
-| **Cubic In/Out** (`EaseInOutCubic`) | Pronounced ease at both ends. | ![EaseInOutCubic](docs/images/easing_ease_in_out_cubic.gif) |
-| **Expo In** (`EaseInExpo`) | Near-still start, exponential acceleration. | ![EaseInExpo](docs/images/easing_ease_in_expo.gif) |
-| **Expo Out** (`EaseOutExpo`) | Fast start, exponential deceleration. | ![EaseOutExpo](docs/images/easing_ease_out_expo.gif) |
-| **Expo In/Out** (`EaseInOutExpo`) | Dramatic ease at both ends. | ![EaseInOutExpo](docs/images/easing_ease_in_out_expo.gif) |
-| **Elastic Out** (`EaseOutElastic`) | Elastic overshoot at the end of the transition. | ![EaseOutElastic](docs/images/easing_ease_out_elastic.gif) |
-| **Bounce Out** (`EaseOutBounce`) | Bouncing effect at the end of the transition. | ![EaseOutBounce](docs/images/easing_ease_out_bounce.gif) |
+| **Linear** | Constant speed (Default). Good for simple fades. | ![Linear](docs/images/easing_linear.webp) |
+| **Sine In** (`EaseInSine`) | Starts slow, accelerates smoothly. | ![EaseInSine](docs/images/easing_ease_in_sine.webp) |
+| **Sine Out** (`EaseOutSine`) | Starts fast, decelerates smoothly. | ![EaseOutSine](docs/images/easing_ease_out_sine.webp) |
+| **Sine In/Out** (`EaseInOutSine`) | Smooth acceleration at start and deceleration at end. | ![EaseInOutSine](docs/images/easing_ease_in_out_sine.webp) |
+| **Cubic In** (`EaseInCubic`) | Starts slow with stronger acceleration. | ![EaseInCubic](docs/images/easing_ease_in_cubic.webp) |
+| **Cubic Out** (`EaseOutCubic`) | Starts fast with stronger deceleration. | ![EaseOutCubic](docs/images/easing_ease_out_cubic.webp) |
+| **Cubic In/Out** (`EaseInOutCubic`) | Pronounced ease at both ends. | ![EaseInOutCubic](docs/images/easing_ease_in_out_cubic.webp) |
+| **Expo In** (`EaseInExpo`) | Near-still start, exponential acceleration. | ![EaseInExpo](docs/images/easing_ease_in_expo.webp) |
+| **Expo Out** (`EaseOutExpo`) | Fast start, exponential deceleration. | ![EaseOutExpo](docs/images/easing_ease_out_expo.webp) |
+| **Expo In/Out** (`EaseInOutExpo`) | Dramatic ease at both ends. | ![EaseInOutExpo](docs/images/easing_ease_in_out_expo.webp) |
+| **Elastic Out** (`EaseOutElastic`) | Elastic overshoot at the end of the transition. | ![EaseOutElastic](docs/images/easing_ease_out_elastic.webp) |
+| **Bounce Out** (`EaseOutBounce`) | Bouncing effect at the end of the transition. | ![EaseOutBounce](docs/images/easing_ease_out_bounce.webp) |
 | **Custom Curve** (`Custom`) | Uses your own Float Curve asset assigned to `Progress Curve`. | — |
 
 *Note: The `Progress Curve` slot only appears when `Custom Curve` is selected.*

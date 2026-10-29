@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/header.png" alt="TransitionFX – Transition Manager & Effects Library" width="100%">
+  <img src="docs/images/header.webp" alt="TransitionFX – Transition Manager & Effects Library" width="100%">
 </p>
 
 # TransitionFX
@@ -186,8 +186,8 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 | Invert | 動作 | Preview |
 | :--- | :--- | :--- |
-| **Off**（デフォルト） | エフェクトの形状が画面を**覆う**方向に動作（内側へ閉じる）。通常のフェードアウト。 | ![Forward Invert Off](docs/images/forward_invert_off.gif) |
-| **On** | エフェクトの形状が画面を**開く**方向に動作（外側へ広がる）。マスクが反転。 | ![Forward Invert On](docs/images/forward_invert_on.gif) |
+| **Off**（デフォルト） | エフェクトの形状が画面を**覆う**方向に動作（内側へ閉じる）。通常のフェードアウト。 | ![Forward Invert Off](docs/images/forward_invert_off.webp) |
+| **On** | エフェクトの形状が画面を**開く**方向に動作（外側へ広がる）。マスクが反転。 | ![Forward Invert On](docs/images/forward_invert_on.webp) |
 
 > **Tip:** `Reverse` モードを使わずにフェードインを実現したい場合は `Mode: Forward` + `Invert: True` の組み合わせが使えます。
 
@@ -195,7 +195,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 「フェード → アイリスオープン → ディゾルブイン」のような複合的な演出は、`TransitionSequence` データアセットで実現できます。
 
-![シーケンスのサンプル: Fade (Forward) → Hexagon (Reverse)](docs/images/sequence_fade_hexagon.gif)
+![シーケンスのサンプル: Fade (Forward) → Hexagon (Reverse)](docs/images/sequence_fade_hexagon.webp)
 
 *同梱の `DA_SequenceSamples`: `DA_Fade` を Forward、続けて `DA_Hexagon` を Reverse で再生。`Play Sequence And Wait` 1 回の呼び出しで連続再生されます。*
 
@@ -264,35 +264,35 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 | Effect Name | Description | Preview |
 | :--- | :--- | :--- |
-| **Fade** | 標準的な不透明度のフェード。シンプルで軽量です。 | ![Fade](docs/images/effect_fade.gif) |
-| **Iris** | 中央に向かって閉じるクラシックな円形ワイプ。アスペクト比補正済み。 | ![Iris](docs/images/effect_iris.gif) |
-| **Flower Iris** | 丸い花びらを持つ花形のアイリスワイプ。花びらの数や形状（鋭さ）を調整可能。 | ![Flower Iris](docs/images/effect_flower_iris.gif) |
-| **Diamond** | 中央に向かって閉じるダイヤモンド型のワイプ。レトロなスタイル。 | ![Diamond](docs/images/effect_diamond.gif) |
-| **Diamond Band Wipe** | 画面中央からひし形の帯（バンド）が拡大しながら割れ、元のシーンをスタイリッシュに表示するユニークなトランジション。 | ![Diamond Band](docs/images/effect_diamond_wipe.gif) |
-| **Box** | 中央から拡大するシンプルな正方形。基本的な幾何学的トランジション。 | ![Box](docs/images/effect_box.gif) |
-| **Linear Wipe** | 方向性のあるワイプ（角度調整可能）。画面の端から端まで正確に覆います。 | ![Linear Wipe](docs/images/effect_linear_wipe.gif) |
-| **Sliding Doors** | エレベーターやエアロックのドアのように、2枚のパネルが左右からスライドして中央で合流するワイプ。 | ![Sliding Doors](docs/images/effect_slidingdoor.gif) |
-| **Corner Wipe** | 指定した画面の角（四隅）を基準点とし、対角線に向かって領域が斜めに拡大していくワイプ。開始する角はパラメータ(0〜3)で自由に選択可能。 | ![Corner Wipe](docs/images/effect_cornerwipe.gif) |
-| **Split** | 画面中央から真っ二つに割れて開くスタイリッシュなワイプ。分割する角度（水平、垂直、斜めなど）を自由に調整可能です。 | ![Split](docs/images/effect_split.gif) |
-| **Wavy Curtain** | Linear Wipeに似ていますが、カーテンのような波打つ境界線を持つ方向性ワイプです。 | ![Wavy Curtain](docs/images/effect_wavy_curtain.gif) |
-| **Radial Wipe** | 時計のような放射状ワイプ。滑らかなエッジと開始角度の調整をサポート。 | ![Radial Wipe](docs/images/effect_radial_wipe.gif) |
-| **Fan** | 中央から扇状のブレードが放射状に広がり、回転しながら画面を覆っていく風車（扇）のようなワイプ。 | ![Fan](docs/images/effect_fan.gif) |
-| **Tiles** | 画面がグリッド状に分割され、ブロックが中央から波のように拡大します。 | ![Tiles](docs/images/effect_tiles.gif) |
-| **Box Roll** | 画面右から箱が転がり込み、下の段から順に積み上がって画面を覆うトランジション。段数、転がる速度、列・段ごとの遅延を調整可能。 | ![Box Roll](docs/images/effect_boxroll.gif) |
-| **Polka Dots** | 拡大する円（ハーフトーンパターン）の波が画面を覆います。ポップでモダンな外観。 | ![Polka Dots](docs/images/effect_polka_dots.gif) |
-| **Blinds** | スタイリッシュなストライプ/ベネチアンブラインド効果。ストライプが拡大・結合して画面を覆います。 | ![Blinds](docs/images/effect_blinds.gif) |
-| **Slice** | 画面が短冊（ストリップ）状に分割され、交互に反対方向へスライドしながら画面外へ抜けていくトランジション。分割数、方向、エッジの柔らかさ、タイミングのずれを調整可能。 | ![Slice](docs/images/effect_slice.gif) |
-| **Stripe Cascade** | 画面がストライプ状に分割され、1本ずつ遅延を伴って順番にワイプが流れていくトランジション。分割数、方向（4方向）、ストライプ間の遅延、エッジの柔らかさを調整可能。 | ![Stripe Cascade](docs/images/effect_stripe_cascade.gif) |
-| **Spiral** | 中央に渦巻く催眠的なスパイラル効果。回転スピンと開始角度を調整可能。 | ![Spiral](docs/images/effect_spiral.gif) |
-| **Random Tiles** | プロシージャルノイズを使用して、グリッドタイルがランダムな順序で現れる確率的なトランジション。 | ![Random Tiles](docs/images/effect_random_tiles.gif) |
-| **Dissolve** | プロシージャルノイズを使用し、画面が霧や砂のように溶けていく王道のトランジション。最小限のマージン設定によりリニアなアニメーションを実現。 | ![Dissolve](docs/images/effect_dissolve.gif) |
-| **Wind** | ストリークノイズを伴う方向性ワイプで、風が画像を吹き飛ばすような表現。 | ![Wind](docs/images/effect_wind.gif) |
-| **Cross Wipe** | 十字の形が中央から拡大し、画像を四隅に押しやって消滅させます。 | ![Cross Wipe](docs/images/effect_cross_wipe.gif) |
-| **Texture Mask** | グレースケールテクスチャを使用してトランジションの順序を決定します（黒=開始、白=終了）。パラメータオーバーライドによるカスタムマスクテクスチャをサポート。 | ![Texture Mask](docs/images/effect_texture_mask.gif) |
-| **TV Switch Off** | ブラウン管テレビの電源を切った時のように、画面が上下に潰れて横線になり、最後に中央の点に向かって消滅するレトロなエフェクトです。 | ![TV Switch Off](docs/images/effect_tv_switch_off.gif) |
-| **Hexagon** | SFテイストのハニカム（六角形）ワイプです。画面中央から波紋のように、各セルが滑らかに縮小して消滅します。 | ![Hexagon](docs/images/effect_hexagon.gif) |
-| **Triangle** | 鋭利な三角形（ポリゴン）が画面中央から波紋のように縮小して消えていくスタイリッシュなワイプ。 | ![Triangle](docs/images/effect_triangle.gif) |
-| **Checkerboard** | 画面をチェッカーボード（市松模様）パターンで分割し、各タイルが拡大して画面を覆います。クラシックなレトロ風。 | ![Checkerboard](docs/images/effect_checkerboard.gif) |
+| **Fade** | 標準的な不透明度のフェード。シンプルで軽量です。 | ![Fade](docs/images/effect_fade.webp) |
+| **Iris** | 中央に向かって閉じるクラシックな円形ワイプ。アスペクト比補正済み。 | ![Iris](docs/images/effect_iris.webp) |
+| **Flower Iris** | 丸い花びらを持つ花形のアイリスワイプ。花びらの数や形状（鋭さ）を調整可能。 | ![Flower Iris](docs/images/effect_flower_iris.webp) |
+| **Diamond** | 中央に向かって閉じるダイヤモンド型のワイプ。レトロなスタイル。 | ![Diamond](docs/images/effect_diamond.webp) |
+| **Diamond Band Wipe** | 画面中央からひし形の帯（バンド）が拡大しながら割れ、元のシーンをスタイリッシュに表示するユニークなトランジション。 | ![Diamond Band](docs/images/effect_diamond_wipe.webp) |
+| **Box** | 中央から拡大するシンプルな正方形。基本的な幾何学的トランジション。 | ![Box](docs/images/effect_box.webp) |
+| **Linear Wipe** | 方向性のあるワイプ（角度調整可能）。画面の端から端まで正確に覆います。 | ![Linear Wipe](docs/images/effect_linear_wipe.webp) |
+| **Sliding Doors** | エレベーターやエアロックのドアのように、2枚のパネルが左右からスライドして中央で合流するワイプ。 | ![Sliding Doors](docs/images/effect_slidingdoor.webp) |
+| **Corner Wipe** | 指定した画面の角（四隅）を基準点とし、対角線に向かって領域が斜めに拡大していくワイプ。開始する角はパラメータ(0〜3)で自由に選択可能。 | ![Corner Wipe](docs/images/effect_cornerwipe.webp) |
+| **Split** | 画面中央から真っ二つに割れて開くスタイリッシュなワイプ。分割する角度（水平、垂直、斜めなど）を自由に調整可能です。 | ![Split](docs/images/effect_split.webp) |
+| **Wavy Curtain** | Linear Wipeに似ていますが、カーテンのような波打つ境界線を持つ方向性ワイプです。 | ![Wavy Curtain](docs/images/effect_wavy_curtain.webp) |
+| **Radial Wipe** | 時計のような放射状ワイプ。滑らかなエッジと開始角度の調整をサポート。 | ![Radial Wipe](docs/images/effect_radial_wipe.webp) |
+| **Fan** | 中央から扇状のブレードが放射状に広がり、回転しながら画面を覆っていく風車（扇）のようなワイプ。 | ![Fan](docs/images/effect_fan.webp) |
+| **Tiles** | 画面がグリッド状に分割され、ブロックが中央から波のように拡大します。 | ![Tiles](docs/images/effect_tiles.webp) |
+| **Box Roll** | 画面右から箱が転がり込み、下の段から順に積み上がって画面を覆うトランジション。段数、転がる速度、列・段ごとの遅延を調整可能。 | ![Box Roll](docs/images/effect_boxroll.webp) |
+| **Polka Dots** | 拡大する円（ハーフトーンパターン）の波が画面を覆います。ポップでモダンな外観。 | ![Polka Dots](docs/images/effect_polka_dots.webp) |
+| **Blinds** | スタイリッシュなストライプ/ベネチアンブラインド効果。ストライプが拡大・結合して画面を覆います。 | ![Blinds](docs/images/effect_blinds.webp) |
+| **Slice** | 画面が短冊（ストリップ）状に分割され、交互に反対方向へスライドしながら画面外へ抜けていくトランジション。分割数、方向、エッジの柔らかさ、タイミングのずれを調整可能。 | ![Slice](docs/images/effect_slice.webp) |
+| **Stripe Cascade** | 画面がストライプ状に分割され、1本ずつ遅延を伴って順番にワイプが流れていくトランジション。分割数、方向（4方向）、ストライプ間の遅延、エッジの柔らかさを調整可能。 | ![Stripe Cascade](docs/images/effect_stripe_cascade.webp) |
+| **Spiral** | 中央に渦巻く催眠的なスパイラル効果。回転スピンと開始角度を調整可能。 | ![Spiral](docs/images/effect_spiral.webp) |
+| **Random Tiles** | プロシージャルノイズを使用して、グリッドタイルがランダムな順序で現れる確率的なトランジション。 | ![Random Tiles](docs/images/effect_random_tiles.webp) |
+| **Dissolve** | プロシージャルノイズを使用し、画面が霧や砂のように溶けていく王道のトランジション。最小限のマージン設定によりリニアなアニメーションを実現。 | ![Dissolve](docs/images/effect_dissolve.webp) |
+| **Wind** | ストリークノイズを伴う方向性ワイプで、風が画像を吹き飛ばすような表現。 | ![Wind](docs/images/effect_wind.webp) |
+| **Cross Wipe** | 十字の形が中央から拡大し、画像を四隅に押しやって消滅させます。 | ![Cross Wipe](docs/images/effect_cross_wipe.webp) |
+| **Texture Mask** | グレースケールテクスチャを使用してトランジションの順序を決定します（黒=開始、白=終了）。パラメータオーバーライドによるカスタムマスクテクスチャをサポート。 | ![Texture Mask](docs/images/effect_texture_mask.webp) |
+| **TV Switch Off** | ブラウン管テレビの電源を切った時のように、画面が上下に潰れて横線になり、最後に中央の点に向かって消滅するレトロなエフェクトです。 | ![TV Switch Off](docs/images/effect_tv_switch_off.webp) |
+| **Hexagon** | SFテイストのハニカム（六角形）ワイプです。画面中央から波紋のように、各セルが滑らかに縮小して消滅します。 | ![Hexagon](docs/images/effect_hexagon.webp) |
+| **Triangle** | 鋭利な三角形（ポリゴン）が画面中央から波紋のように縮小して消えていくスタイリッシュなワイプ。 | ![Triangle](docs/images/effect_triangle.webp) |
+| **Checkerboard** | 画面をチェッカーボード（市松模様）パターンで分割し、各タイルが拡大して画面を覆います。クラシックなレトロ風。 | ![Checkerboard](docs/images/effect_checkerboard.webp) |
 | **Pixelate** | 画面の解像度を徐々に下げていくピクセル化エフェクト。フェードアウトまでモザイクが進行します。 | — |
 
 > **Texture Mask（テクスチャマスク）のヒント:**
@@ -327,7 +327,7 @@ PostProcess 経路ではビューポートの上に描画される UMG/Slate ウ
 
 | PostProcess 版（`DA_Iris`）— UMG パネルは見えたまま | ウィジェットレイヤー版（`DA_Widget_Iris`）— UMG パネルごと覆われる |
 | :--- | :--- |
-| ![PostProcess Iris over UMG](docs/images/widget_layer_postprocess_iris.gif) | ![Widget-layer Iris over UMG](docs/images/widget_layer_widget_iris.gif) |
+| ![PostProcess Iris over UMG](docs/images/widget_layer_postprocess_iris.webp) | ![Widget-layer Iris over UMG](docs/images/widget_layer_widget_iris.webp) |
 
 ## イージングとタイミング
 Transition Presetの`Easing Type`（`EasingType`）プロパティを使用して、トランジションが時間とともにどのように進行するかを制御します。下表の名前はエディタ上の表示名で、括弧内は C++ の列挙値です。
@@ -336,18 +336,18 @@ Transition Presetの`Easing Type`（`EasingType`）プロパティを使用し�
 
 | Easing Type | Description | Preview |
 | :--- | :--- | :--- |
-| **Linear** | 一定速度（デフォルト）。単純なフェードに適しています。 | ![Linear](docs/images/easing_linear.gif) |
-| **Sine In** (`EaseInSine`) | ゆっくり開始し、滑らかに加速します。 | ![EaseInSine](docs/images/easing_ease_in_sine.gif) |
-| **Sine Out** (`EaseOutSine`) | 速く開始し、滑らかに減速します。 | ![EaseOutSine](docs/images/easing_ease_out_sine.gif) |
-| **Sine In/Out** (`EaseInOutSine`) | 開始と終了で滑らかに加減速します。 | ![EaseInOutSine](docs/images/easing_ease_in_out_sine.gif) |
-| **Cubic In** (`EaseInCubic`) | ゆっくり開始し、強く加速します。 | ![EaseInCubic](docs/images/easing_ease_in_cubic.gif) |
-| **Cubic Out** (`EaseOutCubic`) | 速く開始し、強く減速します。 | ![EaseOutCubic](docs/images/easing_ease_out_cubic.gif) |
-| **Cubic In/Out** (`EaseInOutCubic`) | 両端で顕著なイージング。 | ![EaseInOutCubic](docs/images/easing_ease_in_out_cubic.gif) |
-| **Expo In** (`EaseInExpo`) | ほぼ静止から開始し、指数的に加速します。 | ![EaseInExpo](docs/images/easing_ease_in_expo.gif) |
-| **Expo Out** (`EaseOutExpo`) | 速く開始し、指数的に減速します。 | ![EaseOutExpo](docs/images/easing_ease_out_expo.gif) |
-| **Expo In/Out** (`EaseInOutExpo`) | 両端でドラマチックなイージング。 | ![EaseInOutExpo](docs/images/easing_ease_in_out_expo.gif) |
-| **Elastic Out** (`EaseOutElastic`) | トランジション終了時にエラスティック（弾性）オーバーシュート。 | ![EaseOutElastic](docs/images/easing_ease_out_elastic.gif) |
-| **Bounce Out** (`EaseOutBounce`) | トランジション終了時にバウンス効果。 | ![EaseOutBounce](docs/images/easing_ease_out_bounce.gif) |
+| **Linear** | 一定速度（デフォルト）。単純なフェードに適しています。 | ![Linear](docs/images/easing_linear.webp) |
+| **Sine In** (`EaseInSine`) | ゆっくり開始し、滑らかに加速します。 | ![EaseInSine](docs/images/easing_ease_in_sine.webp) |
+| **Sine Out** (`EaseOutSine`) | 速く開始し、滑らかに減速します。 | ![EaseOutSine](docs/images/easing_ease_out_sine.webp) |
+| **Sine In/Out** (`EaseInOutSine`) | 開始と終了で滑らかに加減速します。 | ![EaseInOutSine](docs/images/easing_ease_in_out_sine.webp) |
+| **Cubic In** (`EaseInCubic`) | ゆっくり開始し、強く加速します。 | ![EaseInCubic](docs/images/easing_ease_in_cubic.webp) |
+| **Cubic Out** (`EaseOutCubic`) | 速く開始し、強く減速します。 | ![EaseOutCubic](docs/images/easing_ease_out_cubic.webp) |
+| **Cubic In/Out** (`EaseInOutCubic`) | 両端で顕著なイージング。 | ![EaseInOutCubic](docs/images/easing_ease_in_out_cubic.webp) |
+| **Expo In** (`EaseInExpo`) | ほぼ静止から開始し、指数的に加速します。 | ![EaseInExpo](docs/images/easing_ease_in_expo.webp) |
+| **Expo Out** (`EaseOutExpo`) | 速く開始し、指数的に減速します。 | ![EaseOutExpo](docs/images/easing_ease_out_expo.webp) |
+| **Expo In/Out** (`EaseInOutExpo`) | 両端でドラマチックなイージング。 | ![EaseInOutExpo](docs/images/easing_ease_in_out_expo.webp) |
+| **Elastic Out** (`EaseOutElastic`) | トランジション終了時にエラスティック（弾性）オーバーシュート。 | ![EaseOutElastic](docs/images/easing_ease_out_elastic.webp) |
+| **Bounce Out** (`EaseOutBounce`) | トランジション終了時にバウンス効果。 | ![EaseOutBounce](docs/images/easing_ease_out_bounce.webp) |
 | **Custom Curve** (`Custom`) | `Progress Curve` に指定した独自のフロートカーブアセットを使用します。 | — |
 
 *注: `Progress Curve` スロットは、`Custom Curve` が選択された場合にのみ表示されます。*
