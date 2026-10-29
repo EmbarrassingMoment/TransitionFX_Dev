@@ -10,7 +10,8 @@ struct FGraphPanelPinFactory;
 
 /**
  * Editor module for the TransitionFX plugin.
- * Registers the transition preview tab, editor menus and the TransitionFX asset pin widgets.
+ * Registers the transition preview tab, editor menus and the TransitionFX asset pin widgets,
+ * and makes the cook include the assets the runtime loads by path.
  */
 class FTransitionFXEditorModule : public IModuleInterface
 {
@@ -27,4 +28,7 @@ private:
 	TSharedPtr<IAssetTypeActions> TransitionPresetActions;
 	TSharedPtr<IAssetTypeActions> TransitionSequenceActions;
 	TSharedPtr<FGraphPanelPinFactory> GraphPinFactory;
+
+	/** Re-registers the runtime-loaded assets for the next cook in this process. */
+	FDelegateHandle CookFinishedHandle;
 };
