@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Agent guide shipped with the plugin.** `Plugins/TransitionFX/AGENTS.md` describes the public Blueprint/C++ API, the bundled `DA_*` / `DA_Widget_*` presets, common patterns (fade out/in, `bHoldAtMax` loading screens, level changes, shader warmup, sequences), a troubleshooting table, and the rules an AI coding agent should follow when wiring TransitionFX into a user's project. `Plugins/TransitionFX/CLAUDE.md` imports it for Claude Code; Codex, Cursor, Copilot, Gemini CLI and others read `AGENTS.md` directly. The file travels with the plugin, so Fab and manual installs get it; both files are listed in `Config/FilterPlugin.ini`, because `RunUAT BuildPlugin` leaves out files at the plugin root that the filter does not name.
 - `docs/AI_AGENT_GUIDE_EN.md` / `docs/AI_AGENT_GUIDE_JP.md`: how users point their agent at the guide, including the engine-level (Fab launcher) install where the plugin sits outside the project, with a snippet to paste into their own `AGENTS.md` / `CLAUDE.md`. Linked from both READMEs.
+- FAQ (EN/JP): *Should I delete the transitions I don't use?* No: presets that nothing references are not cooked, and `DA_FadeToBlack` / `M_Transition_Fade` are loaded by path from C++, so the Content Browser's delete dialog reports them as unused although deleting them breaks Quick Fade. `AGENTS.md` tells agents not to delete bundled assets and adds the matching Quick Fade symptom to its troubleshooting table.
 
 ### Changed
 

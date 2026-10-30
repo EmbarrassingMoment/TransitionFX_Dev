@@ -32,6 +32,7 @@ Blueprint / C++ call
 7. **Level transitions:** use `Open Level With Transition` instead of `Open Level` + manual fades. The fade-in on the new level is automatic.
 8. **Loading screens:** use `StartTransition` with `bHoldAtMax = true`, do the work, then `ReleaseHold` and play `Reverse`. Forgetting `ReleaseHold` leaves the screen black forever (recover with console `TransitionFX.ForceClear`).
 9. **Do not assume the plugin is in the project folder.** When installed from Fab it may live under the engine's `Plugins/Marketplace` folder. Check that `TransitionFX` is enabled in the project's `.uproject` or the Plugins window before debugging missing nodes.
+10. **Do not delete unused bundled presets or materials**, even to shrink the build. Plugin assets that nothing references are not cooked, so deleting them saves nothing. `DA_FadeToBlack` and `M_Transition_Fade` are loaded by path from C++ (the default preset for Quick Fade, and for Open Level With Transition without a preset), so the Content Browser's reference check reports them as unused; deleting them breaks those nodes.
 
 ## Blueprint nodes (`UTransitionBlueprintLibrary`, category "TransitionFX")
 
@@ -158,6 +159,7 @@ Entries hold a preset, mode, optional duration override, and delay. Played by `P
 | Nodes missing in Blueprint | Plugin not enabled, or project not restarted after enabling |
 | Hitch on first transition | Shaders compile on first use; preload presets |
 | `OnTransitionCompleted` never fires | `StopTransition` / `ForceClear` do not fire it; Quick Fade nodes do not wait |
+| Quick Fade shows nothing (log: `Could not find DA_FadeToBlack or M_Transition_Fade`) | `DA_FadeToBlack` and `M_Transition_Fade` were deleted from the plugin; reinstall the plugin |
 
 ## Project settings
 

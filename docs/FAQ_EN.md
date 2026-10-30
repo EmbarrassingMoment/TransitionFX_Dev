@@ -154,3 +154,15 @@ Use cases:
 - Speed up transitions when the player presses a "skip" button.
 - Slow down a transition for a dramatic reveal.
 - Synchronize transition speed with gameplay events.
+
+### Q: Should I delete the transitions I don't use?
+
+No, you can leave them. A packaged build only includes the assets your project references (the maps you package and everything they use), unless you add the plugin's folders to **Project Settings > Packaging > Additional Asset Directories to Cook**. Presets you never reference, and the materials behind them, are not cooked. The plugin's whole `Content` folder is about 2 MB in the editor.
+
+Deleting them can break things:
+
+- `DA_FadeToBlack` and `M_Transition_Fade` are loaded by path from C++. `DA_FadeToBlack` is the default preset used by the Quick Fade nodes and by *Open Level With Transition* when no preset is set, and `M_Transition_Fade` is the Quick Fade fallback. The Content Browser's delete dialog cannot see references from code, so it reports both as unused. Without them, those nodes play no transition.
+- Presets reference material instances, which reference master materials and the material functions in `MaterialFunctions/` that most effects share. `DA_SequenceSamples` references several presets.
+- When installed from Fab, the plugin lives in the engine's `Plugins/Marketplace` folder, so deleting edits the engine installation, and updating or reinstalling the plugin restores the files.
+
+If you still want to remove some, delete them in the Content Browser (not in Explorer) so that Unreal checks references, and keep `DA_FadeToBlack` and `M_Transition_Fade`.
