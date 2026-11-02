@@ -8,7 +8,7 @@
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.5%2B-black?style=flat&logo=unrealengine&logoColor=white)](https://www.unrealengine.com/)
 [![Version](https://img.shields.io/badge/Version-1.7.0-brightgreen?style=flat)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Win64-blue?style=flat&logo=windows&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
+[![Platform](https://img.shields.io/badge/Platform-Win64%20%7C%20Linux-blue?style=flat)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Blueprint](https://img.shields.io/badge/Blueprint-Ready-9B59B6?style=flat&logo=unrealengine&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Sponsor](https://img.shields.io/badge/Sponsor-EmbarrassingMoment-ff69b4?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/EmbarrassingMoment)
 
@@ -66,7 +66,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 *   **エンジンバージョン:** Unreal Engine **5.5** 以降。それ以前のバージョン（5.3、5.4）は公式にはサポートされていません。
 *   **プロジェクトタイプ:** **C++ プロジェクト・Blueprint-only プロジェクトの両方**で動作します。通常の使用に C++ は不要です。
 *   **レンダリング:** PostProcess 版プリセット（`PostProcessTransitionEffect`）には PostProcess 対応のレンダリングパイプライン（Deferred、または PostProcess 有効の Forward）が必要です。ウィジェットレイヤー版プリセット（`WidgetTransitionEffect`）は Slate 経由で描画します。
-*   **プラットフォーム:** Win64 のみ（DirectX 12 / SM6）。`TransitionFX.uplugin` の `PlatformAllowList` で両モジュールとも Win64 に限定しているため、Mac・Linux・コンソール・モバイル向けにはビルドされません。SDF ベースのエフェクトは GPU 負荷が中心のため、低スペックな GPU ではパフォーマンスが変動する可能性があります。
+*   **プラットフォーム:** Win64（DirectX 12 / SM6）と Linux（Vulkan）。`TransitionFX.uplugin` の `PlatformAllowList` で両モジュールとも Win64 と Linux を指定しているため、Mac・コンソール・モバイル向けにはビルドされません。Linux 対応は新しく、Win64 ほど検証されていません。ランタイムモジュールは Windows からクロスコンパイルした Linux 向けパッケージビルドで確認済みですが、Linux 版 Unreal Editor での動作は未検証です。SDF ベースのエフェクトは GPU 負荷が中心のため、低スペックな GPU ではパフォーマンスが変動する可能性があります。
 
 ## サンプルプロジェクト
 
@@ -428,7 +428,7 @@ MaxPoolSizePerEffectClass=3
     *   ビューポートの上に描画される UMG/Slate ウィジェットはトランジションで**覆われません**。
     *   UI ごと覆う必要がある場合は `DA_Widget_*` プリセット（`WidgetTransitionEffect`）を使うか、`OnTransitionStarted` デリゲートでウィジェットの Visibility を手動で設定してください。[ウィジェットレイヤー版](#ウィジェットレイヤー版)を参照。
 *   **マルチプレイヤー:** TransitionFX は**各クライアントでローカルに動作**します。サブシステムは GameInstance ごとに実行されるため、本質的にクライアントサイドの処理です。レプリケーションやサーバーサイドのトランジション制御は組み込まれていません。
-*   **パッケージング:** プラグインウィンドウで有効になっていれば、Win64 のパッケージビルドに自動的に含まれます。プラグイン参照を手動で管理している場合は、`.uproject` ファイルの `Plugins` セクションに `TransitionFX` が含まれていることを確認してください。
+*   **パッケージング:** プラグインウィンドウで有効になっていれば、Win64 と Linux のパッケージビルドに自動的に含まれます。プラグイン参照を手動で管理している場合は、`.uproject` ファイルの `Plugins` セクションに `TransitionFX` が含まれていることを確認してください。
 
 ## ロードマップ
 

@@ -127,7 +127,8 @@ Plugins/TransitionFX/
 
 ## Platform & Compatibility Notes
 
-- **Win64 only** (DX12 SM6). Console and mobile are untested — SDF effects are GPU-bound.
+- **Win64 and Linux** (`PlatformAllowList` in `TransitionFX.uplugin`). Win64 (DX12 SM6) is the primary, fully tested platform. Mac, console and mobile are not built — SDF effects are GPU-bound.
+- **Linux (Vulkan SM5) is less tested.** Check it from Windows with `RunUAT BuildPlugin -TargetPlatforms=Linux`; `LINUX_MULTIARCH_ROOT` must point to the clang toolchain version in the engine's `Engine/Config/Linux/Linux_SDK.json` (UE 5.5 and 5.8 need different ones). `BuildPlugin` without `-TargetPlatforms` also builds Linux on engines with the Linux target installed. Verified 2026-11-01: runtime module cross-compiles in UE 5.5 and 5.8, Vulkan cook is clean, and a packaged Linux build passes the full preset smoke test on Mesa software Vulkan (llvmpipe) in WSL. Open: the editor module has never been built on a Linux host, and Dissolve (PostProcess and widget; Noise node `Fast Gradient - 3D Texture`) renders as broken stripes on llvmpipe, not yet checked on a real Linux GPU.
 - **Not compatible with UEFN** (Unreal Editor for Fortnite).
 - **PostProcess limitation**: `UPostProcessTransitionEffect` does not cover UMG/Slate UI layers. `UWidgetTransitionEffect` (full-viewport Slate `SImage` via `AddViewportWidgetContent`, preset `WidgetZOrder`) does, but only for effects with a canonical `SceneTexture → Lerp` final stage; scene-resampling effects (Pixelate) and the A/B-swapped Slice master are deliberately unsupported on the widget layer.
 - **Single active transition**: One subsystem per GameInstance; no simultaneous transitions.

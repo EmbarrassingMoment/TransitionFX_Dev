@@ -3,7 +3,7 @@
 This file is for AI coding agents (Claude Code, Codex, Cursor, Copilot, Gemini CLI, etc.) helping a developer **use** the TransitionFX plugin in their own Unreal Engine project. It describes the public API, the bundled assets, and the rules to follow. It is not a guide for modifying the plugin itself.
 
 - Plugin version: see `VersionName` in `TransitionFX.uplugin`
-- Engine: Unreal Engine 5.5 or later, **Win64 only** (DX12 / SM6)
+- Engine: Unreal Engine 5.5 or later, **Win64** (DX12 / SM6) and **Linux** (Vulkan; less tested, see Known limitations)
 - Works in Blueprint-only and C++ projects; no C++ is needed for standard use
 - Full docs: https://github.com/EmbarrassingMoment/TransitionFX (Quick Start, API Reference, FAQ, in English and Japanese)
 
@@ -179,7 +179,8 @@ Implement `ITransitionEffect` (`Initialize`, `UpdateProgress`, `Cleanup`, `SetIn
 
 ## Known limitations
 
-- Win64 only; not built for Mac, Linux, consoles, or mobile. Not compatible with UEFN.
+- Win64 and Linux only; not built for Mac, consoles, or mobile. Not compatible with UEFN.
+- Linux is less tested than Win64: packaged Linux builds are verified, the Unreal Editor on Linux is not.
 - PostProcess presets need a PostProcess-capable pipeline (Deferred, or Forward with PostProcess enabled).
 - Single active transition per GameInstance; no multiplayer replication.
 - Pull requests to the upstream repository are not accepted; report issues at https://github.com/EmbarrassingMoment/TransitionFX/issues.

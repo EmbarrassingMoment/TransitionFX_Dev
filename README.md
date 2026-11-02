@@ -8,7 +8,7 @@
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.5%2B-black?style=flat&logo=unrealengine&logoColor=white)](https://www.unrealengine.com/)
 [![Version](https://img.shields.io/badge/Version-1.7.0-brightgreen?style=flat)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Win64-blue?style=flat&logo=windows&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
+[![Platform](https://img.shields.io/badge/Platform-Win64%20%7C%20Linux-blue?style=flat)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Blueprint](https://img.shields.io/badge/Blueprint-Ready-9B59B6?style=flat&logo=unrealengine&logoColor=white)](https://www.fab.com/listings/82f9a51f-52e6-4a01-a637-43a4dac76c0a)
 [![Sponsor](https://img.shields.io/badge/Sponsor-EmbarrassingMoment-ff69b4?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/EmbarrassingMoment)
 
@@ -54,7 +54,7 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 *   **Engine Version:** Unreal Engine **5.5** or later. Earlier versions (5.3, 5.4) are not officially supported.
 *   **Project Type:** Works with both **C++ and Blueprint-only** projects. No C++ coding is required for standard use.
 *   **Rendering:** PostProcess presets (`PostProcessTransitionEffect`) require a PostProcess-capable rendering pipeline (Deferred, or Forward with PostProcess enabled). Widget-layer presets (`WidgetTransitionEffect`) draw through Slate instead.
-*   **Platforms:** Win64 only (DirectX 12 / SM6). Both plugin modules are restricted to Win64 by `PlatformAllowList` in `TransitionFX.uplugin`, so the plugin is not built for Mac, Linux, consoles, or mobile. SDF-based effects are GPU-bound, so performance on low-end GPUs may vary.
+*   **Platforms:** Win64 (DirectX 12 / SM6) and Linux (Vulkan). Both plugin modules list `Win64` and `Linux` in `PlatformAllowList` in `TransitionFX.uplugin`, so the plugin is not built for Mac, consoles, or mobile. Linux support is new and less tested than Win64: the runtime module is verified in packaged Linux builds cross-compiled from Windows, but the Unreal Editor on Linux has not been tested. SDF-based effects are GPU-bound, so performance on low-end GPUs may vary.
 
 ## Sample Project
 
@@ -417,7 +417,7 @@ MaxPoolSizePerEffectClass=3
     *   UMG/Slate widgets rendered above the viewport are **not** covered by the transition.
     *   Use a `DA_Widget_*` preset (`WidgetTransitionEffect`) when the transition must cover UI, or use the `OnTransitionStarted` delegate to manually set widget visibility. See [Widget-Layer Variants](#widget-layer-variants).
 *   **Multiplayer:** TransitionFX operates **locally on each client**. The subsystem runs per GameInstance, so it is inherently client-side. There is no built-in replication or server-side transition control.
-*   **Packaging:** The plugin is included in packaged Win64 builds automatically when enabled in the Plugins window. Ensure `TransitionFX` is listed in your `.uproject` file under `Plugins` if you manage plugin references manually.
+*   **Packaging:** The plugin is included in packaged Win64 and Linux builds automatically when enabled in the Plugins window. Ensure `TransitionFX` is listed in your `.uproject` file under `Plugins` if you manage plugin references manually.
 
 ## Roadmap
 
