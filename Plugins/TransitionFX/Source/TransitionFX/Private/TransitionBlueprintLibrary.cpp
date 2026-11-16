@@ -16,6 +16,16 @@
 #include "TransitionFX.h"
 
 /**
+ * Returns the world's transition manager, or nullptr when the world has no GameInstance
+ * (editor and preview worlds, e.g. a latent node run from an Editor Utility Blueprint).
+ */
+static UTransitionManagerSubsystem* GetManagerForWorld(const UWorld* World)
+{
+	const UGameInstance* GameInstance = World ? World->GetGameInstance() : nullptr;
+	return GameInstance ? GameInstance->GetSubsystem<UTransitionManagerSubsystem>() : nullptr;
+}
+
+/**
  * Latent action that polls the transition manager and completes when the current
  * transition finishes, stops without finishing, or the manager becomes invalid.
  */
@@ -200,11 +210,17 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWait(const UObject* WorldCont
 		FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
 		if (LatentActionManager.FindExistingAction<FTransitionLatentAction>(LatentInfo.CallbackTarget, LatentInfo.UUID) == nullptr)
 		{
-			UTransitionManagerSubsystem* Manager = World->GetGameInstance()->GetSubsystem<UTransitionManagerSubsystem>();
+			UTransitionManagerSubsystem* Manager = GetManagerForWorld(World);
 			if (Manager)
 			{
 				Manager->StartTransition(Preset, Mode, PlaySpeed, bInvert, false, OverrideParams);
 				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionLatentAction(LatentInfo, Manager));
+			}
+			else
+			{
+				UE_LOG(LogTransitionFX, Warning, TEXT("PlayTransitionAndWait: No TransitionManagerSubsystem for world '%s' (it has no GameInstance). Finishing immediately."), *World->GetName());
+				// Finish immediately to prevent Blueprint from hanging
+				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionLatentAction(LatentInfo, nullptr));
 			}
 		}
 	}
@@ -437,8 +453,15 @@ void UTransitionBlueprintLibrary::OpenLevelWithTransitionAndWait(const UObject* 
 		FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
 		if (LatentActionManager.FindExistingAction<FOpenLevelTransitionLatentAction>(LatentInfo.CallbackTarget, LatentInfo.UUID) == nullptr)
 		{
-			UTransitionManagerSubsystem* Manager = World->GetGameInstance()->GetSubsystem<UTransitionManagerSubsystem>();
-			if (Manager)
+			UTransitionManagerSubsystem* Manager = GetManagerForWorld(World);
+			if (!Manager)
+			{
+				// With a null manager the action neither starts a fade-out nor opens the level; it
+				// only fires Completed on its first update so the Blueprint does not hang.
+				UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransitionAndWait: No TransitionManagerSubsystem for world '%s' (it has no GameInstance). '%s' is not opened."), *World->GetName(), *LevelName.ToString());
+				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FOpenLevelTransitionLatentAction(LatentInfo, nullptr, LevelName, nullptr, Duration, WorldContextObject));
+			}
+			else
 			{
 				if (!Preset)
 				{
@@ -484,7 +507,7 @@ void UTransitionBlueprintLibrary::PlaySequenceAndWait(const UObject* WorldContex
 		return;
 	}
 
-	UTransitionManagerSubsystem* Manager = World->GetGameInstance() ? World->GetGameInstance()->GetSubsystem<UTransitionManagerSubsystem>() : nullptr;
+	UTransitionManagerSubsystem* Manager = GetManagerForWorld(World);
 
 	if (!Sequence || Sequence->Entries.Num() == 0)
 	{
@@ -512,8 +535,14 @@ void UTransitionBlueprintLibrary::PlayTransitionAndWaitWithDuration(const UObjec
 		FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
 		if (LatentActionManager.FindExistingAction<FTransitionLatentAction>(LatentInfo.CallbackTarget, LatentInfo.UUID) == nullptr)
 		{
-			UTransitionManagerSubsystem* Manager = World->GetGameInstance()->GetSubsystem<UTransitionManagerSubsystem>();
-			if (Manager)
+			UTransitionManagerSubsystem* Manager = GetManagerForWorld(World);
+			if (!Manager)
+			{
+				UE_LOG(LogTransitionFX, Warning, TEXT("PlayTransitionAndWaitWithDuration: No TransitionManagerSubsystem for world '%s' (it has no GameInstance). Finishing immediately."), *World->GetName());
+				// Finish immediately to prevent Blueprint from hanging
+				LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTransitionLatentAction(LatentInfo, nullptr));
+			}
+			else
 			{
 				if (Preset)
 				{
