@@ -521,7 +521,7 @@ Force Clear
 | | `Stop Transition` | `Force Clear` |
 | :--- | :--- | :--- |
 | Effect Post-processing | Cleans up normally | Destroys immediately |
-| Unblocking Input | Follows `bAutoBlockInput` setting | Unblocks forcefully |
+| Unblocking Input | Unblocks if the transition blocked it | Unblocks forcefully |
 | Stopping Sound | Stops | Stops |
 | Firing `OnTransitionCompleted` | No | No |
 | Primary Use | Normal stop processing | Emergency reset / Debugging |

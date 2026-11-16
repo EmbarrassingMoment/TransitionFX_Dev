@@ -53,9 +53,10 @@ TransitionFX's own pickers always list the plugin's content: the `TransitionPres
 
 ### Q: How does auto input blocking work during transitions?
 
-When `bAutoBlockInput` is `true` in the preset (the default), the subsystem calls `SetCinematicMode(true)` on the player controller when the transition starts, which disables player input and hides the cursor. When the transition completes (or `ForceClear` is called), cinematic mode is released. This means:
+When `bAutoBlockInput` is `true` in the preset (the default), the subsystem calls `SetCinematicMode(true)` on the player controller when the transition starts, which disables the player's movement and look input. The pawn and the HUD stay visible (`bHidePlayer` and `bAffectsHUD` are off), the mouse cursor is not changed, and other input such as jump or UI clicks is not blocked. When the transition completes (or `ForceClear` is called), cinematic mode is released. This means:
 - Input is blocked automatically — no additional Blueprint logic is needed.
 - If the transition is interrupted via `StopTransition`, input is also unblocked.
+- In a sequence, input follows each entry's preset: an entry whose preset has `bAutoBlockInput` off restores input that an earlier entry blocked.
 - If the transition is interrupted via `ForceClear`, input is forcefully unblocked regardless of settings.
 
 ### Q: Does TransitionFX work with ServerTravel / seamless travel?

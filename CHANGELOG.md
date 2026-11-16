@@ -17,6 +17,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sample project only: the root `CLAUDE.md` now states that it covers plugin development and points usage questions to the plugin's `AGENTS.md`.
 
+### Fixed
+
+- **`bAutoBlockInput` no longer hides the player's pawn and the HUD.** Input blocking called `SetCinematicMode` with `bHidePlayer` and `bAffectsHUD` on, so the pawn and an `AHUD`-based HUD disappeared the moment a transition started, before the effect covered them, and when the transition ended the pawn was shown and `bShowHUD` was set again even if the game had hidden them itself. Only movement and look input are blocked now; the pawn and the HUD are left as they are, and a pawn the game has hidden stays hidden. `ForceClear` still forces CinematicMode off, without touching the pawn or the HUD. FAQ (EN/JP) corrected: input blocking never hid the mouse cursor.
+- **Input stayed blocked after a sequence that mixed `bAutoBlockInput` settings.** A sequence switches presets without stopping the transition, and input was restored only if the preset current at the end had `bAutoBlockInput` on. A sequence that went from a blocking preset to a non-blocking one left movement and look input blocked until `ForceClear` or until a later transition that blocks input ended. The subsystem now records that it blocked input and restores it from that, and an entry whose preset does not block input restores input an earlier entry blocked.
+- **`ReverseTransition` / `InvertTransition` during the fade-out of a level transition no longer open the level.** Only stopping or replacing the fade-out cancelled `OpenLevelWithTransition` / `OpenLevelWithTransitionAndWait`; after a reverse or invert the level was still opened when the replay completed, with the scene visible again. Both now cancel the level transition, like `StopTransition`: the level is not opened, no fade-in plays on the next level load, and the latent node finishes. API Reference (EN/JP) updated.
+
 ## [1.7.0] - 2026-10-22
 
 ### Added

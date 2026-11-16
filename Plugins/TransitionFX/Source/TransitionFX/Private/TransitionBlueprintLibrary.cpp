@@ -108,12 +108,12 @@ public:
 		}
 		else if (Manager.IsValid())
 		{
-			// The fade-out was stopped, replaced by another transition or force-cleared, which
-			// cancelled the level transition (including the auto-reverse fade-in), or another
-			// level transition has taken over.
+			// The fade-out was stopped, reversed, inverted, replaced by another transition or
+			// force-cleared, which cancelled the level transition (including the auto-reverse
+			// fade-in), or another level transition has taken over.
 			if (!Manager->bIsLevelFadeOutPending || Manager->PendingLevelName != LevelName)
 			{
-				UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransitionAndWait: Transition stopped or replaced before it completed. Aborting level load."));
+				UE_LOG(LogTransitionFX, Warning, TEXT("OpenLevelWithTransitionAndWait: Transition stopped, reversed, inverted or replaced before it completed. Aborting level load."));
 				bFinished = true;
 			}
 			// If transition finished (reached 1.0), we trigger OpenLevel

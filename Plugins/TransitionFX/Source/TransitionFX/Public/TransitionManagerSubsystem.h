@@ -104,11 +104,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (PlaySpeed = "1.0"))
 	void SetPlaySpeed(float PlaySpeed = 1.0f);
 
-	/** Reverses the current transition. */
+	/**
+	 * Reverses the current transition. Reversing the fade-out of a level transition before its
+	 * level is opened cancels the level transition.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void ReverseTransition(bool bAutoStop = true);
 
-	/** Inverts the current transition's mask and replays forward (0 to 1). */
+	/**
+	 * Inverts the current transition's mask and replays forward (0 to 1). Inverting the fade-out
+	 * of a level transition before its level is opened cancels the level transition.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX")
 	void InvertTransition(bool bAutoComplete = true);
 
@@ -159,8 +165,9 @@ public:
 	 * A null Preset falls back to the default fade; if no playable preset is available,
 	 * the level is opened without a transition and an error is logged.
 	 * Stopping (StopTransition / ForceClear) or replacing (StartTransition) the fade-out
-	 * before it completes cancels the level transition: the level is not opened and no
-	 * fade-in plays on the next level load.
+	 * before it completes, or reversing / inverting it (ReverseTransition / InvertTransition),
+	 * cancels the level transition: the level is not opened and no fade-in plays on the next
+	 * level load.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "TransitionFX", meta = (WorldContext = "WorldContextObject"))
 	void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
@@ -258,6 +265,18 @@ private:
 	/** Returns the cached player controller, refreshing the cache if stale. */
 	APlayerController* GetOrCachePlayerController();
 
+	/**
+	 * Enters or leaves CinematicMode on PC for movement and look input only. The pawn and the HUD
+	 * are not hidden, and a pawn the game has hidden itself stays hidden. Null PC is ignored.
+	 */
+	static void SetCinematicInputBlock(APlayerController* PC, bool bBlock);
+
+	/** Blocks movement and look input on the local player controller and sets bIsInputBlocked. */
+	void BlockInput();
+
+	/** Restores input if bIsInputBlocked is set; otherwise does nothing. */
+	void UnblockInput();
+
 	/** Internal helper to return an effect to the pool with size checks. */
 	void ReturnEffectToPool(UObject* EffectObj);
 
@@ -309,6 +328,13 @@ private:
 	 */
 	bool bIsCoveringScreen = false;
 
+	/**
+	 * Whether a transition has blocked input (bAutoBlockInput) and not restored it yet. Input is
+	 * restored from this flag, not from the current preset, because a sequence can hot-swap to a
+	 * preset with a different bAutoBlockInput while input is still blocked.
+	 */
+	bool bIsInputBlocked = false;
+
 	/** Current playback speed multiplier. */
 	float CurrentPlaySpeed = 1.0f;
 
@@ -347,8 +373,8 @@ private:
 	/**
 	 * Whether the fade-out of a level transition (OpenLevelWithTransition or
 	 * OpenLevelWithTransitionAndWait) has started and its level has not been opened yet.
-	 * Stopping, replacing or force-clearing that fade-out before it completes cancels the
-	 * level transition (see CancelPendingLevelTransition).
+	 * Stopping, replacing or force-clearing that fade-out before it completes, or reversing /
+	 * inverting it, cancels the level transition (see CancelPendingLevelTransition).
 	 */
 	bool bIsLevelFadeOutPending = false;
 

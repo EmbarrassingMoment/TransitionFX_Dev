@@ -12,6 +12,7 @@
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/Pawn.h"
 #include "Engine/World.h"
 #include "Curves/CurveFloat.h"
 #include "HAL/IConsoleManager.h"
@@ -304,7 +305,7 @@ void UTransitionManagerSubsystem::CancelPendingLevelTransition()
 {
 	if (bIsLevelFadeOutPending)
 	{
-		UE_LOG(LogTransitionFX, Log, TEXT("TransitionFX: Level transition to '%s' cancelled because its fade-out was stopped or replaced before it completed."), *PendingLevelName.ToString());
+		UE_LOG(LogTransitionFX, Log, TEXT("TransitionFX: Level transition to '%s' cancelled because its fade-out was stopped, reversed, inverted or replaced before it completed."), *PendingLevelName.ToString());
 	}
 
 	OnTransitionCompleted.RemoveDynamic(this, &UTransitionManagerSubsystem::OnLevelTransitionFadeOutFinished);
@@ -478,6 +479,57 @@ APlayerController* UTransitionManagerSubsystem::GetOrCachePlayerController()
 	return PC;
 }
 
+/**
+ * Enters or leaves CinematicMode on the controller with movement and look input affected only.
+ * bHidePlayer and bAffectsHUD stay false, so the pawn and the HUD are not hidden while input is
+ * blocked. Leaving CinematicMode makes the engine show the pawn unconditionally, so a pawn the
+ * game has hidden itself is hidden again afterwards.
+ */
+void UTransitionManagerSubsystem::SetCinematicInputBlock(APlayerController* PC, bool bBlock)
+{
+	if (!PC)
+	{
+		return;
+	}
+
+	APawn* Pawn = PC->GetPawn();
+	const bool bPawnWasHidden = Pawn && Pawn->IsHidden();
+
+	PC->SetCinematicMode(bBlock, /*bHidePlayer=*/false, /*bAffectsHUD=*/false, /*bAffectsMovement=*/true, /*bAffectsTurning=*/true);
+
+	if (bPawnWasHidden && PC->GetPawn() == Pawn && !Pawn->IsHidden())
+	{
+		Pawn->SetActorHiddenInGame(true);
+	}
+}
+
+/** Blocks movement and look input for the current transition and records that it did. */
+void UTransitionManagerSubsystem::BlockInput()
+{
+	if (APlayerController* PC = GetOrCachePlayerController())
+	{
+		SetCinematicInputBlock(PC, true);
+		bIsInputBlocked = true;
+	}
+}
+
+/**
+ * Restores input if a transition blocked it. Tracked with bIsInputBlocked rather than the
+ * current preset's bAutoBlockInput: a sequence hot-swaps presets without stopping, so the
+ * preset that blocked input may no longer be the current one.
+ */
+void UTransitionManagerSubsystem::UnblockInput()
+{
+	if (!bIsInputBlocked)
+	{
+		return;
+	}
+	bIsInputBlocked = false;
+
+	// The cached controller is the one input was blocked on; if it is gone there is nothing to restore.
+	SetCinematicInputBlock(CachedPlayerController.Get(), false);
+}
+
 /** Emergency cleanup: stops the effect, restores player input, stops audio, and resets all state flags. */
 void UTransitionManagerSubsystem::ForceClear()
 {
@@ -496,12 +548,9 @@ void UTransitionManagerSubsystem::ForceClear()
 
 	CleanupAndPoolCurrentEffect();
 
-	// Reset Input
-	if (APlayerController* PC = GetOrCachePlayerController())
-	{
-		// Force disable cinematic mode
-		PC->SetCinematicMode(false, true, true, true, true);
-	}
+	// Reset Input: force CinematicMode off even if this subsystem did not block input itself
+	SetCinematicInputBlock(GetOrCachePlayerController(), false);
+	bIsInputBlocked = false;
 
 	StopAndClearAudio();
 
@@ -731,13 +780,15 @@ void UTransitionManagerSubsystem::StartTransition(UTransitionPreset* Preset, ETr
 		}
 	}
 
-	// Block Input
+	// Block Input. A sequence step hot-swaps the preset without StopTransition, so input that the
+	// previous step blocked is restored here when this step's preset does not block it.
 	if (CurrentPreset->bAutoBlockInput)
 	{
-		if (APlayerController* PC = GetOrCachePlayerController())
-		{
-			PC->SetCinematicMode(true, true, true, true, true);
-		}
+		BlockInput();
+	}
+	else
+	{
+		UnblockInput();
 	}
 
 	OnTransitionStarted.Broadcast();
@@ -773,6 +824,13 @@ void UTransitionManagerSubsystem::ReverseTransition(bool bAutoStop)
 		return;
 	}
 
+	// Reversing the fade-out of a level transition reveals the scene again, so the level must
+	// not be opened when the reverse completes (its OnTransitionCompleted would open it).
+	if (bIsLevelFadeOutPending)
+	{
+		CancelPendingLevelTransition();
+	}
+
 	// Also resumes a completed transition whose effect is still covering the screen.
 	CurrentMode = ETransitionMode::Reverse;
 	bAutoStopOnReverseComplete = bAutoStop;
@@ -788,6 +846,13 @@ void UTransitionManagerSubsystem::InvertTransition(bool bAutoComplete)
 	{
 		UE_LOG(LogTransitionFX, Warning, TEXT("InvertTransition called with null preset."));
 		return;
+	}
+
+	// Inverting the fade-out of a level transition replays it so that it ends revealed, so the
+	// level must not be opened when the replay completes (its OnTransitionCompleted would open it).
+	if (bIsLevelFadeOutPending)
+	{
+		CancelPendingLevelTransition();
 	}
 
 	// Toggle invert state
@@ -837,15 +902,8 @@ void UTransitionManagerSubsystem::StopTransition()
 	StopAndClearAudio();
 	CleanupAndPoolCurrentEffect();
 
-	// Restore Input
-	if (CurrentPreset && CurrentPreset->bAutoBlockInput)
-	{
-		// Use cached controller to restore input
-		if (APlayerController* PC = CachedPlayerController.Get())
-		{
-			PC->SetCinematicMode(false, true, true, true, true);
-		}
-	}
+	// Restore Input (no-op unless a transition blocked it)
+	UnblockInput();
 
 	bIsTransitionActive = false;
 	// bHasCompleted preserved — reset by StartTransition() / ReverseTransition() / ForceClear()

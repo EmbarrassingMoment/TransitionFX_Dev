@@ -152,7 +152,7 @@ Returns true once the current transition has completed (`OnTransitionCompleted` 
 
 Handles the sequence of "Fade Out -> Open Level -> Fade In". The screen stays covered from the end of the fade-out until the old level is torn down, and the fade-in on the new level side is automatically started via `PostLoadMapWithWorld`. If `Preset` is null, the default `DA_FadeToBlack` preset is used. If no playable preset is available (the default preset cannot be loaded, or the preset has no material or `Effect Class`), the level is opened without a transition and an error is logged.
 
-Stopping the fade-out before it completes (`Stop Transition` / `Force Clear`), or replacing it with another transition (`Start Transition`, a Play Transition or Quick Fade node, or another level transition), cancels the level transition: the level is not opened, no fade-in plays on the next level load, and sequences can be played again. Once the fade-out has completed, the level is opened as usual.
+Stopping the fade-out before it completes (`Stop Transition` / `Force Clear`), replacing it with another transition (`Start Transition`, a Play Transition or Quick Fade node, or another level transition), or reversing / inverting it (`Reverse Transition` / `Invert Transition`), cancels the level transition: the level is not opened, no fade-in plays on the next level load, and sequences can be played again. Once the fade-out has completed, the level is opened as usual.
 
 *Note: Internally, the auto fade-in uses `Forward` mode with `bInvert=true` rather than `Reverse` mode. The visual result is equivalent.*
 
@@ -164,7 +164,7 @@ Stopping the fade-out before it completes (`Stop Transition` / `Force Clear`), o
 | **Duration** | Input | The duration of the transition (applies to both fade out and fade in). Default: 1.0. |
 
 #### Open Level With Transition And Wait
-Plays a transition (Fade Out), waits for it to complete, then opens the specified level. The new level will automatically play the reverse transition (Fade In). A null `Preset` falls back to `DA_FadeToBlack`; if no playable preset is available, the level is opened right away without a transition, an error is logged, and **Completed** fires. If the fade-out is stopped or replaced before it completes (as described for `Open Level With Transition`), the level is not opened, the automatic fade-in is cancelled, a warning is logged, and **Completed** fires.
+Plays a transition (Fade Out), waits for it to complete, then opens the specified level. The new level will automatically play the reverse transition (Fade In). A null `Preset` falls back to `DA_FadeToBlack`; if no playable preset is available, the level is opened right away without a transition, an error is logged, and **Completed** fires. If the fade-out is stopped, replaced, reversed or inverted before it completes (as described for `Open Level With Transition`), the level is not opened, the automatic fade-in is cancelled, a warning is logged, and **Completed** fires.
 
 | Pin Name | Type | Description |
 | :--- | :--- | :--- |
@@ -305,14 +305,14 @@ void ReleaseHold();
 ```
 
 #### ReverseTransition
-Reverses the playback direction of the current transition (e.g., from Fade Out to Fade In). Also works on a completed Fade Out that is still covering the screen; logs a warning and does nothing when no transition is left to reverse.
+Reverses the playback direction of the current transition (e.g., from Fade Out to Fade In). Also works on a completed Fade Out that is still covering the screen; logs a warning and does nothing when no transition is left to reverse. Reversing the fade-out of a level transition before its level is opened cancels the level transition.
 
 ```cpp
 void ReverseTransition(bool bAutoStop = true);
 ```
 
 #### InvertTransition
-Toggles the current transition's mask inversion and replays it forward (0 → 1). Also works on a completed Fade Out that is still covering the screen. If `bAutoComplete` is false, the replayed transition holds at max progress (release with `ReleaseHold`).
+Toggles the current transition's mask inversion and replays it forward (0 → 1). Also works on a completed Fade Out that is still covering the screen. If `bAutoComplete` is false, the replayed transition holds at max progress (release with `ReleaseHold`). Inverting the fade-out of a level transition before its level is opened cancels the level transition.
 
 ```cpp
 void InvertTransition(bool bAutoComplete = true);
@@ -354,7 +354,7 @@ void ForceClear();
 ```
 
 #### OpenLevelWithTransition
-Handles the sequence of "Fade Out -> Open Level -> Fade In". Persists state across level transitions. Also callable from Blueprint on the subsystem. A null `Preset` falls back to `GetDefaultFadePreset()`; if no playable preset is available, the level is opened without a transition and an error is logged. Stopping (`StopTransition` / `ForceClear`) or replacing (`StartTransition`) the fade-out before it completes cancels the level transition: the level is not opened and no fade-in plays on the next level load.
+Handles the sequence of "Fade Out -> Open Level -> Fade In". Persists state across level transitions. Also callable from Blueprint on the subsystem. A null `Preset` falls back to `GetDefaultFadePreset()`; if no playable preset is available, the level is opened without a transition and an error is logged. Stopping (`StopTransition` / `ForceClear`) or replacing (`StartTransition`) the fade-out before it completes, or reversing / inverting it (`ReverseTransition` / `InvertTransition`), cancels the level transition: the level is not opened and no fade-in plays on the next level load.
 
 ```cpp
 void OpenLevelWithTransition(const UObject* WorldContextObject, FName LevelName, UTransitionPreset* Preset, float Duration = 1.0f);
