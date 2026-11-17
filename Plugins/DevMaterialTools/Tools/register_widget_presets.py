@@ -8,6 +8,9 @@ L_ShowCase の LevelScriptActor メンバ変数 PostProcess (TArray<TSoftObjectP
     None 混入時は中断する
   - 変数は Instance Editable ではないため Blueprint の CDO に書いて compile_blueprint → save_map で永続化
 
+環境変数 TFX_PRESETS (カンマ区切りの DA 名) を指定すると、DA_Widget_* の代わりにその DA を登録する
+(新しい PostProcess プリセットの登録用。例: TFX_PRESETS=DA_OrbitRings,DA_RippleRings)。
+
 結果は Saved/DevMaterialTools/register_widget_presets.result.json。
 エディタは閉じておくこと (GUI エディタが同プロジェクトを開いていると umap の保存がロックで失敗する)。
 """
@@ -39,11 +42,20 @@ def find_lsa(world):
 
 def run():
     registry = unreal.AssetRegistryHelpers.get_asset_registry()
+    # エディタモジュールは起動時にプラグインコンテンツをスキャンしなくなった (v1.7.0) ので、ここで明示的にスキャンする
+    registry.scan_paths_synchronous(["/TransitionFX"], True)
     all_da_names = []
     for ad in registry.get_assets_by_path(DA_DIR, recursive=False):
         lib.load_asset(str(ad.package_name))
         all_da_names.append(str(ad.asset_name))
-    widget_das = sorted(n for n in all_da_names if n.startswith(PREFIX))
+    requested = [n.strip() for n in os.environ.get("TFX_PRESETS", "").split(",") if n.strip()]
+    if requested:
+        log["requested"] = requested
+        if not check("requested presets exist", all(n in all_da_names for n in requested)):
+            return
+        widget_das = sorted(requested)
+    else:
+        widget_das = sorted(n for n in all_da_names if n.startswith(PREFIX))
     log["widget_presets_on_disk"] = widget_das
     if not check("widget presets found", len(widget_das) > 0):
         return

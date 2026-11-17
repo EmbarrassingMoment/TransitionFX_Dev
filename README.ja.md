@@ -72,7 +72,7 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 
 すぐに試せるサンプルプロジェクトを [Releases ページ](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases) から入手できます。プラグインのソース一式と、次の 2 つのサンプルレベルが含まれています。
 
-*   **`L_ShowCase`:** 45 種のプリセットを再生できます。30 種の組み込みエフェクトのうち 29 種（+ `DA_FadeToBlack`）と、ウィジェットレイヤー版（`DA_Widget_*`）プリセット 15 種です。詳しくは [ShowCase Level](docs/SHOWCASE_LEVEL.md) を参照してください。
+*   **`L_ShowCase`:** 48 種のプリセットを再生できます。33 種の組み込みエフェクトのうち 32 種（+ `DA_FadeToBlack`）と、ウィジェットレイヤー版（`DA_Widget_*`）プリセット 15 種です。詳しくは [ShowCase Level](docs/SHOWCASE_LEVEL.md) を参照してください。
 *   **`L_WidgetLayerSample`:** 画面の半分を不透明な UMG パネルで覆い、ウィジェットレイヤー版プリセットと PostProcess 版を比較できます。詳しくは [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) を参照してください。
 
 ▶ [YouTube でサンプル動画を見る](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
@@ -277,7 +277,10 @@ TransitionFXでは一部のブループリントに **Latent Action** を採用�
 | **Wavy Curtain** | Linear Wipeに似ていますが、カーテンのような波打つ境界線を持つ方向性ワイプです。 | ![Wavy Curtain](docs/images/effect_wavy_curtain.webp) |
 | **Radial Wipe** | 時計のような放射状ワイプ。滑らかなエッジと開始角度の調整をサポート。 | ![Radial Wipe](docs/images/effect_radial_wipe.webp) |
 | **Fan** | 中央から扇状のブレードが放射状に広がり、回転しながら画面を覆っていく風車（扇）のようなワイプ。 | ![Fan](docs/images/effect_fan.webp) |
+| **Ripple Rings** | 同心円のリングが中央から順に現れ、太くなりながらつながって画面を覆うトランジション。リングの数、リング間の遅延、エッジの柔らかさを調整可能。 | ![Ripple Rings](docs/images/effect_ripple_rings.webp) |
+| **Orbit Rings** | 同心円のリングが1本ずつ時計のようなスイープで埋まっていくトランジション。隣り合うリングは逆方向に回り、開始角度もリングごとに異なります。リングの数、リング間の遅延、リング同士の隙間を調整可能。 | ![Orbit Rings](docs/images/effect_orbit_rings.webp) |
 | **Tiles** | 画面がグリッド状に分割され、ブロックが中央から波のように拡大します。 | ![Tiles](docs/images/effect_tiles.webp) |
+| **Spiral Tiles** | 画面の外周から中央へ、渦巻き（矩形スパイラル）の順にタイルが1枚ずつ現れて画面を覆うトランジション。列数・行数と、同時に成長するタイルの数を調整可能。 | ![Spiral Tiles](docs/images/effect_spiral_tiles.webp) |
 | **Box Roll** | 画面右から箱が転がり込み、下の段から順に積み上がって画面を覆うトランジション。段数、転がる速度、列・段ごとの遅延を調整可能。 | ![Box Roll](docs/images/effect_boxroll.webp) |
 | **Polka Dots** | 拡大する円（ハーフトーンパターン）の波が画面を覆います。ポップでモダンな外観。 | ![Polka Dots](docs/images/effect_polka_dots.webp) |
 | **Blinds** | スタイリッシュなストライプ/ベネチアンブラインド効果。ストライプが拡大・結合して画面を覆います。 | ![Blinds](docs/images/effect_blinds.webp) |

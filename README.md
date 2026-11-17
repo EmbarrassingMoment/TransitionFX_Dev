@@ -61,7 +61,7 @@ The manager runs as a **GameInstance Subsystem**, persisting state across level 
 A ready-to-use sample project is available on the [Releases page](https://github.com/EmbarrassingMoment/TransitionFX_Dev/releases).
 It includes the full plugin source and two sample levels:
 
-*   **`L_ShowCase`:** Plays 45 presets: 29 of the 30 built-in effects (plus `DA_FadeToBlack`) and the 15 widget-layer (`DA_Widget_*`) presets. See [ShowCase Level](docs/SHOWCASE_LEVEL.md) (Japanese).
+*   **`L_ShowCase`:** Plays 48 presets: 32 of the 33 built-in effects (plus `DA_FadeToBlack`) and the 15 widget-layer (`DA_Widget_*`) presets. See [ShowCase Level](docs/SHOWCASE_LEVEL.md) (Japanese).
 *   **`L_WidgetLayerSample`:** Covers half the screen with an opaque UMG panel so you can compare widget-layer presets with their PostProcess counterparts. See [Widget Layer Sample](docs/WIDGET_LAYER_SAMPLE.md) (Japanese).
 
 ▶ [Watch the sample video on YouTube](https://www.youtube.com/watch?v=L8d-S7VqaMs&feature=youtu.be)
@@ -266,7 +266,10 @@ The tables below list the Blueprint-callable API. For pin details and C++ signat
 | **Wavy Curtain** | A directional wipe similar to Linear Wipe, but with an animated wavy boundary like a curtain. | ![Wavy Curtain](docs/images/effect_wavy_curtain.webp) |
 | **Radial Wipe** | Clock-like radial wipe. Supports smooth edges and adjustable start angle. | ![Radial Wipe](docs/images/effect_radial_wipe.webp) |
 | **Fan** | A pinwheel-style wipe where angular blades sweep out from the center and rotate to cover the screen, like an opening folding fan. | ![Fan](docs/images/effect_fan.webp) |
+| **Ripple Rings** | Concentric rings appear one after another from the center and grow thicker until they merge and cover the screen. Ring count, the delay between rings, and edge softness are adjustable. | ![Ripple Rings](docs/images/effect_ripple_rings.webp) |
+| **Orbit Rings** | Each concentric ring is filled by its own clock-style sweep. Neighboring rings turn in opposite directions and start at different angles. Ring count, the delay between rings, and the gap between rings are adjustable. | ![Orbit Rings](docs/images/effect_orbit_rings.webp) |
 | **Tiles** | The screen is divided into a grid, and blocks expand outward from the center like a wave. | ![Tiles](docs/images/effect_tiles.webp) |
+| **Spiral Tiles** | Tiles pop in one after another along a rectangular spiral, from the outer edge of the screen to the center. Column and row counts and the number of tiles growing at once are adjustable. | ![Spiral Tiles](docs/images/effect_spiral_tiles.webp) |
 | **Box Roll** | Boxes roll in from the right edge and stack up row by row until they cover the screen. Row count, roll speed, and per-column/per-row stagger are adjustable. | ![Box Roll](docs/images/effect_boxroll.webp) |
 | **Polka Dots** | A wave of expanding circles (halftone pattern) covers the screen. Pop and modern look. | ![Polka Dots](docs/images/effect_polka_dots.webp) |
 | **Blinds** | Stylish stripe/venetian blind effect. Stripes expand and merge to cover the screen. | ![Blinds](docs/images/effect_blinds.webp) |

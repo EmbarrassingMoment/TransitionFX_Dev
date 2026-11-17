@@ -23,7 +23,7 @@ Blueprint / C++ call
 
 ## Rules for agents
 
-1. **Prefer the bundled presets.** `/TransitionFX/Data/DA_*` cover 30 effects. Do not create new materials unless the developer asks for a custom effect.
+1. **Prefer the bundled presets.** `/TransitionFX/Data/DA_*` cover 33 effects. Do not create new materials unless the developer asks for a custom effect.
 2. **Never edit assets under this plugin folder** (`Content/`). To change a preset, duplicate it into the developer's project `Content/` and edit the copy. Plugin assets are overwritten on update.
 3. **Pick the effect layer deliberately.** If the transition must cover UMG/Slate widgets (HUD, menus), use a `DA_Widget_*` preset (`WidgetTransitionEffect`). Otherwise use the plain `DA_*` preset (`PostProcessTransitionEffect`). The Blueprint API is identical.
 4. **Fade Out and Fade In are the same preset** with `Mode` set to `Forward` or `Reverse`. A completed Forward transition keeps covering the screen until a Reverse transition or `Stop Transition` runs. This is intentional.
@@ -106,7 +106,7 @@ Unbind delegates bound in Level Blueprints on `EndPlay`, or bind in the GameInst
 ## Bundled assets (`/TransitionFX/...` content path)
 
 **PostProcess presets** (`Data/DA_*`, materials `Materials/Instances/MI_Transition_*`):
-Blinds, Box, BoxRoll, CheckerBoard, CornerWipe, CrossWipe, Diamond, DiamondWipe, Dissolve, Fade, FadeToBlack, Fan, FlowerIris, Hexagon, Iris, LinearWipe, Pixelate, PolkaDots, RadialWipe, RandomTiles, Slice, SlidingDoor, Spiral, Split, StripeCascade, TVSwitchOff, TextureMask, Tiles, Triangle, WavyCurtain, Wind.
+Blinds, Box, BoxRoll, CheckerBoard, CornerWipe, CrossWipe, Diamond, DiamondWipe, Dissolve, Fade, FadeToBlack, Fan, FlowerIris, Hexagon, Iris, LinearWipe, OrbitRings, Pixelate, PolkaDots, RadialWipe, RandomTiles, RippleRings, Slice, SlidingDoor, Spiral, SpiralTiles, Split, StripeCascade, TVSwitchOff, TextureMask, Tiles, Triangle, WavyCurtain, Wind.
 
 **Widget-layer presets** (`Data/DA_Widget_*`, materials `Materials/Widget/Instances/MI_Widget_*`):
 Blinds, CheckerBoard, CornerWipe, Diamond, Dissolve, Fade, FadeToBlack, Hexagon, Iris, LinearWipe, PolkaDots, RadialWipe, RandomTiles, SlidingDoor, TextureMask.
