@@ -19,3 +19,4 @@
 # Binary, but stored as regular blobs rather than LFS. Marked explicitly so
 # they never depend on text=auto content sniffing.
 *.gif -text
+*.webp -text

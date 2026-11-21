@@ -35,6 +35,8 @@
 | **UMG ウィジェットレイヤートランジション** — UMG/Slate UI ごと覆えるフルスクリーン Slate オーバーレイの描画経路（`WidgetTransitionEffect`）。8 エフェクトで提供 | v1.5.0 |
 | **ウィジェットレイヤー版 第 2 弾** — Diamond、Sliding Doors、Corner Wipe、Polka Dots、Random Tiles、Hexagon（合計 14 エフェクト） | v1.6.0 |
 | **エディタでのプリセットバリデーション** — `TransitionPreset` / `TransitionSequence` が `IsDataValid` を実装し、**Validate Assets** でマテリアル・エフェクトクラス・`Progress` パラメータの欠落やエフェクトクラスが描画できないマテリアルドメインを報告 | v1.7.0 |
+| **新エフェクト: Ripple Rings、Orbit Rings、Spiral Tiles** — PostProcess エフェクト 3 種（組み込みエフェクトは合計 33 種） | v1.7.0 |
+| **Linux 対応** — 両モジュールを Linux（Vulkan）向けにもビルド。パッケージ化した Linux ビルドで全同梱プリセットの再生を確認。Win64 より検証は少なく、Linux 上のエディタは未検証 | v1.7.0 |
 | **プールサイズの設定** — エフェクトプールの上限を **プロジェクト設定 > プラグイン > TransitionFX** の `MaxPoolSizePerEffectClass` で公開 | v1.4.0 |
 | **プリセットごとのトランジションカラー** — プリセットの `bOverrideTransitionColor` / `TransitionColor` で、呼び出し側のオーバーライドなしにフェード先の色（白など）を指定 | v1.3.0 |
 | **トランジションチェイン / シーケンス** — DataAsset ベースでプリセットを連続再生し、任意でループも可能 | v1.2.0 |

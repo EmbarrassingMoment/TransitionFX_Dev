@@ -390,7 +390,7 @@ static void QuickFadeInternal(const UObject* WorldContextObject, float Duration,
 			TempPreset->EffectClass = UPostProcessTransitionEffect::StaticClass();
 
 			// Try to load the Fade material as fallback
-			TempPreset->TransitionMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/TransitionFX/Materials/M_Transition_Fade.M_Transition_Fade"));
+			TempPreset->TransitionMaterial = LoadObject<UMaterialInterface>(nullptr, TransitionFXConfig::FallbackFadeMaterialPath);
 
 			if (!TempPreset->TransitionMaterial)
 			{
