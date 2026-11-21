@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.7.0] - 2026-10-29
+## [1.7.0] - 2026-11-21
 
 ### Added
 
@@ -25,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Plugin version bumped to **1.7.0** (`TransitionFX.uplugin` `VersionName`); README (EN/JA) version badge updated to match.
 - README (EN/JA), the plugin's `AGENTS.md` and the sample project's `CLAUDE.md`: platform support is Win64 and Linux instead of Win64 only; the README platform badge reads `Win64 | Linux`.
+- README (EN/JA): the Platform badge links to `TransitionFX.uplugin` instead of the Fab listing and drops the Windows logo, and the Sponsor badge uses `style=flat` like the other badges.
+- Roadmap (EN/JA): the three new effects and Linux support are listed as shipped in 1.7.0.
 - **`Effect Class` now defaults to `PostProcessTransitionEffect`.** New presets — from the **Transition Preset** Content Browser entry, the generic Data Asset dialog, or `NewObject` in C++/Blueprint — no longer start with no effect class, which `StartTransition` rejects. Presets saved by earlier versions with `Effect Class` left unset also load as `PostProcessTransitionEffect`, because an unset value was not stored in the asset; presets that chose a class keep it, and a class cleared from now on stays cleared. README, Quick Start Guide, FAQ and API Reference (EN/JA) note the default.
 - **Master material cleanup** — Removed nodes that no longer contributed to the output: 24 in `M_Transition_Split`, 3 in `M_Transition_CrossWipe`, and unused `AspectRaito` reroute declarations in 12 PostProcess masters and 7 `M_Widget_*` masters. `MF_StripePos` no longer exposes duplicate `Direction` / `Delay` inputs. Masters that still used the `Default Lit` shading model (Box Roll, Fade, Polka Dots, Slice, Stripe Cascade, TV Switch Off and Texture Mask, plus the Fade, Polka Dots and Texture Mask widget masters) now use `Unlit`, like the rest; PostProcess and UI materials are always rendered unlit, so this is cosmetic. Shader instruction counts and parameter lists are unchanged, so these effects look the same.
 - `T_Circle_SDF` (the default mask of Texture Mask) is no longer streamed, so a transition never samples a low-resolution mip while the full texture is still streaming in.
